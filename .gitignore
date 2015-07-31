@@ -1,0 +1,21 @@
+# patches, diffs, merges
+*.patch
+interdiff.txt
+*.orig
+*.bak
+*.old
+
+# PHPStorm
+.idea/*
+
+# Common library
+acumulus/libraries/Siel/*
+
+# Shared files
+changelog*.txt
+license.txt
+licentie-nl.pdf
+readme-nl.txt
+
+# Resulting installer files
+/*.zip

@@ -1,0 +1,83 @@
+Acumulus plugin filters
+=======================
+
+This file documents the filters that the Acumulus plugin defines. Currently only
+1 filter is defined:
+
+
+Acumulus Plugin API/Filter Reference/acumulus_invoice_add
+---------------------------------------------------------
+
+Warning
+-------
+This filter is experimental. Depending on feedback from actual usage, details
+may change in future versions.
+
+Description
+-----------
+The "acumulus_invoice_add" filter is used to change the invoice that will be
+sent to Acumulus. The Acumulus plugin has created the invoice and is about to
+send it to Acumulus. But just before doing so, this filter allows you to change
+details of the invoice as will be sent to Acumulus.
+
+Usage
+-----
+When the "acumulus_invoice_add" filter is called, it is passed 2 arguments:
+- $invoice:
+  A keyed array containing the invoice that will be sent to Acumulus. The array
+  structure is similar to the XML structure as defined on
+  https://apidoc.sielsystems.nl/content/invoice-add, though at this stage, only
+  the customer key will be present at the highest level. The line tag is
+  represented as a numeric array of lines, even if if there is only 1 line.
+
+  Some keys will be missing, if they are still missing after this filter has
+  been applied, they will be filled in (not overwritten) by the plugin before
+  the actual sending takes place:
+  - ['customer']['locationcode']
+  - ['customer']['overwriteifexists']
+  - ['customer']['type']
+  - ['customer']['invoice']['concept']
+  - ['customer']['invoice']['accountnumber']
+  - ['customer']['invoice']['costcenter']
+  - ['customer']['invoice']['template]
+  - ['customer']['invoice']['vattype]
+
+  The following keys may be filled with a null value, if the 'unitprice' of that
+  'line' = 0. These null values will be replaced by the plugin by the most
+  occurring vat rate before the actual sending takes place:
+  - ['customer']['invoice']['line']['taxrate']
+- $order: The WooCommerce order, a WC_Order class object.
+
+Typical usages for this filter allow to implement business logic specific to
+your business, think of:
+- Template, account number, or cost center selection based on order specifics.
+- Adding descriptive info to the invoice or invoice lines based on custom order
+  meta data.
+- Correcting payment info based on payment plugins not supported by this plugin.
+
+Examples
+--------
+use Siel\Acumulus\Common\WebAPI;
+
+function my_acumulus_invoice_add(array $invoice, WC_Order $order ) {
+  $is_paid = my_determine_payment_status($order);
+  if ($is_paid) {
+    $invoice['customer']['invoice']['paymentstatus'] = WebAPI::PaymentStatus_Paid;
+    $invoice['customer']['invoice']['paymentdate'] = date('Y-m-d', strtotime($order->paid_date);
+  }
+  else {
+    $invoice['customer']['invoice']['paymentstatus'] = WebAPI::PaymentStatus_Due;
+    unset($invoice['customer']['invoice']['paymentdate']);
+  }
+  return $invoice;
+}
+add_filter( 'acumulus_invoice_add', 'my_acumulus_invoice_add', 10, 2 );
+
+Related
+-------
+N.A.
+
+External Resources
+------------------
+- https://apidoc.sielsystems.nl/content/invoice-add.
+- https://apidoc.sielsystems.nl/content/warning-error-and-status-response-section-most-api-calls
