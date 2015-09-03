@@ -33,7 +33,6 @@ When the "acumulus_invoice_add" filter is called, it is passed 2 arguments:
   Some keys will be missing, if they are still missing after this filter has
   been applied, they will be filled in (not overwritten) by the plugin before
   the actual sending takes place:
-  - ['customer']['locationcode']
   - ['customer']['overwriteifexists']
   - ['customer']['type']
   - ['customer']['invoice']['concept']

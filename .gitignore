@@ -12,10 +12,10 @@ interdiff.txt
 acumulus/libraries/Siel/*
 
 # Shared files
-changelog*.txt
+changelog.txt
 license.txt
 licentie-nl.pdf
-readme-nl.txt
+leesmij.txt
 
 # Resulting installer files
 /*.zip

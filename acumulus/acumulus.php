@@ -1,15 +1,21 @@
 <?php
 /*
 Plugin Name: Acumulus
-Description: Acumulus koppeling voor WooCommerce 2.1+
+Description: Acumulus koppeling voor WooCommerce 2.3+
 Plugin URI: https://forum.acumulus.nl/index.php?board=17.0
 Author: Acumulus
-Version: 3.4.5
+Version: 4.0.0-alpha1
 LICENCE: GPLv3
 */
 
-use Siel\Acumulus\Common\WebAPI;
-use Siel\Acumulus\WooCommerce\InvoiceAdd;
+use Siel\Acumulus\Helpers\Translator;
+use Siel\Acumulus\Shop\Config;
+use Siel\Acumulus\WooCommerce\Helpers\FormMapper;
+use Siel\Acumulus\WooCommerce\Helpers\FormRenderer;
+use Siel\Acumulus\WooCommerce\Helpers\Log;
+use Siel\Acumulus\WooCommerce\Invoice\Source;
+use Siel\Acumulus\WooCommerce\Shop\ConfigForm;
+use Siel\Acumulus\WooCommerce\Shop\ConfigStore;
 
 /*
  * Install/uninstall actions.
@@ -28,14 +34,14 @@ class Acumulus {
   /** @var Acumulus|null */
   private static $instance = NULL;
 
-  /** @var \Siel\Acumulus\WooCommerce\WooCommerceAcumulusConfig|null */
-  private $acumulusConfig = NULL;
+  /** @var \Siel\Acumulus\Helpers\TranslatorInterface */
+  protected $translator = null;
 
-  /** @var \Siel\Acumulus\Common\WebAPI|null */
-  private $webAPI = NULL;
+  /** @var \Siel\Acumulus\Shop\Config */
+  protected $acumulusConfig;
 
-  /** @var \Siel\Acumulus\WooCommerce\AcumulusConfigForm|null */
-  private $form = NULL;
+  /** @var \Siel\Acumulus\Shop\ConfigForm */
+  protected $form;
 
   /**
    * Entry point for WordPress.
@@ -53,7 +59,6 @@ class Acumulus {
    * Constructor: setup hooks
    */
   private function __construct() {
-    $this->log('Acumulus: extension constructor');
     add_action('admin_init', array($this, 'adminInit'));
     add_action('admin_menu', array($this, 'addOptionsPage'));
     add_action('admin_enqueue_scripts', array($this, 'adminEnqueueScripts'));
@@ -61,7 +66,11 @@ class Acumulus {
   }
 
   /**
-   * return string
+   * Helper method for the ConfigStore object to get the version number from the
+   * comment at the top of this file, as is the official location for WordPress
+   * plugins.
+   *
+   * @return string
    *   The version number of this plugin.
    */
   public function getVersionNumber() {
@@ -77,39 +86,34 @@ class Acumulus {
   }
 
   /**
-   * Loads our library and creates and returns a configuration object.
-   *
-   * @return \Siel\Acumulus\WooCommerce\WooCommerceAcumulusConfig
+   * Loads our library and creates a configuration object.
    */
   public function init() {
-    if ($this->acumulusConfig === null) {
-      require_once(dirname(__FILE__) . '/Siel/Acumulus/Common/TranslatorInterface.php');
-      require_once(dirname(__FILE__) . '/Siel/Acumulus/Common/BaseTranslator.php');
-      require_once(dirname(__FILE__) . '/Siel/Acumulus/Common/ConfigInterface.php');
-      require_once(dirname(__FILE__) . '/Siel/Acumulus/Common/BaseConfig.php');
-      require_once(dirname(__FILE__) . '/Siel/Acumulus/Common/WebAPICommunication.php');
-      require_once(dirname(__FILE__) . '/Siel/Acumulus/Common/WebAPI.php');
-      require_once(dirname(__FILE__) . '/Siel/Acumulus/WooCommerce/WooCommerceAcumulusConfig.php');
-      $language = get_bloginfo('language');
-      if (empty($language)) {
-        $language = 'nl';
+    if ($this->translator === null) {
+      // Load autoloader
+      require_once(dirname(__FILE__) . '/libraries/Siel/psr4.php');
+
+      $languageCode = get_bloginfo('language');
+      if (empty($languageCode)) {
+        $languageCode = 'nl';
       }
-      $language = substr($language, 0, 2);
-      $this->acumulusConfig = new Siel\Acumulus\WooCommerce\WooCommerceAcumulusConfig($language);
+      $languageCode = substr($languageCode, 0, 2);
+
+      Log::createInstance();
+      $this->translator = new Translator($languageCode);
+      $this->acumulusConfig = new Config(new ConfigStore(), $this->translator);
     }
   }
 
   /**
-   * Returns a configuration form object.
+   * Getter for the configuration form object.
    *
-   * @return \Siel\Acumulus\WooCommerce\AcumulusConfigForm
+   * @return \Siel\Acumulus\Shop\ConfigForm
    */
   public function getForm() {
     $this->init();
     if ($this->form === null) {
-      require_once(dirname(__FILE__) . '/Siel/Acumulus/Common/FormRenderer.php');
-      require_once(dirname(__FILE__) . '/Siel/Acumulus/WooCommerce/AcumulusConfigForm.php');
-      $this->form = new Siel\Acumulus\WooCommerce\AcumulusConfigForm($this->acumulusConfig);
+      $this->form = new ConfigForm($this->translator, $this->acumulusConfig);
     }
     return $this->form;
   }
@@ -118,7 +122,7 @@ class Acumulus {
    * Registers our settings.
    */
   public function adminInit() {
-    register_setting('woocommerce_acumulus', 'woocommerce_acumulus', array($this->getForm(), 'validateForm'));
+    register_setting('woocommerce_acumulus', 'woocommerce_acumulus', array($this->getForm(), 'getSubmittedValues'));
   }
 
   /**
@@ -126,148 +130,60 @@ class Acumulus {
    */
   public function addOptionsPage() {
     $this->init();
-    add_options_page($this->acumulusConfig->t('module_name') . ' ' . $this->acumulusConfig->t('button_settings'),
-      $this->acumulusConfig->t('module_name'),
+    add_options_page($this->translator->get('module_name') . ' ' . $this->translator->get('button_settings'),
+      $this->translator->get('module_name'),
       'manage_options',
       'woocommerce_acumulus',
-      array($this, 'getOptionsForm'));
+      array($this, 'renderOptionsForm'));
   }
 
+  /**
+   * @deprecated ???
+   */
   public function adminEnqueueScripts() {
     $screen = get_current_screen();
     if (is_object($screen) && $screen->id == 'settings_page_woocommerce_acumulus') {
-      $pluginUrl = plugins_url('/woocommerce-acumulus');
-      wp_enqueue_style('acumulus_css_admin', $pluginUrl . '/acumulus.css');
+//      $pluginUrl = plugins_url('/woocommerce-acumulus');
+//      wp_enqueue_style('acumulus_css_admin', $pluginUrl . '/acumulus.css');
     }
   }
 
-// Draw the menu page itself
-  public function getOptionsForm() {
+  public function renderOptionsForm() {
     if (!current_user_can('manage_options')) {
       wp_die(__('You do not have sufficient permissions to access this page.'));
     }
 
+    // Add our own CSS. @todo: still needed?
+    $pluginUrl = plugins_url('/woocommerce-acumulus');
+    wp_enqueue_style('acumulus_css_admin', $pluginUrl . '/acumulus.css');
+
+    // Get our form.
     $form = $this->getForm();
-    $form->addFields();
-    $form->getForm();
+    // Map our form to WordPress setting sections.
+    $formMapper = new FormMapper();
+    $formMapper->map($form);
+    // Render the setting sections.
+    $formRenderer = new FormRenderer();
+    $formRenderer->render($form);
   }
 
-  public function woocommerceOrderStatusChanged($orderId, $status, $newStatus) {
+  /**
+   * Filter function that gets called when the status of an order changes.
+   * @param $orderId
+   * @param $status
+   * @param $newStatus
+   */
+  public function woocommerceOrderStatusChanged($orderId, /** @noinspection PhpUnusedParameterInspection */ $status, $newStatus) {
     $this->init();
-    $this->log('Acumulus: woocommerceOrderStatusChanged(%d, %d, %d): trigger = %d', $orderId, $status, $newStatus, $this->acumulusConfig->get('triggerOrderStatus'));
-    if ($newStatus == $this->acumulusConfig->get('triggerOrderStatus')) {
-      $this->sendOrderToAcumulus(new WC_Order($orderId));
-    }
+    $order = new WC_Order($orderId);
+    $type = $order->order_type === 'refund' ? Source::CreditNote : Source::Order;
+    $source = new Source($type, $order);
+    // @todo: check how to handle refunds: upon creation? do they trigger this filter at all?
+    $this->acumulusConfig->getManager()->sourceStatusChange($source, $newStatus);
   }
 
   /**
-   * Sends the invoice for an order toAcumulus.
-   *
-   * We cannot know if an admin, a user or a batch triggered this hook.
-   * So we assume the process to be not interactive and will send a mail
-   * upon failure.
-   *
-   * @param WC_Order $order
-   *   The order to send to Acumulus
-   *
-   * @return bool
-   *   Success.
-   */
-  public function sendOrderToAcumulus(WC_Order $order) {
-    $this->log('Acumulus: sendOrderToAcumulus(%d)', $order->id);
-    $this->webAPI = new WebAPI($this->acumulusConfig);
-    require_once(dirname(__FILE__) . '/Siel/Acumulus/WooCommerce/InvoiceAdd.php');
-    $addInvoice = new InvoiceAdd($this->acumulusConfig);
-    $invoice = $addInvoice->convertOrderToAcumulusInvoice($order);
-    $invoice = apply_filters('acumulus_invoice_add', $invoice, $order);
-    $result = $this->webAPI->invoiceAdd($invoice, $order->get_order_number());
-
-    if (!empty($result['invoice'])) {
-      $this->saveEntry($result['invoice'], $order);
-    }
-
-    $messages = $this->webAPI->resultToMessages($result);
-    $this->log('Acumulus: sendOrderToAcumulus(): result = "%s"', $messages);
-    if (!empty($messages)) {
-      $this->sendMail($result, $messages, $order);
-    }
-
-    return !empty($result['invoice']['invoicenumber']);
-  }
-
-  /**
-   * Save token and entryId in metadata of order.
-   *
-   * Note: we use separate meta data keys as to be able - in the future - to
-   * query on these values in an efficient way using WP_query().
-   *
-   * @param array $acumulusInvoice
-   * @param WC_Order $order
-   */
-  private function saveEntry(array $acumulusInvoice, WC_Order $order) {
-    $now = current_time('timestamp', true);
-    update_post_meta($order->id, '_acumulus_entry_id', (int) $acumulusInvoice['entryid']);
-    update_post_meta($order->id, '_acumulus_token', $acumulusInvoice['token']);
-    add_post_meta($order->id, '_acumulus_created', $now, true);
-    update_post_meta($order->id, '_acumulus_updated', $now);
-  }
-
-  /**
-   * Send a mail with the results.
-   *
-   * @param array $result
-   * @param array $messages
-   * @param WC_Order $order
-   */
-  private function sendMail(array $result, array $messages, WC_Order $order) {
-    $credentials = $this->acumulusConfig->getCredentials();
-    $toEmail = $credentials['emailonerror'];
-    $fromEmail = get_bloginfo('admin_email');
-    $fromName = get_bloginfo('name');
-    $subject = $this->acumulusConfig->t('mail_subject');
-//      $boundary = sha1(uniqid());
-    $headers = array(
-      "from: $fromName <$fromEmail>",
-      'Content-Type: text/html; charset=UTF-8',
-    );
-
-    $replacements = array(
-      '{order_id}' => $order->get_order_number(),
-      '{invoice_id}' => isset($result['invoice']['invoicenumber']) ? $result['invoice']['invoicenumber'] : $this->acumulusConfig->t('message_no_invoice'),
-      '{status}' => $result['status'],
-      '{status_text}' => $this->webAPI->getStatusText($result['status']),
-      '{status_1_text}' => $this->webAPI->getStatusText(1),
-      '{status_2_text}' => $this->webAPI->getStatusText(2),
-      '{status_3_text}' => $this->webAPI->getStatusText(3),
-      '{messages}' => $this->webAPI->messagesToText($messages),
-      '{messages_html}' => $this->webAPI->messagesToHtml($messages),
-    );
-//      $text = $this->acumulusConfig->t('mail_text');
-//      $text = strtr($text, $replacements);
-    $html = $this->acumulusConfig->t('mail_html');
-    $html = strtr($html, $replacements);
-//      $message = "--$boundary\r\n"
-//        . "Content-Type: text/plain; charset=UTF-8\r\n"
-//        . $text . "\r\n"
-//        .  "--$boundary\r\n"
-//        . "Content-Type: text/html; charset=UTF-8\r\n"
-//        . $html . "\r\n";
-
-    wp_mail($toEmail, $subject, $html, $headers);
-  }
-
-  public function log($message) {
-    if (WP_DEBUG) {
-      if (func_num_args() > 1) {
-        $args = array_splice(func_get_args(), 0, 1);
-        $message = vsprintf($message, $args);
-      }
-      error_log($message);
-    }
-  }
-
-  /**
-   * Forwards the call to the specific setup class.
+   * Forwards the call to an instance of the setup class.
    */
   public static function activate() {
     require_once(dirname(__FILE__) . '/AcumulusSetup.php');
@@ -276,7 +192,7 @@ class Acumulus {
   }
 
   /**
-   * Forwards the call to the specific setup class.
+   * Forwards the call to an instance of the setup class.
    */
   public static function deactivate() {
     require_once(dirname(__FILE__) . '/AcumulusSetup.php');
@@ -285,7 +201,7 @@ class Acumulus {
   }
 
   /**
-   * Forwards the call to the specific setup class.
+   * Forwards the call to an instance of the setup class.
    */
   public static function uninstall() {
     require_once(dirname(__FILE__) . '/AcumulusSetup.php');
