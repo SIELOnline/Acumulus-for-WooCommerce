@@ -169,9 +169,10 @@ class Acumulus {
 
   /**
    * Filter function that gets called when the status of an order changes.
-   * @param $orderId
-   * @param $status
-   * @param $newStatus
+   *
+   * @param int $orderId
+   * @param int $status
+   * @param int $newStatus
    */
   public function woocommerceOrderStatusChanged($orderId, /** @noinspection PhpUnusedParameterInspection */ $status, $newStatus) {
     $this->init();

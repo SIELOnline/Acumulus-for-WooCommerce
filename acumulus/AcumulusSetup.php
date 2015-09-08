@@ -48,6 +48,12 @@ class AcumulusSetup {
     return $model->uninstall();
   }
 
+  /**
+   * Checks the requirements for this module (CURL, DOMXML, ...).
+   *
+   * @return bool
+   *   Success.
+   */
   public function checkRequirements() {
     $requirements = new Requirements();
     $this->messages = $requirements->check();
@@ -59,6 +65,9 @@ class AcumulusSetup {
     return empty($this->messages);
   }
 
+  /**
+   * Action hook that adds administrator notices to the admin screen.
+   */
   public function adminNotice() {
     foreach ($this->messages as $message) {
       echo '<div class="error">' . $message . '</div>';
