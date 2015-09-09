@@ -10,6 +10,7 @@ LICENCE: GPLv3
 
 use Siel\Acumulus\Helpers\Translator;
 use Siel\Acumulus\Shop\Config;
+use Siel\Acumulus\Shop\ModuleTranslations;
 use Siel\Acumulus\WooCommerce\Helpers\FormMapper;
 use Siel\Acumulus\WooCommerce\Helpers\FormRenderer;
 use Siel\Acumulus\WooCommerce\Helpers\Log;
@@ -61,7 +62,6 @@ class Acumulus {
   private function __construct() {
     add_action('admin_init', array($this, 'adminInit'));
     add_action('admin_menu', array($this, 'addOptionsPage'));
-    add_action('admin_enqueue_scripts', array($this, 'adminEnqueueScripts'));
     add_action('woocommerce_order_status_changed', array($this, 'woocommerceOrderStatusChanged'), 10, 3);
   }
 
@@ -77,10 +77,10 @@ class Acumulus {
     if (function_exists('get_plugin_data')) {
       $plugin_data = get_plugin_data( __FILE__ );
       $version = $plugin_data['Version'];
-      update_option('woocommerce_acumulus_version', $version);
+      update_option('acumulus_version', $version);
     }
     else {
-      $version = get_option('woocommerce_acumulus_version');
+      $version = get_option('acumulus_version');
     }
     return $version;
   }
@@ -101,6 +101,9 @@ class Acumulus {
 
       Log::createInstance();
       $this->translator = new Translator($languageCode);
+      $translations = new ModuleTranslations();
+      $this->translator->add($translations);
+
       $this->acumulusConfig = new Config(new ConfigStore(), $this->translator);
     }
   }
@@ -122,7 +125,7 @@ class Acumulus {
    * Registers our settings.
    */
   public function adminInit() {
-    register_setting('woocommerce_acumulus', 'woocommerce_acumulus', array($this->getForm(), 'getSubmittedValues'));
+    register_setting('acumulus', 'acumulus', array($this->getForm(), 'getSubmittedValues'));
   }
 
   /**
@@ -133,19 +136,8 @@ class Acumulus {
     add_options_page($this->translator->get('module_name') . ' ' . $this->translator->get('button_settings'),
       $this->translator->get('module_name'),
       'manage_options',
-      'woocommerce_acumulus',
+      'acumulus',
       array($this, 'renderOptionsForm'));
-  }
-
-  /**
-   * @deprecated ???
-   */
-  public function adminEnqueueScripts() {
-    $screen = get_current_screen();
-    if (is_object($screen) && $screen->id == 'settings_page_woocommerce_acumulus') {
-//      $pluginUrl = plugins_url('/woocommerce-acumulus');
-//      wp_enqueue_style('acumulus_css_admin', $pluginUrl . '/acumulus.css');
-    }
   }
 
   public function renderOptionsForm() {
@@ -153,18 +145,19 @@ class Acumulus {
       wp_die(__('You do not have sufficient permissions to access this page.'));
     }
 
-    // Add our own CSS. @todo: still needed?
-    $pluginUrl = plugins_url('/woocommerce-acumulus');
+    // Add our own CSS.
+    $pluginUrl = plugins_url('/acumulus');
     wp_enqueue_style('acumulus_css_admin', $pluginUrl . '/acumulus.css');
 
     // Get our form.
     $form = $this->getForm();
     // Map our form to WordPress setting sections.
     $formMapper = new FormMapper();
-    $formMapper->map($form);
+    $formRenderer = $formMapper->map($form);
     // Render the setting sections.
-    $formRenderer = new FormRenderer();
-    $formRenderer->render($form);
+
+    $output = $formRenderer->render($form);
+    echo $output;
   }
 
   /**

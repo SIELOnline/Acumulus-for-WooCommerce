@@ -3,23 +3,6 @@
   margin-left: 0.5em;
 }
 
-.form-element-radios {
-  display: inline-block;
-  width: auto;
-  vertical-align: top;
-}
-
-.form-element-radios input[type=radio] {
-  float: left;
-  clear: left;
-  margin-top: 0;
-  margin-bottom: 0.1em;
-}
-
-.form-element-radios label {
-  float: left;
-  width: auto;
-  max-width: 95%;
-  margin-top: 0;
-  margin-bottom: 0.1em;
+.description {
+  font-style: italic;
 }

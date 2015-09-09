@@ -5,8 +5,18 @@ use Siel\Acumulus\WooCommerce\Shop\AcumulusEntryModel;
 defined('ABSPATH') OR exit;
 
 class AcumulusSetup {
+
   private $messages = array();
 
+  /**
+   * Activates the plugin.
+   *
+   * Note that on installing a plugin (copying the files) nothing else happens.
+   * Only on activating, a plugin can do its initial work.
+   *
+   * @return bool
+   *   Success.
+   */
   public function activate() {
     if (!current_user_can('activate_plugins')) {
       return FALSE;
@@ -16,7 +26,7 @@ class AcumulusSetup {
 
     // Setup.
     if ($this->checkRequirements()) {
-      // Install
+      // Install.
       $model = new AcumulusEntryModel();
       return $model->install();
     }
@@ -24,25 +34,38 @@ class AcumulusSetup {
     return FALSE;
   }
 
+  /**
+   * Deactivates the plugin.
+   *
+   * @return bool
+   *   Success.
+   */
   public function deactivate() {
     if (!current_user_can('activate_plugins')) {
-      return;
+      return FALSE;
     }
     $plugin = isset($_REQUEST['plugin']) ? $_REQUEST['plugin'] : '';
     check_admin_referer("deactivate-plugin_{$plugin}");
 
     // Deactivate.
     // None so far.
+    return TRUE;
   }
 
+  /**
+   * Uninstalls the plugin.
+   *
+   * @return bool
+   *   Success.
+   */
   public function uninstall() {
     if (!current_user_can('activate_plugins')) {
-      return false;
+      return FALSE;
     }
     check_admin_referer('bulk-plugins');
 
     // Uninstall.
-    delete_option('woocommerce_acumulus');
+    delete_option('acumulus');
 
     $model = new AcumulusEntryModel();
     return $model->uninstall();
