@@ -12,9 +12,9 @@ use Siel\Acumulus\Helpers\Translator;
 use Siel\Acumulus\Shop\Config;
 use Siel\Acumulus\Shop\ModuleTranslations;
 use Siel\Acumulus\WooCommerce\Helpers\FormMapper;
-use Siel\Acumulus\WooCommerce\Helpers\FormRenderer;
 use Siel\Acumulus\WooCommerce\Helpers\Log;
 use Siel\Acumulus\WooCommerce\Invoice\Source;
+use Siel\Acumulus\WooCommerce\Shop\BatchForm;
 use Siel\Acumulus\WooCommerce\Shop\ConfigForm;
 use Siel\Acumulus\WooCommerce\Shop\ConfigStore;
 
@@ -30,19 +30,22 @@ register_uninstall_hook(__FILE__, array('Acumulus', 'uninstall'));
  */
 add_action('plugins_loaded', array('Acumulus', 'create'));
 
-
+/**
+ * Class Acumulus
+ */
 class Acumulus {
+
   /** @var Acumulus|null */
   private static $instance = NULL;
 
   /** @var \Siel\Acumulus\Helpers\TranslatorInterface */
-  protected $translator = null;
+  protected $translator = NULL;
 
   /** @var \Siel\Acumulus\Shop\Config */
   protected $acumulusConfig;
 
-  /** @var \Siel\Acumulus\Shop\ConfigForm */
-  protected $form;
+  /** @var \Siel\Acumulus\Helpers\Form[] */
+  protected $forms;
 
   /**
    * Entry point for WordPress.
@@ -60,8 +63,12 @@ class Acumulus {
    * Constructor: setup hooks
    */
   private function __construct() {
+    $this->forms = array();
+
     add_action('admin_init', array($this, 'adminInit'));
     add_action('admin_menu', array($this, 'addOptionsPage'));
+    add_action('admin_menu', array($this, 'addBatchForm'), 900);
+    add_action('admin_post_acumulus_batch', array($this, 'processBatchForm'));
     add_action('woocommerce_order_status_changed', array($this, 'woocommerceOrderStatusChanged'), 10, 3);
   }
 
@@ -75,7 +82,7 @@ class Acumulus {
    */
   public function getVersionNumber() {
     if (function_exists('get_plugin_data')) {
-      $plugin_data = get_plugin_data( __FILE__ );
+      $plugin_data = get_plugin_data(__FILE__);
       $version = $plugin_data['Version'];
       update_option('acumulus_version', $version);
     }
@@ -89,7 +96,7 @@ class Acumulus {
    * Loads our library and creates a configuration object.
    */
   public function init() {
-    if ($this->translator === null) {
+    if ($this->translator === NULL) {
       // Load autoloader
       require_once(dirname(__FILE__) . '/libraries/Siel/psr4.php');
 
@@ -109,23 +116,10 @@ class Acumulus {
   }
 
   /**
-   * Getter for the configuration form object.
-   *
-   * @return \Siel\Acumulus\Shop\ConfigForm
-   */
-  public function getForm() {
-    $this->init();
-    if ($this->form === null) {
-      $this->form = new ConfigForm($this->translator, $this->acumulusConfig);
-    }
-    return $this->form;
-  }
-
-  /**
-   * Registers our settings.
+   * Registers our settings and its sanitation callback.
    */
   public function adminInit() {
-    register_setting('acumulus', 'acumulus', array($this->getForm(), 'getSubmittedValues'));
+    register_setting('acumulus', 'acumulus', array($this, 'processConfigForm'));
   }
 
   /**
@@ -133,6 +127,8 @@ class Acumulus {
    */
   public function addOptionsPage() {
     $this->init();
+    // Create form now to get translations.
+    $this->getForm('config');
     add_options_page($this->translator->get('module_name') . ' ' . $this->translator->get('button_settings'),
       $this->translator->get('module_name'),
       'manage_options',
@@ -140,6 +136,26 @@ class Acumulus {
       array($this, 'renderOptionsForm'));
   }
 
+  /**
+   * Adds our configuration page to the menu.
+   */
+  public function addBatchForm() {
+    $this->init();
+    // Create form now to get translations.
+    $this->getForm('batch');
+    add_submenu_page('woocommerce',
+      $this->translator->get('batch_form_title'),
+      $this->translator->get('module_name'),
+      'manage_woocommerce',
+      'acumulus_batch',
+      array($this, 'processBatchForm'));
+  }
+
+  /**
+   * Renders the configuration form.
+   *
+   * @see addOptionsPage()
+   */
   public function renderOptionsForm() {
     if (!current_user_can('manage_options')) {
       wp_die(__('You do not have sufficient permissions to access this page.'));
@@ -150,14 +166,149 @@ class Acumulus {
     wp_enqueue_style('acumulus_css_admin', $pluginUrl . '/acumulus.css');
 
     // Get our form.
-    $form = $this->getForm();
+    $form = $this->getForm('config');
     // Map our form to WordPress setting sections.
     $formMapper = new FormMapper();
-    $formRenderer = $formMapper->map($form);
-    // Render the setting sections.
-
-    $output = $formRenderer->render($form);
+    // And kick off rendering the sections.
+    $formRenderer = $formMapper->map($form, 'acumulus');
+    $output = '';
+    $output .= '<div class="wrap">';
+    /** @noinspection HtmlUnknownTarget */
+    $output .= '<form method="post" action="options.php">';
+    $formRenderer->render($form);
+    ob_start();
+    settings_fields('acumulus');
+    do_settings_sections('acumulus');
+    $output .= ob_get_clean();
+    $output .= get_submit_button();
+    $output .= '</form>';
+    $output .= '</div>';
     echo $output;
+  }
+
+  /**
+   * Validates and sanitizes the submitted form values.
+   *
+   * This is the registered settings and sanitation callback.
+   *
+   * @return array
+   *   The sanitized form values.
+   *
+   * @see adminInit()
+   */
+  public function processConfigForm() {
+    $form = $this->getForm('config');
+    $form->process(FALSE);
+    add_action('admin_notices', array($this, 'showNotices'));
+    return $form->getFormValues();
+  }
+
+  /**
+   * Renders the send batch form. either when called via the menu item this
+   * plugin created or after processing the form.
+   *
+   * @see addBatchForm()
+   */
+  protected function renderBatchForm() {
+    // Add our own CSS.
+    $pluginUrl = plugins_url('/acumulus');
+    wp_enqueue_script('jquery-ui-datepicker');
+    wp_enqueue_script('acumulus.js', $pluginUrl . '/' . 'acumulus.js');
+    //wp_enqueue_style('jquery-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css');
+    wp_enqueue_style('jquery-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css');
+    wp_enqueue_style('acumulus_css_admin', $pluginUrl . '/acumulus.css');
+
+    $url = admin_url('admin.php?page=acumulus_batch');
+    // Get our form.
+    $form = $this->getForm('batch');
+    $formMapper = new FormMapper();
+    // And kick off rendering the sections.
+    $formRenderer = $formMapper->map($form, 'acumulus_batch');
+    $output = '';
+    $output .= $this->showNotices();
+    $output .= '<div class="wrap">';
+    /** @noinspection HtmlUnknownTarget */
+    $output .= '<form method="post" action="' . $url . '">';
+    $output .= '<input type="hidden" name="action" value="acumulus_batch"/>';
+    $output .= wp_nonce_field('acumulus_batch_nonce', '_wpnonce', true, false);
+    $formRenderer->render($form);
+    ob_start();
+    do_settings_sections('acumulus_batch');
+    $output .= ob_get_clean();
+    $output .= get_submit_button($this->translator->get('button_send'));
+    $output .= '</form>';
+    $output .= '</div>';
+    echo $output;
+  }
+
+  /**
+   * Implements the admin_post_acumulus_batch action.
+   */
+  public function processBatchForm() {
+    if (!current_user_can('manage_woocommerce')) {
+      wp_die(__('You do not have sufficient permissions to access this page.'));
+    }
+    $form = $this->getForm('batch');
+    if ($form->isSubmitted()) {
+      check_admin_referer('acumulus_batch_nonce');
+    }
+    $form->process();
+    $this->renderBatchForm();
+  }
+
+  /**
+   * Action method that renders any notices coming from the form(s).
+   *
+   * @return string
+   */
+  public function showNotices() {
+    $output = '';
+    foreach ($this->forms as $form) {
+      foreach ($form->getErrorMessages() as $message) {
+        $output .= $this->renderNotice('error', $message);
+      }
+      foreach ($form->getSuccessMessages() as $message) {
+        $output .= $this->renderNotice('updated', $message);
+      }
+    }
+    return $output;
+  }
+
+  /**
+   * Renders a notice.
+   *
+   * @param string $type
+   * @param string $message
+   *
+   * @return string
+   *   The rendered notice.
+   */
+  public function renderNotice($type, $message) {
+    $output = '';
+    $output .= "<div class='$type notice'><p>";
+    $output .= $message;
+    $output .= '</p></div>';
+    return $output;
+  }
+
+  /**
+   * Getter for the configuration form object.
+   *
+   * @param string $type
+   *
+   * @return \Siel\Acumulus\Shop\ConfigForm
+   */
+  protected function getForm($type) {
+    $this->init();
+    if (empty($this->forms[$type])) {
+      if ($type === 'config') {
+        $this->forms[$type] = new ConfigForm($this->translator, $this->acumulusConfig);
+      }
+      else {
+        $this->forms[$type] = new BatchForm($this->translator, $this->acumulusConfig->getManager());
+      }
+    }
+    return $this->forms[$type];
   }
 
   /**

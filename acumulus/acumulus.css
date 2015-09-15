@@ -6,3 +6,11 @@
 .description {
   font-style: italic;
 }
+
+.form-table {
+  border: 1px solid #444;
+}
+
+.form-table th {
+  padding-left: 20px;
+}
