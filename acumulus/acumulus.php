@@ -70,6 +70,7 @@ class Acumulus {
     add_action('admin_menu', array($this, 'addBatchForm'), 900);
     add_action('admin_post_acumulus_batch', array($this, 'processBatchForm'));
     add_action('woocommerce_order_status_changed', array($this, 'woocommerceOrderStatusChanged'), 10, 3);
+    add_action('woocommerce_order_refunded', array($this, 'woocommerceOrderRefunded'), 10, 2);
   }
 
   /**
@@ -321,10 +322,21 @@ class Acumulus {
   public function woocommerceOrderStatusChanged($orderId, /** @noinspection PhpUnusedParameterInspection */ $status, $newStatus) {
     $this->init();
     $order = new WC_Order($orderId);
-    $type = $order->order_type === 'refund' ? Source::CreditNote : Source::Order;
-    $source = new Source($type, $order);
-    // @todo: check how to handle refunds: upon creation? do they trigger this filter at all?
+    $source = new Source(Source::Order, $order);
     $this->acumulusConfig->getManager()->sourceStatusChange($source, $newStatus);
+  }
+
+  /**
+   * Filter function that gets called when the status of an order changes.
+   *
+   * @param int $orderId
+   * @param int $refundId
+   */
+  public function woocommerceOrderRefunded(/** @noinspection PhpUnusedParameterInspection */ $orderId, $refundId) {
+    $this->init();
+    $refund = new WC_Order_Refund($refundId);
+    $source = new Source(Source::CreditNote, $refund);
+    $this->acumulusConfig->getManager()->sourceStatusChange($source, FALSE);
   }
 
   /**
