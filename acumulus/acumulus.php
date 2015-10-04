@@ -4,7 +4,7 @@ Plugin Name: Acumulus
 Description: Acumulus koppeling voor WooCommerce 2.3+
 Plugin URI: https://forum.acumulus.nl/index.php?board=17.0
 Author: Acumulus
-Version: 4.0.0
+Version: 4.0.1
 LICENCE: GPLv3
 */
 
@@ -343,6 +343,7 @@ class Acumulus {
    * Forwards the call to an instance of the setup class.
    */
   public static function activate() {
+    static::create()->init();
     require_once(dirname(__FILE__) . '/AcumulusSetup.php');
     $setup = new AcumulusSetup();
     $setup->activate();
@@ -352,6 +353,7 @@ class Acumulus {
    * Forwards the call to an instance of the setup class.
    */
   public static function deactivate() {
+    static::create()->init();
     require_once(dirname(__FILE__) . '/AcumulusSetup.php');
     $setup = new AcumulusSetup();
     $setup->deactivate();
@@ -361,10 +363,10 @@ class Acumulus {
    * Forwards the call to an instance of the setup class.
    */
   public static function uninstall() {
+    static::create()->init();
     require_once(dirname(__FILE__) . '/AcumulusSetup.php');
     $setup = new AcumulusSetup();
     $setup->uninstall();
   }
 
 }
-
