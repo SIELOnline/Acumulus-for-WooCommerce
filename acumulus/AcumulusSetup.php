@@ -35,6 +35,21 @@ class AcumulusSetup {
   }
 
   /**
+   * Upgrades the plugin.
+   *
+   *
+   * @param string $oldVersion
+   * @param string $newVersion
+   *
+   * @return bool
+   *   Success.
+   */
+  public function upgrade($oldVersion, $newVersion) {
+    // Upgrade data, settings, etc: nothing for now.
+    return TRUE;
+  }
+
+  /**
    * Deactivates the plugin.
    *
    * @return bool

@@ -4,7 +4,7 @@ Plugin Name: Acumulus
 Description: Acumulus koppeling voor WooCommerce 2.3+
 Plugin URI: https://forum.acumulus.nl/index.php?board=17.0
 Author: Acumulus
-Version: 4.0.1
+Version: 4.0.2
 LICENCE: GPLv3
 */
 
@@ -85,7 +85,7 @@ class Acumulus {
     if (function_exists('get_plugin_data')) {
       $plugin_data = get_plugin_data(__FILE__);
       $version = $plugin_data['Version'];
-      update_option('acumulus_version', $version);
+      $this->upgrade($version);
     }
     else {
       $version = get_option('acumulus_version');
@@ -347,6 +347,22 @@ class Acumulus {
     require_once(dirname(__FILE__) . '/AcumulusSetup.php');
     $setup = new AcumulusSetup();
     $setup->activate();
+  }
+
+  /**
+   * Forwards the call to an instance of the setup class.
+   *
+   * @param string $version
+   */
+  public function upgrade($version) {
+    $dbVersion = get_option('acumulus_version', $version);
+    if (empty($dbVersion) || version_compare($dbVersion, $version) === -1) {
+      $this->init();
+      require_once(dirname(__FILE__) . '/AcumulusSetup.php');
+      $setup = new AcumulusSetup();
+      $setup->upgrade($dbVersion, $version);
+      update_option('acumulus_version', $version);
+    }
   }
 
   /**
