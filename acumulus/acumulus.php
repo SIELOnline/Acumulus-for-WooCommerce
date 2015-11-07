@@ -4,7 +4,7 @@ Plugin Name: Acumulus
 Description: Acumulus koppeling voor WooCommerce 2.3+
 Plugin URI: https://forum.acumulus.nl/index.php?board=17.0
 Author: Acumulus
-Version: 4.0.2
+Version: 4.1.1
 LICENCE: GPLv3
 */
 

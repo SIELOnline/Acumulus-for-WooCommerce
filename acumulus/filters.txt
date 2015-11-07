@@ -1,64 +1,132 @@
 Acumulus plugin filters
 =======================
 
-This file documents the filters that the Acumulus plugin defines. Currently only
-1 filter is defined:
-
-
-Acumulus Plugin API/Filter Reference/acumulus_invoice_add
----------------------------------------------------------
-
 Warning
 -------
-This filter is experimental. Depending on feedback from actual usage, details
+These filters are experimental. Depending on feedback from actual usage, details
 may change in future versions.
+
+This file documents the filters that the Acumulus plugin defines. Currently, the
+following filters are defined:
+- acumulus_invoice_created
+- acumulus_invoice_completed
+- acumulus_invoice_sent
+
+
+Acumulus Plugin API/Filter Reference/acumulus_invoice_created
+=============================================================
 
 Description
 -----------
-The "acumulus_invoice_add" filter is used to change the invoice that will be
-sent to Acumulus. The Acumulus plugin has created the invoice and is about to
-send it to Acumulus. But just before doing so, this filter allows you to change
-details of the invoice as will be sent to Acumulus.
+The "acumulus_invoice_created" filter is used to change the invoice that will be
+sent to Acumulus. The Creator component of the Acumulus plugin has created the
+raw invoice and is about to complete and send it to Acumulus. This filter allows
+you to:
+- Prevent sending the invoice to Acumulus.
+- Change the raw invoice as will be passed through the Completor component and
+  then be sent Acumulus.
 
 Usage
 -----
-When the "acumulus_invoice_add" filter is called, it is passed 2 arguments:
-- $invoice:
-  A keyed array containing the invoice that will be sent to Acumulus. The array
-  structure is similar to the XML structure as defined on
+When the "acumulus_invoice_created" filter is called, it is passed 2 arguments:
+- array $invoice:
+  A keyed array containing the raw invoice that will be sent to Acumulus. The
+  array structure is similar to the XML structure as defined on
   https://apidoc.sielsystems.nl/content/invoice-add, though at this stage, only
   the customer key will be present at the highest level. The line tag is
   represented as a numeric array of lines, even if if there is only 1 line.
 
-  Some keys will be missing, if they are still missing after this filter has
-  been applied, they will be filled in (not overwritten) by the plugin before
-  the actual sending takes place:
-  - ['customer']['overwriteifexists']
-  - ['customer']['type']
-  - ['customer']['invoice']['concept']
-  - ['customer']['invoice']['accountnumber']
-  - ['customer']['invoice']['costcenter']
-  - ['customer']['invoice']['template]
-  - ['customer']['invoice']['vattype]
+  Some keys might be missing or NULL, if they are still not set after this
+  filter has been applied, they will be filled in (not overwritten) by the
+  Completor component of this plugin before the actual sending takes place.
+  See \Siel\Acumulus\Invoice\Creator::getCustomer()
+  See \Siel\Acumulus\Invoice\Creator::getInvoice()
+  See \Siel\Acumulus\Invoice\Creator::getInvoiceLines()
 
-  The following keys may be filled with a null value, if the 'unitprice' of that
-  'line' = 0. These null values will be replaced by the plugin by the most
-  occurring vat rate before the actual sending takes place:
-  - ['customer']['invoice']['line']['taxrate']
-- $order: The WooCommerce order, a WC_Order class object.
+  Some additional keys might be available.
+  See \Siel\Acumulus\Invoice\Creator::getInvoice()
+  See \Siel\Acumulus\Invoice\Creator::getInvoiceTotals()
+  See \Siel\Acumulus\Invoice\Creator::getInvoiceLines()
 
-Typical usages for this filter allow to implement business logic specific to
+- WC_Abstract_Order $order: The WooCommerce order or refund, ie a WC_Order or
+  WC_Order_Refund class object.
+
+The filter should return the altered invoice or NULl if it wants to prevent
+sending the invoice to Acumulus.
+
+
+Acumulus Plugin API/Filter Reference/acumulus_invoice_completed
+===============================================================
+
+Description
+-----------
+The "acumulus_invoice_completed" filter is used to complete/correct the raw
+invoice as created by the Creator component of this plugin and that will be sent
+to Acumulus. The Creator component of the Acumulus plugin has created the
+raw invoice and that has been completed by the Completor. This filter allows
+you to:
+- Prevent sending the invoice to Acumulus.
+- Change the completed invoice as will be sent to Acumulus.
+
+Usage
+-----
+When the "acumulus_invoice_completed" filter is called, it is passed 2
+arguments:
+- array $invoice:
+  A keyed array containing the raw invoice that will be sent to Acumulus. The
+  array structure is similar to the XML structure as defined on
+  https://apidoc.sielsystems.nl/content/invoice-add, though at this stage, only
+  the customer key will be present at the highest level. The line tag is
+  represented as a numeric array of lines, even if if there is only 1 line.
+
+  Some additional keys might be available.
+  See \Siel\Acumulus\Invoice\Creator::getInvoice()
+  See \Siel\Acumulus\Invoice\Creator::getInvoiceTotals()
+  See \Siel\Acumulus\Invoice\Creator::getInvoiceLines()
+
+- WC_Abstract_Order $order: The WooCommerce order or refund, ie a WC_Order or
+  WC_Order_Refund class object.
+
+The filter should return the altered invoice or NULl if it wants to prevent
+sending the invoice to Acumulus.
+
+Typical usages for these filters allow to implement business logic specific to
 your business, think of:
 - Template, account number, or cost center selection based on order specifics.
 - Adding descriptive info to the invoice or invoice lines based on custom order
   meta data.
 - Correcting payment info based on payment plugins not supported by this plugin.
 
-Examples
---------
+The difference between Created and Completed lies in:
+- Tax handling: the vat type (reversed vat, EU vat, Dutch VAT)
+- Tax rates: if tax rates are computed via a division, they might contain
+  rouding errors after Creation. Based on actual VAT rates these should have
+  been corrected after Completion.
+- Division of discount over multiple vat rates.
+
+Example 1
+---------
+// Defines a filter that prevents sending 0-amount invoices (free products).
+// @author Wouter D. Snel
+add_filter('acumulus_invoice_created', 'acumulus_stop_null');
+
+function acumulus_stop_null(array $invoice, WC_Abstract_Order $order) {
+	if ($invoice['customer']['invoice']['meta-invoiceamountinc'] == 0) {
+	  return NULL;
+	}
+	else {
+	  return $invoice;
+	}
+}
+
+
+Example 2
+---------
 use Siel\Acumulus\Common\WebAPI;
 
-function my_acumulus_invoice_add(array $invoice, WC_Order $order ) {
+add_filter('acumulus_invoice_created', 'my_acumulus_invoice_created', 10, 2);
+
+function my_acumulus_invoice_created(array $invoice, WC_Order $order) {
   $is_paid = my_determine_payment_status($order);
   if ($is_paid) {
     $invoice['customer']['invoice']['paymentstatus'] = WebAPI::PaymentStatus_Paid;
@@ -70,13 +138,32 @@ function my_acumulus_invoice_add(array $invoice, WC_Order $order ) {
   }
   return $invoice;
 }
-add_filter( 'acumulus_invoice_add', 'my_acumulus_invoice_add', 10, 2 );
+
+
+Acumulus Plugin API/Filter Reference/acumulus_invoice_sent
+==========================================================
+
+Description
+-----------
+The "acumulus_invoice_sent" action is triggered when the invoice has been sent
+to Acumulus. This is an action, not a filter, thus no return value is expected,
+nor can you change any of the values passed in.
+
+When the "acumulus_invoice_sent" action is called, it is passed 3 arguments:
+- array $invoice The invoice that has been sent toi Acumulus
+- WC_Abstract_Order $invoice, the order or refund object.
+- array $result The result of the invoice add API service.
+
+See https://apidoc.sielsystems.nl/content/invoice-add for the structure of the
+arrays.
+
 
 Related
--------
+=======
 N.A.
 
+
 External Resources
-------------------
+==================
 - https://apidoc.sielsystems.nl/content/invoice-add.
 - https://apidoc.sielsystems.nl/content/warning-error-and-status-response-section-most-api-calls
