@@ -4,19 +4,16 @@ Plugin Name: Acumulus
 Description: Acumulus koppeling voor WooCommerce 2.3+
 Plugin URI: https://forum.acumulus.nl/index.php?board=17.0
 Author: Acumulus
-Version: 4.1.1
+Version: 4.1.2
 LICENCE: GPLv3
 */
 
-use Siel\Acumulus\Helpers\Translator;
 use Siel\Acumulus\Shop\Config;
 use Siel\Acumulus\Shop\ModuleTranslations;
 use Siel\Acumulus\WooCommerce\Helpers\FormMapper;
-use Siel\Acumulus\WooCommerce\Helpers\Log;
 use Siel\Acumulus\WooCommerce\Invoice\Source;
 use Siel\Acumulus\WooCommerce\Shop\BatchForm;
 use Siel\Acumulus\WooCommerce\Shop\ConfigForm;
-use Siel\Acumulus\WooCommerce\Shop\ConfigStore;
 
 /*
  * Install/uninstall actions.
@@ -38,11 +35,8 @@ class Acumulus {
   /** @var Acumulus|null */
   private static $instance = NULL;
 
-  /** @var \Siel\Acumulus\Helpers\TranslatorInterface */
-  protected $translator = NULL;
-
   /** @var \Siel\Acumulus\Shop\Config */
-  protected $acumulusConfig;
+  protected $acumulusConfig = NULL;
 
   /** @var \Siel\Acumulus\Helpers\Form[] */
   protected $forms;
@@ -94,10 +88,24 @@ class Acumulus {
   }
 
   /**
+   * Helper method to translate strings.
+   *
+   * @param string $key
+   *  The key to get a translation for.
+   *
+   * @return string
+   *   The translation for the given key or the key itself if no translation
+   *   could be found.
+   */
+  protected function t($key) {
+    return $this->acumulusConfig->getTranslator()->get($key);
+  }
+
+  /**
    * Loads our library and creates a configuration object.
    */
   public function init() {
-    if ($this->translator === NULL) {
+    if ($this->acumulusConfig === NULL) {
       // Load autoloader
       require_once(dirname(__FILE__) . '/libraries/Siel/psr4.php');
 
@@ -106,13 +114,8 @@ class Acumulus {
         $languageCode = 'nl';
       }
       $languageCode = substr($languageCode, 0, 2);
-
-      Log::createInstance();
-      $this->translator = new Translator($languageCode);
-      $translations = new ModuleTranslations();
-      $this->translator->add($translations);
-
-      $this->acumulusConfig = new Config(new ConfigStore(), $this->translator);
+      $this->acumulusConfig = new Config('Woocommerce', $languageCode);
+      $this->acumulusConfig->getTranslator()->add(new ModuleTranslations());
     }
   }
 
@@ -130,8 +133,8 @@ class Acumulus {
     $this->init();
     // Create form now to get translations.
     $this->getForm('config');
-    add_options_page($this->translator->get('module_name') . ' ' . $this->translator->get('button_settings'),
-      $this->translator->get('module_name'),
+    add_options_page($this->t('module_name') . ' ' . $this->t('button_settings'),
+      $this->t('module_name'),
       'manage_options',
       'acumulus',
       array($this, 'renderOptionsForm'));
@@ -145,8 +148,8 @@ class Acumulus {
     // Create form now to get translations.
     $this->getForm('batch');
     add_submenu_page('woocommerce',
-      $this->translator->get('batch_form_title'),
-      $this->translator->get('module_name'),
+      $this->t('batch_form_title'),
+      $this->t('module_name'),
       'manage_woocommerce',
       'acumulus_batch',
       array($this, 'processBatchForm'));
@@ -236,7 +239,7 @@ class Acumulus {
     ob_start();
     do_settings_sections('acumulus_batch');
     $output .= ob_get_clean();
-    $output .= get_submit_button($this->translator->get('button_send'));
+    $output .= get_submit_button($this->t('button_send'));
     $output .= '</form>';
     $output .= '</div>';
     echo $output;
@@ -303,10 +306,10 @@ class Acumulus {
     $this->init();
     if (empty($this->forms[$type])) {
       if ($type === 'config') {
-        $this->forms[$type] = new ConfigForm($this->translator, $this->acumulusConfig);
+        $this->forms[$type] = new ConfigForm($this->acumulusConfig->getTranslator(), $this->acumulusConfig);
       }
       else {
-        $this->forms[$type] = new BatchForm($this->translator, $this->acumulusConfig->getManager());
+        $this->forms[$type] = new BatchForm($this->acumulusConfig->getTranslator(), $this->acumulusConfig->getManager());
       }
     }
     return $this->forms[$type];
