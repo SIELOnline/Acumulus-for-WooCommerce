@@ -1,6 +1,6 @@
 === Plugin Name ===
 Contributors: SIEL Acumulus.
-Tags: WooCommerce, Acumulus, Financial administration
+Tags: WooCommerce, Acumulus, Financial, Administration
 Requires at least: 4.2.3
 Tested up to: 4.4
 Stable tag: trunk
@@ -14,10 +14,17 @@ financial administration application.
 
 The Acumulus plugin connects your Woocommerce store to the Dutch SIEL Acumulus online
 financial administration application. It can add your invoices automatically or via a
-batch send form to your administration.
+batch send form to your administration, saving you a lot of manual, error prone work.
 
-This plugin assumes that you have installed WooCommerce and that you have an account with
-SIEL Acumulus (https://www.siel.nl/acumulus/, https://www.sielsystems.nl/acumulus).
+The Acumulus plugin:
+- reacts to order status changes via actions.
+- does have 2 admin screens: a settings and a batch send screen.
+- does not in any way interfere with the front end UI.
+
+The Acumulus plugin assumes that:
+- you have installed WooCommerce
+- you have an account with SIEL Acumulus (https://www.siel.nl/acumulus/,
+  https://www.sielsystems.nl/acumulus).
 If not, this plugin is useless and will not do anything.
 
 == Installation ==

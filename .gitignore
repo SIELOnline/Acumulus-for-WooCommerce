@@ -5,8 +5,9 @@ interdiff.txt
 *.bak
 *.old
 
-# PHPStorm
+# PHPStorm, svn
 .idea/*
+svn/*
 
 # Common library
 acumulus/libraries/Siel/*
