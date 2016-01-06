@@ -1,6 +1,6 @@
 === Plugin Name ===
 Contributors: SIEL Acumulus.
-Tags: WooCommerce, Acumulus, Financial, Administration
+Tags: WooCommerce, Acumulus, Financial, Bookkeeping, Accounting
 Requires at least: 4.2.3
 Tested up to: 4.4
 Stable tag: trunk
@@ -43,7 +43,9 @@ If not, this plugin is useless and will not do anything.
 
 == Screenshots ==
 
-TODO
+1. Settings form (1 of 2)
+2. Settings form (2 of 2)
+3. Batch form
 
 == Changelog ==
 

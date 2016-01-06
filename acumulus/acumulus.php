@@ -4,7 +4,7 @@ Plugin Name: Acumulus
 Description: Acumulus koppeling voor WooCommerce 2.3+
 Plugin URI: https://forum.acumulus.nl/index.php?board=17.0
 Author: Acumulus
-Version: 4.2.0-beta3
+Version: 4.2.0-beta4
 LICENCE: GPLv3
 */
 
@@ -114,7 +114,7 @@ class Acumulus {
         $languageCode = 'nl';
       }
       $languageCode = substr($languageCode, 0, 2);
-      $this->acumulusConfig = new Config('Woocommerce', $languageCode);
+      $this->acumulusConfig = new Config('WooCommerce', $languageCode);
       $this->acumulusConfig->getTranslator()->add(new ModuleTranslations());
     }
   }
