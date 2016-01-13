@@ -17,14 +17,15 @@ financial administration application. It can add your invoices automatically or 
 batch send form to your administration, saving you a lot of manual, error prone work.
 
 The Acumulus plugin:
-- reacts to order status changes via actions.
-- does have 2 admin screens: a settings and a batch send screen.
-- does not in any way interfere with the front end UI.
+* Reacts to order status changes via actions.
+* Does have 2 admin screens: a settings and a batch send screen.
+* Does not in any way interfere with the front-end UI.
 
 The Acumulus plugin assumes that:
-- you have installed WooCommerce
-- you have an account with SIEL Acumulus (https://www.siel.nl/acumulus/,
-  https://www.sielsystems.nl/acumulus).
+* You have installed WooCommerce
+* You have an account with SIEL Acumulus, see https://www.siel.nl/acumulus/ or
+https://www.siel.nl/acumulus/koppelingen/webwinkels/WooCommerce/.
+
 If not, this plugin is useless and will not do anything.
 
 == Installation ==
@@ -53,6 +54,8 @@ The Acumulus plugin exists for multiple eCommerce solutions and are all built on
 a common library. Therefore the changelog is also shared by all the plugins, see
 the separate changelog.txt file.
 
+== Support ==
+See the Acumulus forum at https://forum.acumulus.nl/index.php?board=17.0
 == Upgrade Notice ==
 
 None yet.

@@ -2,9 +2,9 @@
 /*
 Plugin Name: Acumulus
 Description: Acumulus koppeling voor WooCommerce 2.3+
-Plugin URI: https://forum.acumulus.nl/index.php?board=17.0
-Author: Acumulus
-Version: 4.2.0-beta4
+Plugin URI: https://wordpress.org/plugins/acumulus/
+Author: SIEL Acumulus
+Version: 4.2.0-beta7
 LICENCE: GPLv3
 */
 
@@ -316,7 +316,9 @@ class Acumulus {
   }
 
   /**
-   * Filter function that gets called when the status of an order changes.
+   * Filter function for the 'woocommerce_order_status_changed' action,
+   *
+   * This action gets called when the status of an order changes.
    *
    * @param int $orderId
    * @param int $status
