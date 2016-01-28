@@ -4,7 +4,7 @@ Plugin Name: Acumulus
 Description: Acumulus koppeling voor WooCommerce 2.3+
 Plugin URI: https://wordpress.org/plugins/acumulus/
 Author: SIEL Acumulus
-Version: 4.2.0-beta7
+Version: 4.2.0-beta10
 LICENCE: GPLv3
 */
 
@@ -12,8 +12,6 @@ use Siel\Acumulus\Shop\Config;
 use Siel\Acumulus\Shop\ModuleTranslations;
 use Siel\Acumulus\WooCommerce\Helpers\FormMapper;
 use Siel\Acumulus\WooCommerce\Invoice\Source;
-use Siel\Acumulus\WooCommerce\Shop\BatchForm;
-use Siel\Acumulus\WooCommerce\Shop\ConfigForm;
 
 /*
  * Install/uninstall actions.
@@ -38,9 +36,6 @@ class Acumulus {
   /** @var \Siel\Acumulus\Shop\Config */
   protected $acumulusConfig = NULL;
 
-  /** @var \Siel\Acumulus\Helpers\Form[] */
-  protected $forms;
-
   /**
    * Entry point for WordPress.
    *
@@ -57,8 +52,6 @@ class Acumulus {
    * Constructor: setup hooks
    */
   private function __construct() {
-    $this->forms = array();
-
     add_action('admin_init', array($this, 'adminInit'));
     add_action('admin_menu', array($this, 'addOptionsPage'));
     add_action('admin_menu', array($this, 'addBatchForm'), 900);
@@ -130,7 +123,6 @@ class Acumulus {
    * Adds our configuration page to the menu.
    */
   public function addOptionsPage() {
-    $this->init();
     // Create form now to get translations.
     $this->getForm('config');
     add_options_page($this->t('module_name') . ' ' . $this->t('button_settings'),
@@ -144,7 +136,6 @@ class Acumulus {
    * Adds our configuration page to the menu.
    */
   public function addBatchForm() {
-    $this->init();
     // Create form now to get translations.
     $this->getForm('batch');
     add_submenu_page('woocommerce',
@@ -229,7 +220,7 @@ class Acumulus {
     // And kick off rendering the sections.
     $formRenderer = $formMapper->map($form, 'acumulus_batch');
     $output = '';
-    $output .= $this->showNotices();
+    $output .= $this->showNotices($form);
     $output .= '<div class="wrap">';
     /** @noinspection HtmlUnknownTarget */
     $output .= '<form method="post" action="' . $url . '">';
@@ -263,17 +254,17 @@ class Acumulus {
   /**
    * Action method that renders any notices coming from the form(s).
    *
+   * @param \Siel\Acumulus\Helpers\Form $form
+   *
    * @return string
    */
-  public function showNotices() {
+  public function showNotices($form) {
     $output = '';
-    foreach ($this->forms as $form) {
-      foreach ($form->getErrorMessages() as $message) {
-        $output .= $this->renderNotice('error', $message);
-      }
-      foreach ($form->getSuccessMessages() as $message) {
-        $output .= $this->renderNotice('updated', $message);
-      }
+    foreach ($form->getErrorMessages() as $message) {
+      $output .= $this->renderNotice('error', $message);
+    }
+    foreach ($form->getSuccessMessages() as $message) {
+      $output .= $this->renderNotice('updated', $message);
     }
     return $output;
   }
@@ -304,15 +295,7 @@ class Acumulus {
    */
   protected function getForm($type) {
     $this->init();
-    if (empty($this->forms[$type])) {
-      if ($type === 'config') {
-        $this->forms[$type] = new ConfigForm($this->acumulusConfig->getTranslator(), $this->acumulusConfig);
-      }
-      else {
-        $this->forms[$type] = new BatchForm($this->acumulusConfig->getTranslator(), $this->acumulusConfig->getManager());
-      }
-    }
-    return $this->forms[$type];
+    return $this->acumulusConfig->getForm($type);
   }
 
   /**

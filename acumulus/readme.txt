@@ -52,10 +52,10 @@ If not, this plugin is useless and will not do anything.
 
 The Acumulus plugin exists for multiple eCommerce solutions and are all built on
 a common library. Therefore the changelog is also shared by all the plugins, see
-the separate changelog.txt file.
+the separate [changelog.txt](http://plugins.svn.wordpress.org/acumulus/trunk/changelog.txt) file.
 
 == Support ==
 See the Acumulus forum at https://forum.acumulus.nl/index.php?board=17.0
-== Upgrade Notice ==
 
+== Upgrade Notice ==
 None yet.
