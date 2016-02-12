@@ -304,14 +304,13 @@ class Acumulus {
    * This action gets called when the status of an order changes.
    *
    * @param int $orderId
-   * @param int $status
-   * @param int $newStatus
+   * param int $status
+   * param int $newStatus
    */
-  public function woocommerceOrderStatusChanged($orderId, /** @noinspection PhpUnusedParameterInspection */ $status, $newStatus) {
+  public function woocommerceOrderStatusChanged($orderId/*, $status, $newStatus*/) {
     $this->init();
-    $order = new WC_Order($orderId);
-    $source = new Source(Source::Order, $order);
-    $this->acumulusConfig->getManager()->sourceStatusChange($source, $newStatus);
+    $source = new Source(Source::Order, $orderId);
+    $this->acumulusConfig->getManager()->sourceStatusChange($source);
   }
 
   /**
@@ -322,9 +321,8 @@ class Acumulus {
    */
   public function woocommerceOrderRefunded(/** @noinspection PhpUnusedParameterInspection */ $orderId, $refundId) {
     $this->init();
-    $refund = new WC_Order_Refund($refundId);
-    $source = new Source(Source::CreditNote, $refund);
-    $this->acumulusConfig->getManager()->sourceStatusChange($source, FALSE);
+    $source = new Source(Source::CreditNote, $refundId);
+    $this->acumulusConfig->getManager()->sourceStatusChange($source);
   }
 
   /**
