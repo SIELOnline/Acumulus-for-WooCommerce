@@ -1,10 +1,10 @@
 <?php
 /*
 Plugin Name: Acumulus
-Description: Acumulus koppeling voor WooCommerce 2.3+
+Description: Acumulus koppeling voor WooCommerce 2.4+
 Plugin URI: https://wordpress.org/plugins/acumulus/
 Author: SIEL Acumulus
-Version: 4.2.0
+Version: 4.2.1
 LICENCE: GPLv3
 */
 
