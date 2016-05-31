@@ -1,5 +1,6 @@
 <?php
 use Siel\Acumulus\Helpers\Requirements;
+use Siel\Acumulus\Shop\Config;
 use Siel\Acumulus\WooCommerce\Shop\AcumulusEntryModel;
 
 defined('ABSPATH') OR exit;
@@ -7,6 +8,18 @@ defined('ABSPATH') OR exit;
 class AcumulusSetup {
 
   private $messages = array();
+
+  /** @var \Siel\Acumulus\Shop\Config */
+  private $acumulusConfig;
+
+  /**
+   * AcumulusSetup constructor.
+   *
+   * @param \Siel\Acumulus\Shop\Config $acumulusConfig
+   */
+  public function __construct(Config $acumulusConfig) {
+    $this->acumulusConfig = $acumulusConfig;
+  }
 
   /**
    * Activates the plugin.
@@ -43,9 +56,15 @@ class AcumulusSetup {
    * @return bool
    *   Success.
    */
-  public function upgrade(/** @noinspection PhpUnusedParameterInspection */ $oldVersion, $newVersion) {
-    // Upgrade data, settings, etc: nothing for now.
-    return TRUE;
+  public function upgrade($oldVersion, $newVersion) {
+    // Upgrade data, settings, etc.
+    if (!current_user_can('update_plugins')) {
+        return FALSE;
+    }
+    $plugin = isset($_REQUEST['plugin']) ? $_REQUEST['plugin'] : '';
+    check_admin_referer("upgradee-plugin_{$plugin}");
+
+    return $this->acumulusConfig->upgrade($newVersion, $oldVersion);
   }
 
   /**

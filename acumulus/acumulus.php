@@ -331,7 +331,7 @@ class Acumulus {
   public static function activate() {
     static::create()->init();
     require_once(dirname(__FILE__) . '/AcumulusSetup.php');
-    $setup = new AcumulusSetup();
+    $setup = new AcumulusSetup(static::$instance->acumulusConfig);
     $setup->activate();
   }
 
@@ -345,7 +345,7 @@ class Acumulus {
     if (empty($dbVersion) || version_compare($dbVersion, $version) === -1) {
       $this->init();
       require_once(dirname(__FILE__) . '/AcumulusSetup.php');
-      $setup = new AcumulusSetup();
+      $setup = new AcumulusSetup($this->acumulusConfig);
       $setup->upgrade($dbVersion, $version);
       update_option('acumulus_version', $version);
     }
@@ -357,7 +357,7 @@ class Acumulus {
   public static function deactivate() {
     static::create()->init();
     require_once(dirname(__FILE__) . '/AcumulusSetup.php');
-    $setup = new AcumulusSetup();
+    $setup = new AcumulusSetup(static::$instance->acumulusConfig);
     $setup->deactivate();
   }
 
@@ -367,7 +367,7 @@ class Acumulus {
   public static function uninstall() {
     static::create()->init();
     require_once(dirname(__FILE__) . '/AcumulusSetup.php');
-    $setup = new AcumulusSetup();
+    $setup = new AcumulusSetup(static::$instance->acumulusConfig);
     $setup->uninstall();
   }
 
