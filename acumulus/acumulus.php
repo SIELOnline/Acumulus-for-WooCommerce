@@ -4,7 +4,7 @@ Plugin Name: Acumulus
 Description: Acumulus koppeling voor WooCommerce 2.4+
 Plugin URI: https://wordpress.org/plugins/acumulus/
 Author: SIEL Acumulus
-Version: 4.5.0
+Version: 4.5.1
 LICENCE: GPLv3
 */
 
@@ -35,6 +35,9 @@ class Acumulus {
 
   /** @var \Siel\Acumulus\Shop\Config */
   protected $acumulusConfig = NULL;
+
+  /** @var bool */
+  protected $inUpgrade = false;
 
   /**
    * Entry point for WordPress.
@@ -72,7 +75,10 @@ class Acumulus {
     if (function_exists('get_plugin_data')) {
       $plugin_data = get_plugin_data(__FILE__);
       $version = $plugin_data['Version'];
-      $this->upgrade($version);
+      if (!$this->inUpgrade) {
+        $this->inUpgrade = true;
+        $this->upgrade($version);
+      }
     }
     else {
       $version = get_option('acumulus_version');

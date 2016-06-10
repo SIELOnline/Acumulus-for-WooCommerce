@@ -58,11 +58,10 @@ class AcumulusSetup {
    */
   public function upgrade($oldVersion, $newVersion) {
     // Upgrade data, settings, etc.
-    if (!current_user_can('update_plugins')) {
-        return FALSE;
-    }
-    $plugin = isset($_REQUEST['plugin']) ? $_REQUEST['plugin'] : '';
-    check_admin_referer("upgradee-plugin_{$plugin}");
+    // No need to check: harmless and even obligatory upgrade only.
+//    if (!current_user_can('update_plugins')) {
+//        return FALSE;
+//    }
 
     return $this->acumulusConfig->upgrade($newVersion, $oldVersion);
   }

@@ -2,7 +2,7 @@
 Contributors: SIEL Acumulus.
 Tags: WooCommerce, Acumulus, Financial, Bookkeeping, Accounting
 Requires at least: 4.2.3
-Tested up to: 4.4
+Tested up to: 4.5
 Stable tag: trunk
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl.html
@@ -17,14 +17,15 @@ financial administration application. It can add your invoices automatically or 
 batch send form to your administration, saving you a lot of manual, error prone work.
 
 The Acumulus plugin:
+
 * Reacts to order status changes via actions.
 * Does have 2 admin screens: a settings and a batch send screen.
 * Does not in any way interfere with the front-end UI.
 
 The Acumulus plugin assumes that:
+
 * You have installed WooCommerce
-* You have an account with SIEL Acumulus, see https://www.siel.nl/acumulus/ or
-https://www.siel.nl/acumulus/koppelingen/webwinkels/WooCommerce/.
+* You have an account with SIEL Acumulus, see https://www.siel.nl/acumulus/ or https://www.siel.nl/acumulus/koppelingen/webwinkels/WooCommerce/.
 
 If not, this plugin is useless and will not do anything.
 
