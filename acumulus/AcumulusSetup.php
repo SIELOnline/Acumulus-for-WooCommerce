@@ -7,6 +7,10 @@ defined('ABSPATH') OR exit;
 
 class AcumulusSetup {
 
+  /** @var string */
+  private $version;
+
+  /** @var array */
   private $messages = array();
 
   /** @var \Siel\Acumulus\Shop\Config */
@@ -16,9 +20,11 @@ class AcumulusSetup {
    * AcumulusSetup constructor.
    *
    * @param \Siel\Acumulus\Shop\Config $acumulusConfig
+   * @param string $version
    */
-  public function __construct(Config $acumulusConfig) {
+  public function __construct(Config $acumulusConfig, $version = '') {
     $this->acumulusConfig = $acumulusConfig;
+    $this->version = $version;
   }
 
   /**
@@ -31,39 +37,36 @@ class AcumulusSetup {
    *   Success.
    */
   public function activate() {
-    if (!current_user_can('activate_plugins')) {
-      return FALSE;
-    }
-    $plugin = isset($_REQUEST['plugin']) ? $_REQUEST['plugin'] : '';
-    check_admin_referer("activate-plugin_{$plugin}");
+    $result = FALSE;
+    if (current_user_can('activate_plugins')) {
+      $plugin = isset($_REQUEST['plugin']) ? $_REQUEST['plugin'] : '';
+      check_admin_referer("activate-plugin_{$plugin}");
 
-    // Setup.
-    if ($this->checkRequirements()) {
       // Install.
-      $model = new AcumulusEntryModel();
-      return $model->install();
+      if ($this->checkRequirements()) {
+        $model = new AcumulusEntryModel();
+        $result = $model->install();
+        add_option('acumulus_version', $this->version);
+      }
     }
-
-    return FALSE;
+    return $result;
   }
 
   /**
    * Upgrades the plugin.
    *
-   * @param string $oldVersion
-   * @param string $newVersion
-   *
    * @return bool
    *   Success.
    */
-  public function upgrade($oldVersion, $newVersion) {
-    // Upgrade data, settings, etc.
-    // No need to check: harmless and even obligatory upgrade only.
-//    if (!current_user_can('update_plugins')) {
-//        return FALSE;
-//    }
-
-    return $this->acumulusConfig->upgrade($newVersion, $oldVersion);
+  public function upgrade() {
+    $result = true;
+    // Only execute if we are really upgrading.
+    $dbVersion = get_option('acumulus_version');
+    if (!empty($dbVersion) && version_compare($dbVersion, $this->version, '<')) {
+      $result = $this->acumulusConfig->upgrade($dbVersion);
+      update_option('acumulus_version', $this->version);
+    }
+    return $result;
   }
 
   /**

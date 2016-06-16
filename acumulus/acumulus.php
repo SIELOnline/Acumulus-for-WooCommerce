@@ -1,10 +1,10 @@
 <?php
 /*
 Plugin Name: Acumulus
-Description: Acumulus koppeling voor WooCommerce 2.4+
+Description: Acumulus plugin for WooCommerce 2.4+
 Plugin URI: https://wordpress.org/plugins/acumulus/
 Author: SIEL Acumulus
-Version: 4.5.1
+Version: 4.5.3
 LICENCE: GPLv3
 */
 
@@ -13,34 +13,22 @@ use Siel\Acumulus\Shop\ModuleTranslations;
 use Siel\Acumulus\WooCommerce\Helpers\FormMapper;
 use Siel\Acumulus\WooCommerce\Invoice\Source;
 
-/*
- * Install/uninstall actions.
- */
-register_activation_hook(__FILE__, array('Acumulus', 'activate'));
-register_deactivation_hook(__FILE__, array('Acumulus', 'deactivate'));
-register_uninstall_hook(__FILE__, array('Acumulus', 'uninstall'));
-
-/*
- * Actions.
- */
-add_action('plugins_loaded', array('Acumulus', 'create'));
-
 /**
- * Class Acumulus
+ * Class Acumulus is the base plugin class.
  */
 class Acumulus {
 
   /** @var Acumulus|null */
   private static $instance = NULL;
 
-  /** @var \Siel\Acumulus\Shop\Config */
-  protected $acumulusConfig = NULL;
+  /** @var string */
+  private $file;
 
-  /** @var bool */
-  protected $inUpgrade = false;
+  /** @var \Siel\Acumulus\Shop\Config */
+  private $acumulusConfig = NULL;
 
   /**
-   * Entry point for WordPress.
+   * Entry point for our plugin.
    *
    * @return Acumulus
    */
@@ -52,9 +40,22 @@ class Acumulus {
   }
 
   /**
-   * Constructor: setup hooks
+   * Constructor.
    */
   private function __construct() {
+    $this->file = str_replace('\\', '/', __FILE__);
+  }
+
+  /**
+   * Setup the environment for the plugin
+   */
+  public function bootstrap() {
+    // Install/uninstall actions.
+    register_activation_hook($this->file, array($this, 'activate'));
+    register_deactivation_hook($this->file, array($this, 'deactivate'));
+    register_uninstall_hook($this->file, array($this, 'uninstall'));
+
+    // Actions.
     add_action('admin_init', array($this, 'adminInit'));
     add_action('admin_menu', array($this, 'addOptionsPage'));
     add_action('admin_menu', array($this, 'addBatchForm'), 900);
@@ -73,12 +74,8 @@ class Acumulus {
    */
   public function getVersionNumber() {
     if (function_exists('get_plugin_data')) {
-      $plugin_data = get_plugin_data(__FILE__);
+      $plugin_data = get_plugin_data($this->file);
       $version = $plugin_data['Version'];
-      if (!$this->inUpgrade) {
-        $this->inUpgrade = true;
-        $this->upgrade($version);
-      }
     }
     else {
       $version = get_option('acumulus_version');
@@ -106,7 +103,7 @@ class Acumulus {
   public function init() {
     if ($this->acumulusConfig === NULL) {
       // Load autoloader
-      require_once(dirname(__FILE__) . '/libraries/Siel/psr4.php');
+      require_once(dirname($this->file) . '/libraries/Siel/psr4.php');
 
       $languageCode = get_bloginfo('language');
       if (empty($languageCode)) {
@@ -334,47 +331,35 @@ class Acumulus {
   /**
    * Forwards the call to an instance of the setup class.
    */
-  public static function activate() {
-    static::create()->init();
-    require_once(dirname(__FILE__) . '/AcumulusSetup.php');
-    $setup = new AcumulusSetup(static::$instance->acumulusConfig);
+  public function activate() {
+    $this->init();
+    require_once(dirname($this->file) . '/AcumulusSetup.php');
+    $setup = new AcumulusSetup($this->acumulusConfig, $this->getVersionNumber());
     $setup->activate();
-  }
-
-  /**
-   * Forwards the call to an instance of the setup class.
-   *
-   * @param string $version
-   */
-  public function upgrade($version) {
-    $dbVersion = get_option('acumulus_version', $version);
-    if (empty($dbVersion) || version_compare($dbVersion, $version) === -1) {
-      $this->init();
-      require_once(dirname(__FILE__) . '/AcumulusSetup.php');
-      $setup = new AcumulusSetup($this->acumulusConfig);
-      $setup->upgrade($dbVersion, $version);
-      update_option('acumulus_version', $version);
-    }
+    $setup->upgrade();
   }
 
   /**
    * Forwards the call to an instance of the setup class.
    */
-  public static function deactivate() {
-    static::create()->init();
-    require_once(dirname(__FILE__) . '/AcumulusSetup.php');
-    $setup = new AcumulusSetup(static::$instance->acumulusConfig);
+  public function deactivate() {
+    $this->init();
+    require_once(dirname($this->file) . '/AcumulusSetup.php');
+    $setup = new AcumulusSetup($this->acumulusConfig);
     $setup->deactivate();
   }
 
   /**
    * Forwards the call to an instance of the setup class.
    */
-  public static function uninstall() {
-    static::create()->init();
-    require_once(dirname(__FILE__) . '/AcumulusSetup.php');
-    $setup = new AcumulusSetup(static::$instance->acumulusConfig);
+  public function uninstall() {
+    $this->init();
+    require_once(dirname($this->file) . '/AcumulusSetup.php');
+    $setup = new AcumulusSetup($this->acumulusConfig);
     $setup->uninstall();
   }
 
 }
+
+// Entry point for WP: create and bootstrap our module.
+Acumulus::create()->bootstrap();
