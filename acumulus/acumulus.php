@@ -4,7 +4,7 @@ Plugin Name: Acumulus
 Description: Acumulus plugin for WooCommerce 2.4+
 Plugin URI: https://wordpress.org/plugins/acumulus/
 Author: SIEL Acumulus
-Version: 4.5.3
+Version: 4.5.4
 LICENCE: GPLv3
 */
 
@@ -52,7 +52,7 @@ class Acumulus {
   public function bootstrap() {
     // Install/uninstall actions.
     register_activation_hook($this->file, array($this, 'activate'));
-    register_deactivation_hook($this->file, array($this, 'deactivate'));
+    register_deactivation_hook($this->file, array('Acumulus', 'deactivate'));
     register_uninstall_hook($this->file, array($this, 'uninstall'));
 
     // Actions.
@@ -342,10 +342,11 @@ class Acumulus {
   /**
    * Forwards the call to an instance of the setup class.
    */
-  public function deactivate() {
-    $this->init();
-    require_once(dirname($this->file) . '/AcumulusSetup.php');
-    $setup = new AcumulusSetup($this->acumulusConfig);
+  static public function deactivate() {
+    $acumulus = static::create();
+    $acumulus->init();
+    require_once(dirname($acumulus->file) . '/AcumulusSetup.php');
+    $setup = new AcumulusSetup($acumulus->acumulusConfig);
     $setup->deactivate();
   }
 
