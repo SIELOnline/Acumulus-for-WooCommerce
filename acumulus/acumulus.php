@@ -57,8 +57,9 @@ class Acumulus {
 
     // Actions.
     add_action('admin_init', array($this, 'adminInit'));
-    add_action('admin_menu', array($this, 'addOptionsPage'));
+    add_action('admin_menu', array($this, 'addOptionsPages'));
     add_action('admin_menu', array($this, 'addBatchForm'), 900);
+    add_action('admin_post_acumulus_advanced_config', array($this, 'processAdvancedConfigForm'));
     add_action('admin_post_acumulus_batch', array($this, 'processBatchForm'));
     add_action('woocommerce_order_status_changed', array($this, 'woocommerceOrderStatusChanged'), 10, 3);
     add_action('woocommerce_order_refunded', array($this, 'woocommerceOrderRefunded'), 10, 2);
@@ -102,8 +103,8 @@ class Acumulus {
    */
   public function init() {
     if ($this->acumulusConfig === NULL) {
-      // Load autoloader
-      require_once(dirname($this->file) . '/libraries/Siel/psr4.php');
+      // Load autoloader.
+      require_once('libraries/Siel/psr4.php');
 
       $languageCode = get_bloginfo('language');
       if (empty($languageCode)) {
@@ -119,20 +120,26 @@ class Acumulus {
    * Registers our settings and its sanitation callback.
    */
   public function adminInit() {
-    register_setting('acumulus', 'acumulus', array($this, 'processConfigForm'));
+    register_setting('acumulus', 'acumulus', array($this, 'processSettingsForm'));
+    register_setting('acumulus', 'acumulus_advanced_config', array($this, 'processAdvancedSettingsForm'));
   }
 
   /**
    * Adds our configuration page to the menu.
    */
-  public function addOptionsPage() {
+  public function addOptionsPages() {
     // Create form now to get translations.
     $this->getForm('config');
-    add_options_page($this->t('module_name') . ' ' . $this->t('button_settings'),
+    add_options_page($this->t('config_form_title'),
       $this->t('module_name'),
       'manage_options',
       'acumulus',
       array($this, 'renderOptionsForm'));
+    add_options_page($this->t('advanced_form_title'),
+      $this->t('advanced_form_header'),
+      'manage_options',
+      'acumulus_advanced_config',
+      array($this, 'renderAdvancedConfigForm'));
   }
 
   /**
@@ -152,9 +159,11 @@ class Acumulus {
   /**
    * Renders the configuration form.
    *
-   * @see addOptionsPage()
+   * @see addOptionsPages()
+   *
+   * @param string $type
    */
-  public function renderOptionsForm() {
+  public function renderConfigForm($type) {
     if (!current_user_can('manage_options')) {
       wp_die(__('You do not have sufficient permissions to access this page.'));
     }
@@ -164,7 +173,7 @@ class Acumulus {
     wp_enqueue_style('acumulus_css_admin', $pluginUrl . '/acumulus.css');
 
     // Get our form.
-    $form = $this->getForm('config');
+    $form = $this->getForm($type);
     // Map our form to WordPress setting sections.
     $formMapper = new FormMapper();
     // And kick off rendering the sections.
@@ -194,11 +203,73 @@ class Acumulus {
    *
    * @see adminInit()
    */
-  public function processConfigForm() {
-    $form = $this->getForm('config');
+  public function renderOptionsForm() {
+      return $this->renderConfigForm('config');
+  }
+
+  /**
+   * Validates and sanitizes the submitted form values.
+   *
+   * This is the registered settings and sanitation callback.
+   *
+   * @return array
+   *   The sanitized form values.
+   *
+   * @see adminInit()
+   */
+  public function renderAdvancedConfigForm() {
+      return $this->renderConfigForm('advanced');
+  }
+
+  /**
+   * Validates and sanitizes the submitted form values.
+   *
+   * This is the registered settings and sanitation callback.
+   *
+   * @param string $type
+   *   The form type.
+   *
+   * @return array
+   *   The sanitized form values.
+   *
+   * @see adminInit()
+   */
+  public function processConfigForm($type) {
+    if (!current_user_can('manage_options')) {
+      wp_die(__('You do not have sufficient permissions to access this page.'));
+    }
+    $form = $this->getForm($type);
     $form->process(FALSE);
     add_action('admin_notices', array($this, 'showNotices'));
     return $form->getFormValues();
+  }
+
+  /**
+   * Validates and sanitizes the submitted form values.
+   *
+   * This is the registered settings and sanitation callback.
+   *
+   * @return array
+   *   The sanitized form values.
+   *
+   * @see adminInit()
+   */
+  public function processSettingsForm() {
+    return $this->processConfigForm('config');
+  }
+
+  /**
+   * Validates and sanitizes the submitted form values.
+   *
+   * This is the registered settings and sanitation callback.
+   *
+   * @return array
+   *   The sanitized form values.
+   *
+   * @see adminInit()
+   */
+  public function processAdvancedSettingsForm() {
+    return $this->processConfigForm('advanced');
   }
 
   /**
@@ -208,6 +279,10 @@ class Acumulus {
    * @see addBatchForm()
    */
   protected function renderBatchForm() {
+    if (!current_user_can('manage_woocommerce')) {
+      wp_die(__('You do not have sufficient permissions to access this page.'));
+    }
+
     // Add our own CSS.
     $pluginUrl = plugins_url('/acumulus');
     wp_enqueue_script('jquery-ui-datepicker');
@@ -333,7 +408,7 @@ class Acumulus {
    */
   public function activate() {
     $this->init();
-    require_once(dirname($this->file) . '/AcumulusSetup.php');
+    require_once('AcumulusSetup.php');
     $setup = new AcumulusSetup($this->acumulusConfig, $this->getVersionNumber());
     $setup->activate();
     $setup->upgrade();
@@ -344,7 +419,7 @@ class Acumulus {
    */
   public function deactivate() {
     $this->init();
-    require_once(dirname($this->file) . '/AcumulusSetup.php');
+    require_once('AcumulusSetup.php');
     $setup = new AcumulusSetup($this->acumulusConfig);
     $setup->deactivate();
   }
@@ -355,7 +430,7 @@ class Acumulus {
   static public function uninstall() {
     $acumulus = static::create();
     $acumulus->init();
-    require_once(dirname($acumulus->file) . '/AcumulusSetup.php');
+    require_once('AcumulusSetup.php');
     $setup = new AcumulusSetup($acumulus->acumulusConfig);
     $setup->uninstall();
   }
