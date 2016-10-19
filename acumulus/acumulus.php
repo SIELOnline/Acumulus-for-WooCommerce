@@ -15,6 +15,8 @@ use Siel\Acumulus\WooCommerce\Invoice\Source;
 
 /**
  * Class Acumulus is the base plugin class.
+ *
+ * @todo: not easy to get warnings displayed on config screen: WP executes a redirect in between.
  */
 class Acumulus {
 
@@ -59,7 +61,7 @@ class Acumulus {
     add_action('admin_init', array($this, 'adminInit'));
     add_action('admin_menu', array($this, 'addOptionsPages'));
     add_action('admin_menu', array($this, 'addBatchForm'), 900);
-    add_action('admin_post_acumulus_advanced_config', array($this, 'processAdvancedConfigForm'));
+    add_action('admin_post_acumulus_advanced', array($this, 'processAdvancedConfigForm'));
     add_action('admin_post_acumulus_batch', array($this, 'processBatchForm'));
     add_action('woocommerce_order_status_changed', array($this, 'woocommerceOrderStatusChanged'), 10, 3);
     add_action('woocommerce_order_refunded', array($this, 'woocommerceOrderRefunded'), 10, 2);
@@ -121,7 +123,7 @@ class Acumulus {
    */
   public function adminInit() {
     register_setting('acumulus', 'acumulus', array($this, 'processSettingsForm'));
-    register_setting('acumulus', 'acumulus_advanced_config', array($this, 'processAdvancedSettingsForm'));
+    register_setting('acumulus', 'acumulus_advanced', array($this, 'processAdvancedSettingsForm'));
   }
 
   /**
@@ -138,7 +140,7 @@ class Acumulus {
     add_options_page($this->t('advanced_form_title'),
       $this->t('advanced_form_header'),
       'manage_options',
-      'acumulus_advanced_config',
+      'acumulus_advanced',
       array($this, 'renderAdvancedConfigForm'));
   }
 
@@ -180,6 +182,7 @@ class Acumulus {
     $formRenderer = $formMapper->map($form, 'acumulus');
     $output = '';
     $output .= '<div class="wrap">';
+    $output .= $this->showNotices($form);
     /** @noinspection HtmlUnknownTarget */
     $output .= '<form method="post" action="options.php">';
     $formRenderer->render($form);
@@ -240,7 +243,6 @@ class Acumulus {
     }
     $form = $this->getForm($type);
     $form->process(FALSE);
-    add_action('admin_notices', array($this, 'showNotices'));
     return $form->getFormValues();
   }
 
@@ -268,7 +270,7 @@ class Acumulus {
    *
    * @see adminInit()
    */
-  public function processAdvancedSettingsForm() {
+  public function processAdvancedConfigForm() {
     return $this->processConfigForm('advanced');
   }
 
@@ -298,8 +300,8 @@ class Acumulus {
     // And kick off rendering the sections.
     $formRenderer = $formMapper->map($form, 'acumulus_batch');
     $output = '';
-    $output .= $this->showNotices($form);
     $output .= '<div class="wrap">';
+      $output .= $this->showNotices($form);
     /** @noinspection HtmlUnknownTarget */
     $output .= '<form method="post" action="' . $url . '">';
     $output .= '<input type="hidden" name="action" value="acumulus_batch"/>';
@@ -338,11 +340,16 @@ class Acumulus {
    */
   public function showNotices($form) {
     $output = '';
-    foreach ($form->getErrorMessages() as $message) {
-      $output .= $this->renderNotice('error', $message);
-    }
-    foreach ($form->getSuccessMessages() as $message) {
-      $output .= $this->renderNotice('updated', $message);
+    if (isset($form)) {
+        foreach ($form->getErrorMessages() as $message) {
+            $output .= $this->renderNotice('error', $message);
+        }
+        foreach ($form->getWarningMessages() as $message) {
+            $output .= $this->renderNotice('warning', $message);
+        }
+        foreach ($form->getSuccessMessages() as $message) {
+            $output .= $this->renderNotice('updated', $message);
+        }
     }
     return $output;
   }
@@ -357,19 +364,15 @@ class Acumulus {
    *   The rendered notice.
    */
   public function renderNotice($type, $message) {
-    $output = '';
-    $output .= "<div class='$type notice'><p>";
-    $output .= $message;
-    $output .= '</p></div>';
-    return $output;
+      return "<div class='notice notice-$type'><p>$message</p></div>";
   }
 
   /**
-   * Getter for the configuration form object.
+   * Getter for the form object.
    *
    * @param string $type
    *
-   * @return \Siel\Acumulus\Shop\ConfigForm
+   * @return \Siel\Acumulus\Helpers\Form
    */
   protected function getForm($type) {
     $this->init();
