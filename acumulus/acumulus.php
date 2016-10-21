@@ -9,6 +9,7 @@ LICENCE: GPLv3
 */
 
 use Siel\Acumulus\Shop\Config;
+use Siel\Acumulus\Shop\ConfigForm;
 use Siel\Acumulus\Shop\ModuleTranslations;
 use Siel\Acumulus\WooCommerce\Helpers\FormMapper;
 use Siel\Acumulus\WooCommerce\Invoice\Source;
@@ -123,7 +124,7 @@ class Acumulus {
    */
   public function adminInit() {
     register_setting('acumulus', 'acumulus', array($this, 'processSettingsForm'));
-    register_setting('acumulus', 'acumulus_advanced', array($this, 'processAdvancedSettingsForm'));
+    register_setting('acumulus', 'acumulus_advanced', array($this, 'processSettingsForm'));
   }
 
   /**
@@ -176,10 +177,11 @@ class Acumulus {
 
     // Get our form.
     $form = $this->getForm($type);
+    $option_group = $form instanceof ConfigForm ? 'acumulus' : 'acumulus_advanced';
     // Map our form to WordPress setting sections.
     $formMapper = new FormMapper();
     // And kick off rendering the sections.
-    $formRenderer = $formMapper->map($form, 'acumulus');
+    $formRenderer = $formMapper->map($form, $option_group);
     $output = '';
     $output .= '<div class="wrap">';
     $output .= $this->showNotices($form);
@@ -188,7 +190,7 @@ class Acumulus {
     $formRenderer->render($form);
     ob_start();
     settings_fields('acumulus');
-    do_settings_sections('acumulus');
+    do_settings_sections($option_group);
     $output .= ob_get_clean();
     $output .= get_submit_button();
     $output .= '</form>';
@@ -237,7 +239,7 @@ class Acumulus {
    *
    * @see adminInit()
    */
-  public function processConfigForm($type) {
+  protected function processConfigForm($type) {
     if (!current_user_can('manage_options')) {
       wp_die(__('You do not have sufficient permissions to access this page.'));
     }
@@ -257,21 +259,13 @@ class Acumulus {
    * @see adminInit()
    */
   public function processSettingsForm() {
-    return $this->processConfigForm('config');
-  }
-
-  /**
-   * Validates and sanitizes the submitted form values.
-   *
-   * This is the registered settings and sanitation callback.
-   *
-   * @return array
-   *   The sanitized form values.
-   *
-   * @see adminInit()
-   */
-  public function processAdvancedConfigForm() {
-    return $this->processConfigForm('advanced');
+    $type = 'acumulus';
+    @parse_str(parse_url($_POST['_wp_http_referer'], PHP_URL_QUERY));
+    /** @var string $page */
+    if ($page === 'acumulus_advanced') {
+        $type = 'advanced';
+    }
+    return $this->processConfigForm($type);
   }
 
   /**

@@ -99,13 +99,14 @@ The difference between Created and Completed lies in:
 
 Example 1
 ---------
+// NOTE: this feature is now an option.
 // Defines a filter that prevents sending 0-amount invoices (free products).
 // @author Wouter D. Snel
 use Siel\Acumulus\Invoice\Source;
 add_filter('acumulus_invoice_created', 'acumulus_stop_null');
 
 function acumulus_stop_null(array $invoice, Source $source) {
-	if ($invoice['customer']['invoice']['meta-invoiceamountinc'] == 0) {
+	if ($invoice['customer']['invoice']['meta-invoice-amount-inc'] == 0) {
 	  return NULL;
 	}
 	else {
