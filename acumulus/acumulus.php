@@ -17,7 +17,7 @@ use Siel\Acumulus\WooCommerce\Invoice\Source;
 /**
  * Class Acumulus is the base plugin class.
  *
- * @todo: not easy to get warnings displayed on config screen: WP executes a redirect in between.
+ * @todo: warnings or errors are not displayed on config screen: WP executes a redirect in between.
  */
 class Acumulus {
 
