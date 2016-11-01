@@ -4,7 +4,7 @@ Plugin Name: Acumulus
 Description: Acumulus plugin for WooCommerce 2.4+
 Plugin URI: https://wordpress.org/plugins/acumulus/
 Author: SIEL Acumulus
-Version: 4.6.0-beta1
+Version: 4.6.0-beta2
 LICENCE: GPLv3
 */
 
