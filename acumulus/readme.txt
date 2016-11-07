@@ -2,7 +2,7 @@
 Contributors: SIEL Acumulus.
 Tags: WooCommerce, Acumulus, Financial, Bookkeeping, Accounting
 Requires at least: 4.2.3
-Tested up to: 4.5
+Tested up to: 4.6
 Stable tag: trunk
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl.html
@@ -59,4 +59,5 @@ the separate [changelog.txt](http://plugins.svn.wordpress.org/acumulus/trunk/cha
 See the Acumulus forum at https://forum.acumulus.nl/index.php?board=17.0
 
 == Upgrade Notice ==
-None yet.
+With each new version you should visit the settings (and advanced settings) page to see if
+there are new settings that apply to your situation.
