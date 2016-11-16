@@ -1,6 +1,6 @@
 === Plugin Name ===
 Contributors: SIEL Acumulus.
-Tags: WooCommerce, Acumulus, Financial, Bookkeeping, Accounting
+Tags: WooCommerce, Acumulus, financial, bookkeeping, accounting, administratie, bank, boekhouden, boekhoudpakket, boekhoudprogramma, e-commerce, free, gratis, koppeling, online boekhouden
 Requires at least: 4.2.3
 Tested up to: 4.6
 Stable tag: trunk
