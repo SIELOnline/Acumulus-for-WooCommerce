@@ -4,7 +4,7 @@ Plugin Name: Acumulus
 Description: Acumulus plugin for WooCommerce 2.4+
 Plugin URI: https://wordpress.org/plugins/acumulus/
 Author: SIEL Acumulus
-Version: 4.6.6
+Version: 4.6.7
 LICENCE: GPLv3
 */
 
@@ -66,6 +66,7 @@ class Acumulus {
     add_action('admin_post_acumulus_batch', array($this, 'processBatchForm'));
     add_action('woocommerce_order_status_changed', array($this, 'woocommerceOrderStatusChanged'), 10, 3);
     add_action('woocommerce_order_refunded', array($this, 'woocommerceOrderRefunded'), 10, 2);
+    add_action('woocommerce_valid_order_statuses_for_payment', array($this, 'woocommerceValidOrderStatusesForPayment'), 10, 2);
   }
 
   /**
@@ -398,6 +399,21 @@ class Acumulus {
     $this->init();
     $source = new Source(Source::CreditNote, $refundId);
     $this->acumulusConfig->getManager()->sourceStatusChange($source);
+  }
+
+  /**
+   * Hook to correct the behavior of WC_Abstract_Order::needs_payment().
+   *
+   * WooCommerce thinks that orders in the on-hold state are to be seen as
+   * paid, whereas for Acumulus they are seen as due.
+   *
+   * @param array $statuses
+   * param WC_Abstract_Order $order
+   *
+   * @return array
+   */
+  public function woocommerceValidOrderStatusesForPayment(array $statuses/*, WC_Abstract_Order $order*/) {
+      return array_merge($statuses, array('on-hold'));
   }
 
   /**
