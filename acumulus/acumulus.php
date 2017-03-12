@@ -4,20 +4,17 @@ Plugin Name: Acumulus
 Description: Acumulus plugin for WooCommerce 2.4+
 Plugin URI: https://wordpress.org/plugins/acumulus/
 Author: SIEL Acumulus
-Version: 4.7.0
+Version: 4.7.2
 LICENCE: GPLv3
 */
 
 use Siel\Acumulus\Shop\Config;
-use Siel\Acumulus\Shop\ConfigForm;
 use Siel\Acumulus\Shop\ModuleTranslations;
 use Siel\Acumulus\WooCommerce\Helpers\FormMapper;
 use Siel\Acumulus\WooCommerce\Invoice\Source;
 
 /**
  * Class Acumulus is the base plugin class.
- *
- * @todo: warnings or errors are not displayed on config screen: WP executes a redirect in between.
  */
 class Acumulus {
 
@@ -59,10 +56,9 @@ class Acumulus {
     register_uninstall_hook($this->file, array('Acumulus', 'uninstall'));
 
     // Actions.
-    add_action('admin_init', array($this, 'adminInit'));
-    add_action('admin_menu', array($this, 'addOptionsPages'));
-    add_action('admin_menu', array($this, 'addBatchForm'), 900);
-    add_action('admin_post_acumulus_advanced', array($this, 'processAdvancedConfigForm'));
+    add_action('admin_menu', array($this, 'addMenuLinks'), 900);
+    add_action('admin_post_acumulus_config', array($this, 'processConfigForm'));
+    add_action('admin_post_acumulus_advanced', array($this, 'processAdvancedForm'));
     add_action('admin_post_acumulus_batch', array($this, 'processBatchForm'));
     add_action('woocommerce_order_status_changed', array($this, 'woocommerceOrderStatusChanged'), 10, 3);
     add_action('woocommerce_order_refunded', array($this, 'woocommerceOrderRefunded'), 10, 2);
@@ -121,209 +117,132 @@ class Acumulus {
   }
 
   /**
-   * Registers our settings and its sanitation callback.
+   * Adds our pages to the admin menu.
    */
-  public function adminInit() {
-    register_setting('acumulus', 'acumulus', array($this, 'processSettingsForm'));
-    register_setting('acumulus', 'acumulus_advanced', array($this, 'processSettingsForm'));
-  }
-
-  /**
-   * Adds our configuration page to the menu.
-   */
-  public function addOptionsPages() {
-    // Create form now to get translations.
+  public function addMenuLinks() {
+    // Start with creating a config form, so we can use the translations.
     $this->getForm('config');
-    add_options_page($this->t('config_form_title'),
-      $this->t('module_name'),
+    add_submenu_page('options-general.php',
+      $this->t('config_form_title'),
+      $this->t('config_form_header'),
       'manage_options',
-      'acumulus',
-      array($this, 'renderOptionsForm'));
-    add_options_page($this->t('advanced_form_title'),
+      'acumulus_config',
+      array($this, 'processConfigForm')
+    );
+    add_submenu_page('options-general.php',
+      $this->t('advanced_form_title'),
       $this->t('advanced_form_header'),
       'manage_options',
       'acumulus_advanced',
-      array($this, 'renderAdvancedConfigForm'));
-  }
+      array($this, 'processAdvancedForm')
+    );
 
-  /**
-   * Adds our configuration page to the menu.
-   */
-  public function addBatchForm() {
-    // Create form now to get translations.
+    // Start with creating the batch form, so we can use the translations.
     $this->getForm('batch');
     add_submenu_page('woocommerce',
       $this->t('batch_form_title'),
-      $this->t('module_name'),
+      $this->t('batch_form_header'),
       'manage_woocommerce',
       'acumulus_batch',
       array($this, 'processBatchForm'));
   }
 
   /**
-   * Renders the configuration form.
+   * Implements the admin_post_acumulus_config action.
    *
-   * @see addOptionsPages()
+   *  Processes and renders the basic config form.
+   */
+  public function processConfigForm() {
+    $this->processForm('config', 'manage_options');
+  }
+
+  /**
+   * Implements the admin_post_acumulus_advanced action.
+   *
+   *  Processes and renders the advanced config form.
+   */
+  public function processAdvancedForm() {
+    $this->processForm('advanced', 'manage_options');
+  }
+
+  /**
+   * Implements the admin_post_acumulus_batch action.
+   *
+   *  Processes and renders the batch form.
+   */
+  public function processBatchForm() {
+    $this->processForm('batch', 'manage_woocommerce');
+  }
+
+  /**
+   * Processes and renders the form of the given type.
    *
    * @param string $type
+   *   The form type: config, advanced, or batch.
+   * @param string $capability
+   *   The required access right the user should have.
    */
-  public function renderConfigForm($type) {
-    if (!current_user_can('manage_options')) {
+  public function processForm($type, $capability ) {
+    if (!current_user_can($capability)) {
+      wp_die(__('You do not have sufficient permissions to access this page.'));
+    }
+    $form = $this->getForm($type);
+
+    // Trigger auto update before each form invocation.
+    if (!$this->upgrade()) {
+      $form->addErrorMessage(sprintf($this->t('update_failed'), $this->getVersionNumber()));
+    }
+
+    if ($form->isSubmitted()) {
+      check_admin_referer("acumulus_{$type}_nonce");
+    }
+    $form->process();
+    $this->renderForm($type, $capability);
+  }
+
+  /**
+   * Renders the form of the given $type.
+   *
+   * @param string $type
+   *   config, advanced, or batch.
+   * @param string $capability
+   *   The required access right the user should have.
+   */
+  protected function renderForm($type, $capability) {
+    if (!current_user_can($capability)) {
       wp_die(__('You do not have sufficient permissions to access this page.'));
     }
 
     // Add our own CSS.
     $pluginUrl = plugins_url('/acumulus');
+    if ($type === 'batch') {
+      wp_enqueue_script('jquery-ui-datepicker');
+      wp_enqueue_script('acumulus.js', $pluginUrl . '/' . 'acumulus.js');
+      wp_enqueue_style('jquery-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css');
+    }
     wp_enqueue_style('acumulus_css_admin', $pluginUrl . '/acumulus.css');
 
+    $url = admin_url("admin.php?page=acumulus_{$type}");
     // Get our form.
     $form = $this->getForm($type);
-    $option_group = $form instanceof ConfigForm ? 'acumulus' : 'acumulus_advanced';
-    // Map our form to WordPress setting sections.
     $formMapper = new FormMapper();
     // And kick off rendering the sections.
-    $formRenderer = $formMapper->map($form, $option_group);
-    $output = '';
-    $output .= '<div class="wrap">';
-    $output .= $this->showNotices($form);
-    /** @noinspection HtmlUnknownTarget */
-    $output .= '<form method="post" action="options.php">';
-    $formRenderer->render($form);
-    ob_start();
-    settings_fields('acumulus');
-    do_settings_sections($option_group);
-    $output .= ob_get_clean();
-    $output .= get_submit_button();
-    $output .= '</form>';
-    $output .= '</div>';
-    echo $output;
-  }
-
-  /**
-   * Validates and sanitizes the submitted form values.
-   *
-   * This is the registered settings and sanitation callback.
-   *
-   * @return array
-   *   The sanitized form values.
-   *
-   * @see adminInit()
-   */
-  public function renderOptionsForm() {
-      return $this->renderConfigForm('config');
-  }
-
-  /**
-   * Validates and sanitizes the submitted form values.
-   *
-   * This is the registered settings and sanitation callback.
-   *
-   * @return array
-   *   The sanitized form values.
-   *
-   * @see adminInit()
-   */
-  public function renderAdvancedConfigForm() {
-      return $this->renderConfigForm('advanced');
-  }
-
-  /**
-   * Validates and sanitizes the submitted form values.
-   *
-   * This is the registered settings and sanitation callback.
-   *
-   * @param string $type
-   *   The form type.
-   *
-   * @return array
-   *   The sanitized form values.
-   *
-   * @see adminInit()
-   */
-  protected function processConfigForm($type) {
-    if (!current_user_can('manage_options')) {
-      wp_die(__('You do not have sufficient permissions to access this page.'));
-    }
-    $form = $this->getForm($type);
-    $form->process(FALSE);
-    return $form->getFormValues();
-  }
-
-  /**
-   * Validates and sanitizes the submitted form values.
-   *
-   * This is the registered settings and sanitation callback.
-   *
-   * @return array
-   *   The sanitized form values.
-   *
-   * @see adminInit()
-   */
-  public function processSettingsForm() {
-    $type = 'config';
-    @parse_str(parse_url($_POST['_wp_http_referer'], PHP_URL_QUERY));
-    /** @var string $page */
-    if ($page === 'acumulus_advanced') {
-        $type = 'advanced';
-    }
-    return $this->processConfigForm($type);
-  }
-
-  /**
-   * Renders the send batch form. either when called via the menu item this
-   * plugin created or after processing the form.
-   *
-   * @see addBatchForm()
-   */
-  protected function renderBatchForm() {
-    if (!current_user_can('manage_woocommerce')) {
-      wp_die(__('You do not have sufficient permissions to access this page.'));
-    }
-
-    // Add our own CSS.
-    $pluginUrl = plugins_url('/acumulus');
-    wp_enqueue_script('jquery-ui-datepicker');
-    wp_enqueue_script('acumulus.js', $pluginUrl . '/' . 'acumulus.js');
-    //wp_enqueue_style('jquery-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css');
-    wp_enqueue_style('jquery-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css');
-    wp_enqueue_style('acumulus_css_admin', $pluginUrl . '/acumulus.css');
-
-    $url = admin_url('admin.php?page=acumulus_batch');
-    // Get our form.
-    $form = $this->getForm('batch');
-    $formMapper = new FormMapper();
-    // And kick off rendering the sections.
-    $formRenderer = $formMapper->map($form, 'acumulus_batch');
+    $formRenderer = $formMapper->map($form, "acumulus_{$type}");
     $output = '';
     $output .= '<div class="wrap">';
       $output .= $this->showNotices($form);
     /** @noinspection HtmlUnknownTarget */
     $output .= '<form method="post" action="' . $url . '">';
-    $output .= '<input type="hidden" name="action" value="acumulus_batch"/>';
-    $output .= wp_nonce_field('acumulus_batch_nonce', '_wpnonce', true, false);
+    $output .= "<input type=\"hidden\" name=\"action\" value=\"acumulus_{$type}\"/>";
+    $output .= wp_nonce_field("acumulus_{$type}_nonce", '_wpnonce', true, false);
     $formRenderer->render($form);
     ob_start();
-    do_settings_sections('acumulus_batch');
+    do_settings_sections("acumulus_{$type}");
     $output .= ob_get_clean();
-    $output .= get_submit_button($this->t('button_send'));
+    $output .= get_submit_button($type === 'batch' ? $this->t('button_send') : '');
     $output .= '</form>';
     $output .= '</div>';
     echo $output;
-  }
-
-  /**
-   * Implements the admin_post_acumulus_batch action.
-   */
-  public function processBatchForm() {
-    if (!current_user_can('manage_woocommerce')) {
-      wp_die(__('You do not have sufficient permissions to access this page.'));
-    }
-    $form = $this->getForm('batch');
-    if ($form->isSubmitted()) {
-      check_admin_referer('acumulus_batch_nonce');
-    }
-    $form->process();
-    $this->renderBatchForm();
   }
 
   /**
@@ -358,7 +277,7 @@ class Acumulus {
    * @return string
    *   The rendered notice.
    */
-  public function renderNotice($type, $message) {
+  protected function renderNotice($type, $message) {
       return "<div class='notice notice-$type'><p>$message</p></div>";
   }
 
@@ -429,23 +348,39 @@ class Acumulus {
 
   /**
    * Forwards the call to an instance of the setup class.
+   *
+   * @return bool
+   */
+  public function upgrade() {
+    $this->init();
+    require_once('AcumulusSetup.php');
+    $setup = new AcumulusSetup($this->acumulusConfig, $this->getVersionNumber());
+    return $setup->upgrade();
+  }
+
+  /**
+   * Forwards the call to an instance of the setup class.
+   *
+   * @return bool
    */
   public function deactivate() {
     $this->init();
     require_once('AcumulusSetup.php');
     $setup = new AcumulusSetup($this->acumulusConfig);
-    $setup->deactivate();
+    return $setup->deactivate();
   }
 
   /**
    * Forwards the call to an instance of the setup class.
+   *
+   * @return bool
    */
   static public function uninstall() {
     $acumulus = static::create();
     $acumulus->init();
     require_once('AcumulusSetup.php');
     $setup = new AcumulusSetup($acumulus->acumulusConfig);
-    $setup->uninstall();
+    return $setup->uninstall();
   }
 
 }

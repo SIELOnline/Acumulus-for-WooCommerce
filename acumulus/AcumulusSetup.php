@@ -60,12 +60,20 @@ class AcumulusSetup {
    */
   public function upgrade() {
     $result = true;
+
     // Only execute if we are really upgrading.
     $dbVersion = get_option('acumulus_version');
     if (!empty($dbVersion) && version_compare($dbVersion, $this->version, '<')) {
       $result = $this->acumulusConfig->upgrade($dbVersion);
+      if (version_compare($dbVersion, '4.7.2', '<')) {
+        $result = $this->upgrade472() && $result;
+      }
+      update_option('acumulus_version', $this->version);
+    } else if (empty($dbVersion)) {
+      // Set it so we can compare it in the future.
       update_option('acumulus_version', $this->version);
     }
+
     return $result;
   }
 
@@ -130,5 +138,29 @@ class AcumulusSetup {
     foreach ($this->messages as $message) {
       echo '<div class="error">' . $message . '</div>';
     }
+  }
+
+  /**
+   * 4.7.2 upgrade.
+   *
+   * - WC: Strip slashes and remove values that are not one of our keys.
+   *
+   * @return bool
+   */
+  protected function upgrade472() {
+    $configurationValues = get_option('acumulus');
+    // Not sure that this operation can be performed safely on just any value,
+    // so I decided to not strip slashes, users can do this manually in the
+    // settings forms.
+//    $configurationValues = stripslashes_deep($configurationValues);
+    $keys = $this->acumulusConfig->getKeys();
+    $defaults = $this->acumulusConfig->getDefaults();
+    $result = array();
+    foreach ($keys as $key) {
+      if (isset($configurationValues[$key]) && $configurationValues[$key] != $defaults[$key]) {
+        $result[$key] = $configurationValues[$key];
+      }
+    }
+    return update_option('acumulus', $result);
   }
 }
