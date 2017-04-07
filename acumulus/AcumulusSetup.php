@@ -38,12 +38,14 @@ class AcumulusSetup {
    */
   public function activate() {
     $result = FALSE;
+    // Check user access.
     if (current_user_can('activate_plugins')) {
       $plugin = isset($_REQUEST['plugin']) ? $_REQUEST['plugin'] : '';
       check_admin_referer("activate-plugin_{$plugin}");
 
-      // Install.
+      // Check plugin requirements.
       if ($this->checkRequirements()) {
+        // Install.
         $model = new AcumulusEntryModel();
         $result = $model->install();
         add_option('acumulus_version', $this->version);
@@ -123,6 +125,11 @@ class AcumulusSetup {
   public function checkRequirements() {
     $requirements = new Requirements();
     $this->messages = $requirements->check();
+
+    // Check that WooCommerce is active.
+    if (!is_plugin_active('woocommerce/woocommerce.php')) {
+      $this->messages[] = "The Acumulus component (version = {$this->version}) requires WooCommerce to be installed and enabled.";
+    }
 
     if (!empty($this->messages)) {
       add_action('admin_notices', array($this, 'adminNotice'));

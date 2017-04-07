@@ -4,7 +4,7 @@ Plugin Name: Acumulus
 Description: Acumulus plugin for WooCommerce 2.4+
 Plugin URI: https://wordpress.org/plugins/acumulus/
 Author: SIEL Acumulus
-Version: 4.7.3
+Version: 4.7.4
 LICENCE: GPLv3
 */
 
@@ -106,12 +106,20 @@ class Acumulus {
       // Load autoloader.
       require_once('libraries/Siel/psr4.php');
 
+      // Get language
       $languageCode = get_bloginfo('language');
       if (empty($languageCode)) {
         $languageCode = 'nl';
       }
       $languageCode = substr($languageCode, 0, 2);
-      $this->acumulusConfig = new Config('WooCommerce', $languageCode);
+
+      // Get WC version to set the shop namespace.
+      /** @var \WooCommerce $woocommerce */
+      global $woocommerce;
+      $wcVersion = $woocommerce->version;
+      $shopNamespace = version_compare($wcVersion, '3', '>=') ? 'WooCommerce' : 'WooCommerce\Woocommerce2';
+
+      $this->acumulusConfig = new Config($shopNamespace, $languageCode);
       $this->acumulusConfig->getTranslator()->add(new ModuleTranslations());
     }
   }
@@ -230,7 +238,7 @@ class Acumulus {
     $formRenderer = $formMapper->map($form, "acumulus_{$type}");
     $output = '';
     $output .= '<div class="wrap">';
-      $output .= $this->showNotices($form);
+    $output .= $this->showNotices($form);
     /** @noinspection HtmlUnknownTarget */
     $output .= '<form method="post" action="' . $url . '">';
     $output .= "<input type=\"hidden\" name=\"action\" value=\"acumulus_{$type}\"/>";
