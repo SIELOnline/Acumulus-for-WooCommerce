@@ -4,7 +4,7 @@ Plugin Name: Acumulus
 Description: Acumulus plugin for WooCommerce 2.4+
 Plugin URI: https://wordpress.org/plugins/acumulus/
 Author: SIEL Acumulus
-Version: 4.7.5
+Version: 4.7.6
 LICENCE: GPLv3
 */
 
@@ -62,7 +62,6 @@ class Acumulus {
     add_action('admin_post_acumulus_batch', array($this, 'processBatchForm'));
     add_action('woocommerce_order_status_changed', array($this, 'woocommerceOrderStatusChanged'), 10, 3);
     add_action('woocommerce_order_refunded', array($this, 'woocommerceOrderRefunded'), 10, 2);
-    add_action('woocommerce_valid_order_statuses_for_payment', array($this, 'woocommerceValidOrderStatusesForPayment'), 10, 2);
   }
 
   /**
@@ -201,10 +200,18 @@ class Acumulus {
       $form->addErrorMessage(sprintf($this->t('update_failed'), $this->getVersionNumber()));
     }
 
+    $doRemoveAction = false;
     if ($form->isSubmitted()) {
       check_admin_referer("acumulus_{$type}_nonce");
+      if ($type === 'batch') {
+        add_action('woocommerce_valid_order_statuses_for_payment', array($this, 'woocommerceValidOrderStatusesForPayment'), 10, 2);
+        $doRemoveAction = true;
+      }
     }
     $form->process();
+    if ($doRemoveAction) {
+      remove_action('woocommerce_valid_order_statuses_for_payment', array($this, 'woocommerceValidOrderStatusesForPayment'), 10);
+    }
     $this->renderForm($type, $capability);
   }
 
@@ -312,8 +319,10 @@ class Acumulus {
    */
   public function woocommerceOrderStatusChanged($orderId/*, $status, $newStatus*/) {
     $this->init();
+    add_action('woocommerce_valid_order_statuses_for_payment', array($this, 'woocommerceValidOrderStatusesForPayment'), 10, 2);
     $source = new Source(Source::Order, $orderId);
     $this->acumulusConfig->getManager()->sourceStatusChange($source);
+    remove_action('woocommerce_valid_order_statuses_for_payment', array($this, 'woocommerceValidOrderStatusesForPayment'), 10);
   }
 
   /**
