@@ -104,10 +104,9 @@ class AcumulusSetup {
    *   Success.
    */
   public function uninstall() {
-    if (!current_user_can('activate_plugins')) {
+    if (!current_user_can('delete_plugins')) {
       return FALSE;
     }
-    check_admin_referer('bulk-plugins');
 
     // Uninstall.
     delete_option('acumulus');
