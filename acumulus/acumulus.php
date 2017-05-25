@@ -4,7 +4,7 @@ Plugin Name: Acumulus
 Description: Acumulus plugin for WooCommerce 2.4+
 Plugin URI: https://wordpress.org/plugins/acumulus/
 Author: SIEL Acumulus
-Version: 4.7.6
+Version: 4.7.7
 LICENCE: GPLv3
 */
 
@@ -115,8 +115,7 @@ class Acumulus {
       // Get WC version to set the shop namespace.
       /** @var \WooCommerce $woocommerce */
       global $woocommerce;
-      $wcVersion = $woocommerce->version;
-      $shopNamespace = version_compare($wcVersion, '3', '>=') ? 'WooCommerce' : 'WooCommerce\Woocommerce2';
+      $shopNamespace = version_compare($woocommerce->version, '3', '>=') ? 'WooCommerce' : 'WooCommerce\WooCommerce2';
 
       $this->acumulusConfig = new Config($shopNamespace, $languageCode);
       $this->acumulusConfig->getTranslator()->add(new ModuleTranslations());
