@@ -4,14 +4,13 @@ Plugin Name: Acumulus
 Description: Acumulus plugin for WooCommerce 2.4+
 Plugin URI: https://wordpress.org/plugins/acumulus/
 Author: SIEL Acumulus
-Version: 4.7.7
+Version: 4.8.0
 LICENCE: GPLv3
 */
 
-use Siel\Acumulus\Shop\Config;
+use Siel\Acumulus\Helpers\Container;
+use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Shop\ModuleTranslations;
-use Siel\Acumulus\WooCommerce\Helpers\FormMapper;
-use Siel\Acumulus\WooCommerce\Invoice\Source;
 
 /**
  * Class Acumulus is the base plugin class.
@@ -24,8 +23,8 @@ class Acumulus {
   /** @var string */
   private $file;
 
-  /** @var \Siel\Acumulus\Shop\Config */
-  private $acumulusConfig = NULL;
+  /** @var \Siel\Acumulus\Helpers\ContainerInterface */
+  private $container = NULL;
 
   /**
    * Entry point for our plugin.
@@ -94,14 +93,14 @@ class Acumulus {
    *   could be found.
    */
   protected function t($key) {
-    return $this->acumulusConfig->getTranslator()->get($key);
+    return $this->container->getTranslator()->get($key);
   }
 
   /**
    * Loads our library and creates a configuration object.
    */
   public function init() {
-    if ($this->acumulusConfig === NULL) {
+    if ($this->container === NULL) {
       // Load autoloader.
       require_once('libraries/Siel/psr4.php');
 
@@ -117,8 +116,8 @@ class Acumulus {
       global $woocommerce;
       $shopNamespace = version_compare($woocommerce->version, '3', '>=') ? 'WooCommerce' : 'WooCommerce\WooCommerce2';
 
-      $this->acumulusConfig = new Config($shopNamespace, $languageCode);
-      $this->acumulusConfig->getTranslator()->add(new ModuleTranslations());
+      $this->container = new Container($shopNamespace, $languageCode);
+      $this->container->getTranslator()->add(new ModuleTranslations());
     }
   }
 
@@ -239,13 +238,14 @@ class Acumulus {
     $url = admin_url("admin.php?page=acumulus_{$type}");
     // Get our form.
     $form = $this->getForm($type);
-    $formMapper = new FormMapper();
     // And kick off rendering the sections.
-    $formRenderer = $formMapper->map($form, "acumulus_{$type}");
+    $formRenderer = $this->container->getFormRenderer();
+    /** @var \Siel\Acumulus\WooCommerce\Helpers\FormMapper $formMapper */
+    $formMapper = $this->container->getFormMapper();
+    $formMapper->setPage("acumulus_{$type}")->setCallback(array($formRenderer, 'field'))->map($form);
     $output = '';
     $output .= '<div class="wrap">';
     $output .= $this->showNotices($form);
-    /** @noinspection HtmlUnknownTarget */
     $output .= '<form method="post" action="' . $url . '">';
     $output .= "<input type=\"hidden\" name=\"action\" value=\"acumulus_{$type}\"/>";
     $output .= wp_nonce_field("acumulus_{$type}_nonce", '_wpnonce', true, false);
@@ -304,7 +304,7 @@ class Acumulus {
    */
   protected function getForm($type) {
     $this->init();
-    return $this->acumulusConfig->getForm($type);
+    return $this->container->getForm($type);
   }
 
   /**
@@ -319,8 +319,8 @@ class Acumulus {
   public function woocommerceOrderStatusChanged($orderId/*, $status, $newStatus*/) {
     $this->init();
     add_action('woocommerce_valid_order_statuses_for_payment', array($this, 'woocommerceValidOrderStatusesForPayment'), 10, 2);
-    $source = new Source(Source::Order, $orderId);
-    $this->acumulusConfig->getManager()->sourceStatusChange($source);
+    $source = $this->container->getSource(Source::Order, $orderId);
+    $this->container->getManager()->sourceStatusChange($source);
     remove_action('woocommerce_valid_order_statuses_for_payment', array($this, 'woocommerceValidOrderStatusesForPayment'), 10);
   }
 
@@ -332,8 +332,8 @@ class Acumulus {
    */
   public function woocommerceOrderRefunded(/** @noinspection PhpUnusedParameterInspection */ $orderId, $refundId) {
     $this->init();
-    $source = new Source(Source::CreditNote, $refundId);
-    $this->acumulusConfig->getManager()->sourceStatusChange($source);
+    $source = $this->container->getSource(Source::CreditNote, $refundId);
+    $this->container->getManager()->sourceStatusChange($source);
   }
 
   /**
@@ -357,7 +357,7 @@ class Acumulus {
   public function activate() {
     $this->init();
     require_once('AcumulusSetup.php');
-    $setup = new AcumulusSetup($this->acumulusConfig, $this->getVersionNumber());
+    $setup = new AcumulusSetup($this->container, $this->getVersionNumber());
     $setup->activate();
     $setup->upgrade();
   }
@@ -370,7 +370,7 @@ class Acumulus {
   public function upgrade() {
     $this->init();
     require_once('AcumulusSetup.php');
-    $setup = new AcumulusSetup($this->acumulusConfig, $this->getVersionNumber());
+    $setup = new AcumulusSetup($this->container, $this->getVersionNumber());
     return $setup->upgrade();
   }
 
@@ -382,7 +382,7 @@ class Acumulus {
   public function deactivate() {
     $this->init();
     require_once('AcumulusSetup.php');
-    $setup = new AcumulusSetup($this->acumulusConfig);
+    $setup = new AcumulusSetup($this->container);
     return $setup->deactivate();
   }
 
@@ -395,7 +395,7 @@ class Acumulus {
     $acumulus = static::create();
     $acumulus->init();
     require_once('AcumulusSetup.php');
-    $setup = new AcumulusSetup($acumulus->acumulusConfig);
+    $setup = new AcumulusSetup($acumulus->container);
     return $setup->uninstall();
   }
 

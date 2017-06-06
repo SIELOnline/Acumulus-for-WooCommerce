@@ -1,7 +1,6 @@
 <?php
-use Siel\Acumulus\Helpers\Requirements;
-use Siel\Acumulus\Shop\Config;
-use Siel\Acumulus\WooCommerce\Shop\AcumulusEntryModel;
+
+use Siel\Acumulus\Helpers\ContainerInterface;
 
 defined('ABSPATH') OR exit;
 
@@ -13,17 +12,17 @@ class AcumulusSetup {
   /** @var array */
   private $messages = array();
 
-  /** @var \Siel\Acumulus\Shop\Config */
-  private $acumulusConfig;
+  /** @var \Siel\Acumulus\Helpers\ContainerInterface */
+  private $container;
 
   /**
    * AcumulusSetup constructor.
    *
-   * @param \Siel\Acumulus\Shop\Config $acumulusConfig
+   * @param \Siel\Acumulus\Helpers\ContainerInterface $container
    * @param string $version
    */
-  public function __construct(Config $acumulusConfig, $version = '') {
-    $this->acumulusConfig = $acumulusConfig;
+  public function __construct(ContainerInterface $container, $version = '') {
+    $this->container = $container;
     $this->version = $version;
   }
 
@@ -46,7 +45,7 @@ class AcumulusSetup {
       // Check plugin requirements.
       if ($this->checkRequirements()) {
         // Install.
-        $model = new AcumulusEntryModel();
+        $model = $this->container->getAcumulusEntryModel();
         $result = $model->install();
         add_option('acumulus_version', $this->version);
       }
@@ -66,7 +65,7 @@ class AcumulusSetup {
     // Only execute if we are really upgrading.
     $dbVersion = get_option('acumulus_version');
     if (!empty($dbVersion) && version_compare($dbVersion, $this->version, '<')) {
-      $result = $this->acumulusConfig->upgrade($dbVersion);
+      $result = $this->container->getConfig()->upgrade($dbVersion);
       if (version_compare($dbVersion, '4.7.2', '<')) {
         $result = $this->upgrade472() && $result;
       }
@@ -111,7 +110,7 @@ class AcumulusSetup {
     // Uninstall.
     delete_option('acumulus');
 
-    $model = new AcumulusEntryModel();
+    $model = $this->container->getAcumulusEntryModel();
     return $model->uninstall();
   }
 
@@ -122,7 +121,7 @@ class AcumulusSetup {
    *   Success.
    */
   public function checkRequirements() {
-    $requirements = new Requirements();
+    $requirements = $this->container->getRequirements();
     $this->messages = $requirements->check();
 
     // Check that WooCommerce is active.
@@ -159,8 +158,8 @@ class AcumulusSetup {
     // so I decided to not strip slashes, users can do this manually in the
     // settings forms.
 //    $configurationValues = stripslashes_deep($configurationValues);
-    $keys = $this->acumulusConfig->getKeys();
-    $defaults = $this->acumulusConfig->getDefaults();
+    $keys = $this->container->getConfig()->getKeys();
+    $defaults = $this->container->getConfig()->getDefaults();
     $result = array();
     foreach ($keys as $key) {
       if (isset($configurationValues[$key]) && $configurationValues[$key] != $defaults[$key]) {
