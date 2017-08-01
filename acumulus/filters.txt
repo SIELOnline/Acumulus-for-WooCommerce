@@ -103,10 +103,11 @@ Example 1
 // Defines a filter that prevents sending 0-amount invoices (free products).
 // @author Wouter D. Snel
 use Siel\Acumulus\Invoice\Source;
+use Siel\Acumulus\Meta;
 add_filter('acumulus_invoice_created', 'acumulus_stop_null');
 
 function acumulus_stop_null(array $invoice, Source $source) {
-	if ($invoice['customer']['invoice']['meta-invoice-amount-inc'] == 0) {
+	if ($invoice['customer']['invoice'][Meta::InvoiceAmountInc'] == 0) {
 	  return NULL;
 	}
 	else {
