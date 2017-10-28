@@ -12,3 +12,4 @@ cd svn
 svn add --force * --auto-props --parents --depth infinity
 svn cp trunk tags/%version%
 svn ci --username "SIEL Acumulus" --password yddez(9tCZYT -m "%version%"
+cd ..
