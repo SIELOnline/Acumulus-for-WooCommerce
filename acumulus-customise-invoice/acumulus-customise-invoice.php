@@ -9,12 +9,17 @@ LICENCE: GPLv3
 
 use Siel\Acumulus\Api;
 use Siel\Acumulus\Helpers\Container;
+use Siel\Acumulus\Invoice\Creator;
 use Siel\Acumulus\Invoice\Result;
 use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Meta;
+use Siel\Acumulus\Tag;
 
 /**
- * AcumulusCustomiseInvoice base plugin class contains example code to:
+ * The AcumulusCustomiseInvoice plugin class contains plumbing and example code
+ * to react to filters and actions triggered by the Acumulus plugin. These
+ * filters and actions allow you to:
+ * - Prevent sending an invoice to Acumulus.
  * - Customise the invoice before it is sent to Acumulus.
  * - Process the results of sending the invoice to Acumulus.
  *
@@ -61,8 +66,8 @@ use Siel\Acumulus\Meta;
  * correcting tax rates before the completor strategies are executed.
  *
  * ad 2)
- * This filter is triggered just before the invoice is sent to Acumulus. You
- * can make changes to the invoice or add warnings or errors to the Result
+ * This filter is triggered just before the invoice will be sent to Acumulus.
+ * You can make changes to the invoice or add warnings or errors to the Result
  * object.
  *
  * Typical use cases are:
@@ -83,7 +88,6 @@ use Siel\Acumulus\Meta;
  * External Resources:
  * - https://apidoc.sielsystems.nl/content/invoice-add.
  * - https://apidoc.sielsystems.nl/content/warning-error-and-status-response-section-most-api-calls
-
  */
 class AcumulusCustomiseInvoice {
 
@@ -99,7 +103,7 @@ class AcumulusCustomiseInvoice {
 	/**
 	 * Entry point for our plugin.
 	 *
-	 * @return Acumulus
+	 * @return \AcumulusCustomiseInvoice
 	 */
 	public static function create() {
 		if (self::$instance === null) {
@@ -134,6 +138,7 @@ class AcumulusCustomiseInvoice {
 	 * Helper method for the ConfigStore object to get the version number from
 	 * the comment at the top of this file, as is the official location for
 	 * WordPress plugins.
+     * @todo: not called...
 	 *
 	 * @return string
 	 *   The version number of this plugin.
@@ -153,10 +158,11 @@ class AcumulusCustomiseInvoice {
 	 * Loads the Acumulus library and creates a configuration object so this
 	 * custom plugin has access to the Acumulus classes, configuration and
 	 * constants.
+     * @todo: not called...
 	 */
 	public function init() {
 		if ($this->container === null) {
-			// Load Acumulus autoloader.
+			// Load Acumulus autoloader. @todo: should already have been loaded by now.
 			require_once('../acumulus/libraries/Siel/psr4.php');
 
 			// Get language
@@ -202,7 +208,16 @@ class AcumulusCustomiseInvoice {
 			return null;
 		} else {
 			// Change invoice here.
-			return $invoice;
+            foreach ($invoice['customer']['invoice']['line'] as &$line) {
+                if ($line[Tag::Quantity] < 1 && $line[Tag::Quantity] > 0) {
+                    // Get precision info.
+                    $precisionEx = !empty($line[Meta::PrecisionUnitPrice]) ? $line[Meta::PrecisionUnitPrice] : (wc_prices_include_tax() ? 0.02 : 0.01);
+                    $line[Meta::VatAmount] /= $line[Tag::Quantity];
+                    $line += Creator::getVatRangeTags($line[Meta::VatAmount], $line[Tag::UnitPrice], 0.01, $precisionEx);
+                }
+            }
+
+            return $invoice;
 		}
 	}
 
@@ -246,7 +261,7 @@ class AcumulusCustomiseInvoice {
 	 *   Wrapper around the original WooCommerce order or refund for which te
 	 *   invoice has been sent.
 	 * @param \Siel\Acumulus\Invoice\Result $result
-	 *   The result as sent back by Acumulus.
+     *   The result as sent back by Acumulus + any local messages and warnings.
 	 */
 	public function acumulusinvoiceSendAfter(array $invoice, Source $invoiceSource, Result $result)
 	{
