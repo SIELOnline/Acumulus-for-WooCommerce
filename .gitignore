@@ -10,13 +10,13 @@ interdiff.txt
 svn/*
 
 # Common library
-acumulus/libraries/Siel/*
+acumulus/lib/Siel/*
 
 # Shared files
-changelog.txt
 license.txt
 licentie-nl.pdf
 leesmij.txt
 
 # Resulting installer files
 /*.zip
+

@@ -4,7 +4,7 @@ Plugin Name: Acumulus
 Description: Acumulus plugin for WooCommerce 2.4+
 Plugin URI: https://wordpress.org/plugins/acumulus/
 Author: SIEL Acumulus
-Version: 4.9.2
+Version: 5.0.1
 LICENCE: GPLv3
 */
 
@@ -101,8 +101,8 @@ class Acumulus {
    */
   public function init() {
     if ($this->container === NULL) {
-      // Load autoloader.
-      require_once('libraries/Siel/psr4.php');
+      // Load autoloader
+      $this->registerSielAutoloader();
 
       // Get language
       $languageCode = get_bloginfo('language');
@@ -270,13 +270,13 @@ class Acumulus {
     $output = '';
     if (isset($form)) {
         foreach ($form->getErrorMessages() as $message) {
-            $output .= $this->renderNotice('error', $message);
+            $output .= $this->renderNotice($message, 'error');
         }
         foreach ($form->getWarningMessages() as $message) {
-            $output .= $this->renderNotice('warning', $message);
+            $output .= $this->renderNotice($message, 'warning');
         }
         foreach ($form->getSuccessMessages() as $message) {
-            $output .= $this->renderNotice('updated', $message);
+            $output .= $this->renderNotice($message, 'updated');
         }
     }
     return $output;
@@ -285,14 +285,14 @@ class Acumulus {
   /**
    * Renders a notice.
    *
-   * @param string $type
    * @param string $message
+   * @param string $type
    *
    * @return string
    *   The rendered notice.
    */
-  protected function renderNotice($type, $message) {
-      return "<div class='notice notice-$type'><p>$message</p></div>";
+  protected function renderNotice($message, $type) {
+      return sprintf('<div class="notice notice-%s is-dismissble"><p>%s</p></div>', $type, $message);
   }
 
   /**
@@ -399,6 +399,33 @@ class Acumulus {
     return $setup->uninstall();
   }
 
+  /**
+   * Registers an autoloader for the Siel\Acumulus namespace library.
+   *
+   * As not all web shops support auto-loading based on namespaces or have
+   * other glitches, eg. expecting lower cased file names, we define our own
+   * autoloader. If the module cannot use the autoloader of the web shop, this
+   * function should be loaded during bootstrapping of the module.
+   *
+   * Thanks to https://gist.github.com/mageekguy/8300961
+   */
+  private function registerSielAutoloader() {
+    $dir = __DIR__ . '/lib/siel/acumulus/src/';
+    $ourNamespace = 'Siel\\Acumulus\\';
+    $ourNamespaceLen = strlen($ourNamespace);
+    $autoloadFunction = function ($class) use ($ourNamespace, $ourNamespaceLen, $dir) {
+      if (strncmp($class, $ourNamespace, $ourNamespaceLen) === 0) {
+        $fileName = $dir . str_replace('\\', DIRECTORY_SEPARATOR, substr($class, $ourNamespaceLen)) . '.php';
+        if (is_readable($fileName)) {
+          /** @noinspection PhpIncludeInspection */
+          include($fileName);
+        }
+      }
+    };
+    // Prepend this autoloader: it will not throw, nor warn, while the shop
+    // specific autoloader might do so.
+    spl_autoload_register($autoloadFunction, true, true);
+  }
 }
 
 // Entry point for WP: create and bootstrap our module.

@@ -97,7 +97,11 @@ class AcumulusCustomiseInvoice {
 	/** @var string */
 	private $file;
 
-	/** @var \Siel\Acumulus\Helpers\ContainerInterface */
+	/**
+   * Do not call directly, use getAcumulusContainer().
+   *
+   * @var \Siel\Acumulus\Helpers\ContainerInterface
+   */
 	private $container = null;
 
 	/**
@@ -135,36 +139,14 @@ class AcumulusCustomiseInvoice {
 	}
 
 	/**
-	 * Helper method for the ConfigStore object to get the version number from
-	 * the comment at the top of this file, as is the official location for
-	 * WordPress plugins.
-     * @todo: not called...
-	 *
-	 * @return string
-	 *   The version number of this plugin.
-	 */
-	public function getVersionNumber() {
-		if (function_exists('get_plugin_data')) {
-			$plugin_data = get_plugin_data($this->file);
-			$version = $plugin_data['Version'];
-		} else {
-			$version = get_option('acumulus_version');
-		}
-
-		return $version;
-	}
-
-	/**
 	 * Loads the Acumulus library and creates a configuration object so this
 	 * custom plugin has access to the Acumulus classes, configuration and
 	 * constants.
-     * @todo: not called...
+   *
+   * Do not call directly, use getAcumulusContainer().
 	 */
-	public function init() {
+	private function init() {
 		if ($this->container === null) {
-			// Load Acumulus autoloader. @todo: should already have been loaded by now.
-			require_once('../acumulus/libraries/Siel/psr4.php');
-
 			// Get language
 			$languageCode = get_bloginfo('language');
 			if (empty($languageCode)) {
@@ -180,7 +162,16 @@ class AcumulusCustomiseInvoice {
 		}
 	}
 
-	/**
+  /**
+   * @return \Siel\Acumulus\Helpers\ContainerInterface
+   */
+  private function getAcumulusContainer()
+  {
+    $this->init();
+    return $this->container;
+  }
+
+  /**
 	 * Processes the filter triggered before an invoice will be sent to Acumulus.
 	 *
 	 * @param array|null $invoice
@@ -306,11 +297,10 @@ class AcumulusCustomiseInvoice {
 	 * @return bool
 	 *   True if the order has been paid, false otherwise.
 	 */
-	protected function isOrderPaid(Source $invoiceSource)
-	{
+	private function isOrderPaid(Source $invoiceSource)	{
 		/** @var \WC_Abstract_Order $order */
 		$order = $invoiceSource->getSource();
-//        $this->>container->getLog()->info('ControllerExtensionModuleCustomiseAcumulusInvoice::isOrderPaid(): invoiceSource = ' . var_export($order, true));
+    //$this->getAcumulusContainer()->getLog()->info('ControllerExtensionModuleCustomiseAcumulusInvoice::isOrderPaid(): invoiceSource = ' . var_export($order, true));
 		return true;
 	}
 
@@ -320,7 +310,7 @@ class AcumulusCustomiseInvoice {
 	 * @return bool
 	 */
 	public function activate() {
-		if ( !current_user_can('activate_plugins')) {
+		if (!current_user_can('activate_plugins')) {
 			return false;
 		}
 
@@ -333,7 +323,7 @@ class AcumulusCustomiseInvoice {
 	 * @return bool
 	 */
 	public function deactivate() {
-		if ( !current_user_can('activate_plugins')) {
+		if (!current_user_can('activate_plugins')) {
 			return false;
 		}
 
@@ -346,7 +336,7 @@ class AcumulusCustomiseInvoice {
 	 * @return bool
 	 */
 	static public function uninstall() {
-		if ( !current_user_can('delete_plugins')) {
+		if (!current_user_can('delete_plugins')) {
 			return false;
 		}
 

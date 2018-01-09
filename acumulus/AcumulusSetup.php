@@ -2,8 +2,6 @@
 
 use Siel\Acumulus\Helpers\ContainerInterface;
 
-defined('ABSPATH') OR exit;
-
 class AcumulusSetup {
 
   /** @var string */
@@ -68,6 +66,8 @@ class AcumulusSetup {
       $result = $this->container->getConfig()->upgrade($dbVersion);
       if (version_compare($dbVersion, '4.7.2', '<')) {
         $result = $this->upgrade472() && $result;
+      } elseif (version_compare($dbVersion, '5.0.1', '<')) {
+        $result = $this->upgrade501() && $result;
       }
       update_option('acumulus_version', $this->version);
     } else if (empty($dbVersion)) {
@@ -140,9 +140,24 @@ class AcumulusSetup {
    * Action hook that adds administrator notices to the admin screen.
    */
   public function adminNotice() {
+    $output = '';
     foreach ($this->messages as $message) {
-      echo '<div class="error">' . $message . '</div>';
+      $output .= $this->renderNotice($message, 'error');
     }
+    echo $output;
+  }
+
+  /**
+   * Renders a notice.
+   *
+   * @param string $message
+   * @param string $type
+   *
+   * @return string
+   *   The rendered notice.
+   */
+  protected function renderNotice($message, $type) {
+    return sprintf('<div class="notice notice-%s is-dismissble"><p>%s</p></div>', $type, $message);
   }
 
   /**
@@ -168,4 +183,16 @@ class AcumulusSetup {
     }
     return update_option('acumulus', $result);
   }
+
+  protected function upgrade501() {
+    add_action('admin_notices', array($this, 'removeLibrariesFolder'));
+    return true;
+  }
+
+  public function removeLibrariesFolder() {
+    $dir = strtr(__DIR__ . '/libraries', array('\\' => DIRECTORY_SEPARATOR, '/' => DIRECTORY_SEPARATOR));
+    $message = 'Version 5 of the Acumulus plugin renamed its libraries folder to lib. Check if the folder %s still exists and, if so, remove it manually';
+    echo $this->renderNotice(sprintf($message, $dir), 'warning');
+  }
+
 }
