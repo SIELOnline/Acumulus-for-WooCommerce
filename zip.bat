@@ -5,9 +5,9 @@ echo Usage: %~n0 version
 exit /B 1;
 )
 set version=%1
+set archive=WooCommerce-Acumulus-%version%.zip
 
-del WooCommerce-Acumulus-%version%.zip 2> nul
-
-rem zip package.
-"C:\Program Files\7-Zip\7z.exe" a -tzip WooCommerce-Acumulus-%version%.zip acumulus | findstr /i "Failed Error"
-"C:\Program Files\7-Zip\7z.exe" t WooCommerce-Acumulus-%version%.zip | findstr /i "Processing Everything Failed Error"
+rem delete, recreate and check zip package.
+del %archive% 2> nul
+"C:\Program Files\7-Zip\7z.exe" a -xr!.git -tzip %archive% acumulus | findstr /i "Failed Error"
+"C:\Program Files\7-Zip\7z.exe" t %archive% | findstr /i "Processing Everything Failed Error"

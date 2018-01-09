@@ -98,7 +98,7 @@ class AcumulusCustomiseInvoice {
 	private $file;
 
 	/**
-   * Do not call directly, use getAcumulusContainer().
+   * Do not call directly, use the getter getAcumulusContainer().
    *
    * @var \Siel\Acumulus\Helpers\ContainerInterface
    */
@@ -165,8 +165,7 @@ class AcumulusCustomiseInvoice {
   /**
    * @return \Siel\Acumulus\Helpers\ContainerInterface
    */
-  private function getAcumulusContainer()
-  {
+  private function getAcumulusContainer() {
     $this->init();
     return $this->container;
   }
@@ -254,8 +253,7 @@ class AcumulusCustomiseInvoice {
 	 * @param \Siel\Acumulus\Invoice\Result $result
      *   The result as sent back by Acumulus + any local messages and warnings.
 	 */
-	public function acumulusinvoiceSendAfter(array $invoice, Source $invoiceSource, Result $result)
-	{
+	public function acumulusinvoiceSendAfter(array $invoice, Source $invoiceSource, Result $result)	{
 		if ($result->getException()) {
 			// Serious error:
 			if ($result->isSent()) {

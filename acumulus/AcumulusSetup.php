@@ -58,7 +58,7 @@ class AcumulusSetup {
    *   Success.
    */
   public function upgrade() {
-    $result = true;
+    $result = TRUE;
 
     // Only execute if we are really upgrading.
     $dbVersion = get_option('acumulus_version');
@@ -186,7 +186,7 @@ class AcumulusSetup {
 
   protected function upgrade501() {
     add_action('admin_notices', array($this, 'removeLibrariesFolder'));
-    return true;
+    return TRUE;
   }
 
   public function removeLibrariesFolder() {
