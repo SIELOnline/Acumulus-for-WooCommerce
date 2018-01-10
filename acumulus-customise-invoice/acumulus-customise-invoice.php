@@ -2,8 +2,9 @@
 /*
 Plugin Name: Acumulus Customise Invoice
 Description: Plugin to customise Acumulus invoices before sending them
-Author: SIEL Acumulus
-Version: 4.9.2
+Author: Buro RaDer, http://www.burorader.com/
+Copyright: SIEL BV, https://www.siel.nl/acumulus/
+Version: 5.0.1
 LICENCE: GPLv3
 */
 
