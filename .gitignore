@@ -9,14 +9,5 @@ interdiff.txt
 .idea/*
 svn/*
 
-# Common library
-acumulus/lib/Siel/*
-
-# Shared files
-license.txt
-licentie-nl.pdf
-leesmij.txt
-
 # Resulting installer files
 /*.zip
-
