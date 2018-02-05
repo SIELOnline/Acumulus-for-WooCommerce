@@ -4,11 +4,12 @@ Plugin Name: Acumulus
 Description: Acumulus plugin for WooCommerce 2.4+
 Author: Buro RaDer, http://www.burorader.com/
 Copyright: SIEL BV, https://www.siel.nl/acumulus/
-Version: 5.0.4
+Version: 5.1.0
 LICENCE: GPLv3
 */
 
 use Siel\Acumulus\Helpers\Container;
+use Siel\Acumulus\Invoice\Result;
 use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Shop\ModuleTranslations;
 
@@ -61,6 +62,7 @@ class Acumulus {
     add_action('admin_post_acumulus_batch', array($this, 'processBatchForm'));
     add_action('woocommerce_order_status_changed', array($this, 'woocommerceOrderStatusChanged'), 10, 3);
     add_action('woocommerce_order_refunded', array($this, 'woocommerceOrderRefunded'), 10, 2);
+    add_filter('acumulus_invoice_created', array($this, 'acumulusInvoiceCreated'), 10, 3);
   }
 
   /**
@@ -350,6 +352,33 @@ class Acumulus {
    */
   public function woocommerceValidOrderStatusesForPayment(array $statuses/*, WC_Abstract_Order $order*/) {
       return array_merge($statuses, array('on-hold'));
+  }
+
+  /**
+   * Processes the filter triggered before an invoice will be sent to Acumulus.
+   *
+   * @param array|null $invoice
+   *   The invoice in Acumulus format as will be sent to Acumulus or null if
+   *   another filter already decided that the invoice should not be sent to
+   *   Acumulus.
+   * @param \Siel\Acumulus\Invoice\Source $invoiceSource
+   *   Wrapper around the original WooCommerce order or refund for which the
+   *   invoice has been created.
+   * @param \Siel\Acumulus\Invoice\Result $localResult
+   *   Any local error or warning messages that were created locally.
+   *
+   * @return array|null
+   *   The changed invoice or null if you do not want the invoice to be sent
+   *   to Acumulus.
+   *
+   * @throws \ReflectionException
+   */
+  public function acumulusInvoiceCreated($invoice, Source $invoiceSource, Result $localResult) {
+    $this->init();
+    /** @var \Siel\Acumulus\WooCommerce\Invoice\CreatorPluginSupport $pluginSupport */
+    $pluginSupport = $this->container->getInstance('CreatorSupportForOtherPlugins', 'Invoice');
+    $invoice = $pluginSupport->acumulusInvoiceCreated($invoice, $invoiceSource, $localResult);
+    return $invoice;
   }
 
   /**
