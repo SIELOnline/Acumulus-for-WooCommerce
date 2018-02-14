@@ -4,7 +4,7 @@ Plugin Name: Acumulus
 Description: Acumulus plugin for WooCommerce 2.4+
 Author: Buro RaDer, http://www.burorader.com/
 Copyright: SIEL BV, https://www.siel.nl/acumulus/
-Version: 5.1.0
+Version: 5.1.2
 LICENCE: GPLv3
 */
 
@@ -374,10 +374,12 @@ class Acumulus {
    * @throws \ReflectionException
    */
   public function acumulusInvoiceCreated($invoice, Source $invoiceSource, Result $localResult) {
-    $this->init();
-    /** @var \Siel\Acumulus\WooCommerce\Invoice\CreatorPluginSupport $pluginSupport */
-    $pluginSupport = $this->container->getInstance('CreatorSupportForOtherPlugins', 'Invoice');
-    $invoice = $pluginSupport->acumulusInvoiceCreated($invoice, $invoiceSource, $localResult);
+    if ($invoice !== null) {
+      $this->init();
+      /** @var \Siel\Acumulus\WooCommerce\Invoice\CreatorPluginSupport $pluginSupport */
+      $pluginSupport = $this->container->getInstance('CreatorPluginSupport', 'Invoice');
+      $invoice = $pluginSupport->acumulusInvoiceCreated($invoice, $invoiceSource, $localResult);
+    }
     return $invoice;
   }
 
