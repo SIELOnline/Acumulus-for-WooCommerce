@@ -4,7 +4,7 @@
  * Description: Acumulus plugin for WooCommerce 2.4+
  * Author: Buro RaDer, http://www.burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 5.2.0
+ * Version: 5.2.1
  * LICENCE: GPLv3
  * Requires at least: 4.2.3
  * Tested up to: 4.9
@@ -71,6 +71,7 @@ class Acumulus {
     add_action('woocommerce_order_status_changed', array($this, 'woocommerceOrderStatusChanged'), 10, 3);
     add_action('woocommerce_order_refunded', array($this, 'woocommerceOrderRefunded'), 10, 2);
     add_filter('acumulus_invoice_created', array($this, 'acumulusInvoiceCreated'), 10, 3);
+    add_action('add_meta_boxes', array($this, 'addMetaBoxes'));
   }
 
   /**
@@ -250,20 +251,13 @@ class Acumulus {
     // Get our form.
     $form = $this->getForm($type);
     // And kick off rendering the sections.
-    $formRenderer = $this->container->getFormRenderer();
-    /** @var \Siel\Acumulus\WooCommerce\Helpers\FormMapper $formMapper */
-    $formMapper = $this->container->getFormMapper();
-    $formMapper->setPage("acumulus_{$type}")->setCallback(array($formRenderer, 'field'))->map($form);
     $output = '';
     $output .= '<div class="wrap">';
     $output .= $this->showNotices($form);
     $output .= '<form method="post" action="' . $url . '">';
     $output .= "<input type=\"hidden\" name=\"action\" value=\"acumulus_{$type}\"/>";
     $output .= wp_nonce_field("acumulus_{$type}_nonce", '_wpnonce', true, false);
-    $formRenderer->render($form);
-    ob_start();
-    do_settings_sections("acumulus_{$type}");
-    $output .= ob_get_clean();
+    $output .= $this->container->getFormRenderer()->render($form);
     $output .= get_submit_button($type === 'batch' ? $this->t('button_send') : '');
     $output .= '</form>';
     $output .= '</div>';
@@ -378,8 +372,6 @@ class Acumulus {
    * @return array|null
    *   The changed invoice or null if you do not want the invoice to be sent
    *   to Acumulus.
-   *
-   * @throws \ReflectionException
    */
   public function acumulusInvoiceCreated($invoice, Source $invoiceSource, Result $localResult) {
     if ($invoice !== null) {
@@ -389,6 +381,67 @@ class Acumulus {
       $invoice = $pluginSupport->acumulusInvoiceCreated($invoice, $invoiceSource, $localResult);
     }
     return $invoice;
+  }
+
+    /**
+     * Action handler for the add_meta_boxes action.
+     *
+     * @param string $postType
+     *
+     *
+     */
+    public function addMetaBoxes($postType) {
+      if ($postType === 'shop_order') {
+        $this->init();
+        add_meta_box('acumulus_shop_order_info_box',
+          $this->t('shop_order_title'),
+          array($this, 'renderShopOrderInfoBox'),
+          'shop_order',
+          'side',
+          'default');
+      }
+  }
+
+  /**
+   * Renders the content of the Acumulusinfo box.
+   *
+   * @param WP_Post|null $shopOrderPost
+   *   The post for the current order.
+   *
+   */
+  public function renderShopOrderInfoBox($shopOrderPost = null) {
+//    if(!empty($shopOrderPost)) {
+      $orderId = $shopOrderPost->ID;
+//    } else {
+//      global $post;
+//      $orderId = $post->ID;
+//    }
+
+    $this->init();
+    $source = $this->container->getSource(Source::Order, $orderId);
+    $type = 'shop_order';
+    $url = admin_url("admin.php?page=acumulus_{$type}");
+
+    $pluginUrl = plugins_url('/acumulus');
+    wp_enqueue_style('acumulus_css_admin', $pluginUrl . '/acumulus.css');
+
+    // Get our form.
+    /** @var \Siel\Acumulus\WooCommerce\Shop\ShopOrderOverviewForm $form */
+    $form = $this->getForm($type);
+    $form->setSource($source);
+    // And kick off rendering the sections.
+    $output = '';
+    $output .= '<div class="wrap">';
+    $output .= '<div id="acumulus-' . $type . '" class="acumulus-overview" method="post" action="' . $url . '">';
+    $output .= "<input type=\"hidden\" name=\"action\" value=\"acumulus_{$type}\"/>";
+    $output .= wp_nonce_field("acumulus_{$type}_nonce", '_wpnonce', true, false);
+//    $output .= "<table id=\"acumulus_{$type}\" class=\"acumulus-overview\"/>";
+    $output .= $this->container->getFormRenderer()->setUsePopupDescription(true)->render($form);
+//    $output .= '</table>';
+//    $output .= get_submit_button($type === 'batch' ? $this->t('button_send') : '');
+    $output .= '</div>';
+    $output .= '</div>';
+    echo $output;
   }
 
   /**

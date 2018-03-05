@@ -43,7 +43,7 @@ class AcumulusSetup {
       // Check plugin requirements.
       if ($this->checkRequirements()) {
         // Install.
-        $model = $this->container->getAcumulusEntryModel();
+        $model = $this->container->getAcumulusEntryManager();
         $result = $model->install();
         add_option('acumulus_version', $this->version);
       }
@@ -110,7 +110,7 @@ class AcumulusSetup {
     // Uninstall.
     delete_option('acumulus');
 
-    $model = $this->container->getAcumulusEntryModel();
+    $model = $this->container->getAcumulusEntryManager();
     return $model->uninstall();
   }
 
