@@ -54,6 +54,14 @@
   margin-bottom: 0;
 }
 
+#acumulus_shop_order_info_box .inside {
+  padding-right: 0;
+}
+
+label:not([for]) {
+  cursor: inherit;
+}
+
 .pdf {
   display: inline-block;
   padding-left: 14px;
@@ -64,31 +72,31 @@
   background-repeat: no-repeat;
 }
 
-.acumulus-overview .form-table,
-.acumulus-overview .form-table th,
-.acumulus-overview .form-table td {
+.acumulus-overview .data .notice {
+  box-shadow: none;
   margin: 0;
+}
+
+.acumulus-overview .data th.notice {
   padding: 0;
+}
+
+.acumulus-overview .data .notice .notice {
   border: none;
 }
 
-.acumulus-overview .form-table th,
-.acumulus-overview .form-table td {
-  padding-bottom: 0.3em;
+.acumulus-overview .data .notice-info {
+  color: #00a0d2;
 }
 
-.acumulus-overview .form-table th {
-  padding-right: 0.2em;
+.acumulus-overview .data .notice-warning {
+  color: #ffb900;
 }
 
-.acumulus-overview .form-table th,
-.acumulus-overview .form-table label {
-  width: auto;
+.acumulus-overview .data .notice-error {
+  color: #bc3232;
 }
 
-.acumulus-overview .form-table label,
-.acumulus-overview .form-table td,
-.acumulus-overview .form-table th,
-.acumulus-overview .form-table .message {
-  vertical-align: top;
+.acumulus-overview .data .notice-success {
+  color: #46b450;
 }

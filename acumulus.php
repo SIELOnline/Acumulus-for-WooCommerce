@@ -4,7 +4,7 @@
  * Description: Acumulus plugin for WooCommerce 2.4+
  * Author: Buro RaDer, http://www.burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 5.2.1
+ * Version: 5.3.0
  * LICENCE: GPLv3
  * Requires at least: 4.2.3
  * Tested up to: 4.9
@@ -71,7 +71,7 @@ class Acumulus {
     add_action('woocommerce_order_status_changed', array($this, 'woocommerceOrderStatusChanged'), 10, 3);
     add_action('woocommerce_order_refunded', array($this, 'woocommerceOrderRefunded'), 10, 2);
     add_filter('acumulus_invoice_created', array($this, 'acumulusInvoiceCreated'), 10, 3);
-    add_action('add_meta_boxes', array($this, 'addMetaBoxes'));
+    //add_action('add_meta_boxes', array($this, 'addMetaBoxes'));
   }
 
   /**
@@ -376,9 +376,14 @@ class Acumulus {
   public function acumulusInvoiceCreated($invoice, Source $invoiceSource, Result $localResult) {
     if ($invoice !== null) {
       $this->init();
-      /** @var \Siel\Acumulus\WooCommerce\Invoice\CreatorPluginSupport $pluginSupport */
-      $pluginSupport = $this->container->getInstance('CreatorPluginSupport', 'Invoice');
-      $invoice = $pluginSupport->acumulusInvoiceCreated($invoice, $invoiceSource, $localResult);
+      // Get WC version: only for WC 3+ do we support the other plugins.
+      /** @var \WooCommerce $woocommerce */
+      global $woocommerce;
+      if (version_compare($woocommerce->version, '3', '>=')) {
+        /** @var \Siel\Acumulus\WooCommerce\Invoice\CreatorPluginSupport $pluginSupport */
+        $pluginSupport = $this->container->getInstance('CreatorPluginSupport', 'Invoice');
+        $invoice = $pluginSupport->acumulusInvoiceCreated($invoice, $invoiceSource, $localResult);
+      }
     }
     return $invoice;
   }
@@ -431,15 +436,18 @@ class Acumulus {
     $form->setSource($source);
     // And kick off rendering the sections.
     $output = '';
-    $output .= '<div class="wrap">';
     $output .= '<div id="acumulus-' . $type . '" class="acumulus-overview" method="post" action="' . $url . '">';
     $output .= "<input type=\"hidden\" name=\"action\" value=\"acumulus_{$type}\"/>";
     $output .= wp_nonce_field("acumulus_{$type}_nonce", '_wpnonce', true, false);
 //    $output .= "<table id=\"acumulus_{$type}\" class=\"acumulus-overview\"/>";
-    $output .= $this->container->getFormRenderer()->setUsePopupDescription(true)->render($form);
+    $output .= $this->container->getFormRenderer()
+                               ->setProperty('usePopupDescription', true)
+                               ->setProperty('fieldsetContentWrapperClass', 'data')
+                               ->setProperty('labelWrapperClass', 'label')
+                               ->setProperty('inputDescriptionWrapperClass', 'value')
+                               ->render($form);
 //    $output .= '</table>';
 //    $output .= get_submit_button($type === 'batch' ? $this->t('button_send') : '');
-    $output .= '</div>';
     $output .= '</div>';
     echo $output;
   }
