@@ -4,12 +4,13 @@
  * Description: Acumulus plugin for WooCommerce 2.4+
  * Author: Buro RaDer, http://www.burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 5.3.0
+ * Version: 5.4.1
  * LICENCE: GPLv3
  * Requires at least: 4.2.3
  * Tested up to: 4.9
  * WC requires at least: 2.4
  * WC tested up to: 3.3
+ * libAcumulus requires at least: 5.4.1
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -19,6 +20,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 use Siel\Acumulus\Helpers\Container;
 use Siel\Acumulus\Invoice\Result;
 use Siel\Acumulus\Invoice\Source;
+use Siel\Acumulus\Shop\BatchFormTranslations;
+use Siel\Acumulus\Shop\ConfigFormTranslations;
 use Siel\Acumulus\Shop\ModuleTranslations;
 
 /**
@@ -32,7 +35,7 @@ class Acumulus {
   /** @var string */
   private $file;
 
-  /** @var \Siel\Acumulus\Helpers\ContainerInterface */
+  /** @var \Siel\Acumulus\Helpers\Container */
   private $container = NULL;
 
   /**
@@ -138,7 +141,8 @@ class Acumulus {
    */
   public function addMenuLinks() {
     // Start with creating a config form, so we can use the translations.
-    $this->getForm('config');
+    $this->init();
+    $this->container->getTranslator()->add(new ConfigFormTranslations());
     add_submenu_page('options-general.php',
       $this->t('config_form_title'),
       $this->t('config_form_header'),
@@ -155,13 +159,14 @@ class Acumulus {
     );
 
     // Start with creating the batch form, so we can use the translations.
-    $this->getForm('batch');
+    $this->container->getTranslator()->add(new BatchFormTranslations());
     add_submenu_page('woocommerce',
       $this->t('batch_form_title'),
       $this->t('batch_form_header'),
       'manage_woocommerce',
       'acumulus_batch',
-      array($this, 'processBatchForm'));
+      array($this, 'processBatchForm')
+    );
   }
 
   /**
@@ -207,7 +212,7 @@ class Acumulus {
 
     // Trigger auto update before each form invocation.
     if (!$this->upgrade()) {
-      $form->addErrorMessage(sprintf($this->t('update_failed'), $this->getVersionNumber()));
+      $form->addErrorMessages(sprintf($this->t('update_failed'), $this->getVersionNumber()));
     }
 
     $doRemoveAction = false;
@@ -250,6 +255,10 @@ class Acumulus {
     $url = admin_url("admin.php?page=acumulus_{$type}");
     // Get our form.
     $form = $this->getForm($type);
+    // Render the form first, so that any messages added during rendering can be
+    // shown on top.
+    $formOutput = $this->container->getFormRenderer()->render($form);
+
     // And kick off rendering the sections.
     $output = '';
     $output .= '<div class="wrap">';
@@ -257,7 +266,7 @@ class Acumulus {
     $output .= '<form method="post" action="' . $url . '">';
     $output .= "<input type=\"hidden\" name=\"action\" value=\"acumulus_{$type}\"/>";
     $output .= wp_nonce_field("acumulus_{$type}_nonce", '_wpnonce', true, false);
-    $output .= $this->container->getFormRenderer()->render($form);
+    $output .= $formOutput;
     $output .= get_submit_button($type === 'batch' ? $this->t('button_send') : '');
     $output .= '</form>';
     $output .= '</div>';
@@ -325,7 +334,7 @@ class Acumulus {
     $this->init();
     add_action('woocommerce_valid_order_statuses_for_payment', array($this, 'woocommerceValidOrderStatusesForPayment'), 10, 2);
     $source = $this->container->getSource(Source::Order, $orderId);
-    $this->container->getManager()->sourceStatusChange($source);
+    $this->container->getInvoiceManager()->sourceStatusChange($source);
     remove_action('woocommerce_valid_order_statuses_for_payment', array($this, 'woocommerceValidOrderStatusesForPayment'), 10);
   }
 
@@ -338,7 +347,7 @@ class Acumulus {
   public function woocommerceOrderRefunded(/** @noinspection PhpUnusedParameterInspection */ $orderId, $refundId) {
     $this->init();
     $source = $this->container->getSource(Source::CreditNote, $refundId);
-    $this->container->getManager()->sourceStatusChange($source);
+    $this->container->getInvoiceManager()->sourceStatusChange($source);
   }
 
   /**
@@ -415,12 +424,7 @@ class Acumulus {
    *
    */
   public function renderShopOrderInfoBox($shopOrderPost = null) {
-//    if(!empty($shopOrderPost)) {
       $orderId = $shopOrderPost->ID;
-//    } else {
-//      global $post;
-//      $orderId = $post->ID;
-//    }
 
     $this->init();
     $source = $this->container->getSource(Source::Order, $orderId);

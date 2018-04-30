@@ -1,6 +1,6 @@
 <?php
 
-use Siel\Acumulus\Helpers\ContainerInterface;
+use Siel\Acumulus\Helpers\Container;
 
 class AcumulusSetup {
 
@@ -10,16 +10,16 @@ class AcumulusSetup {
   /** @var array */
   private $messages = array();
 
-  /** @var \Siel\Acumulus\Helpers\ContainerInterface */
+  /** @var \Siel\Acumulus\Helpers\Container */
   private $container;
 
   /**
    * AcumulusSetup constructor.
    *
-   * @param \Siel\Acumulus\Helpers\ContainerInterface $container
+   * @param \Siel\Acumulus\Helpers\Container $container
    * @param string $version
    */
-  public function __construct(ContainerInterface $container, $version = '') {
+  public function __construct(Container $container, $version = '') {
     $this->container = $container;
     $this->version = $version;
   }
