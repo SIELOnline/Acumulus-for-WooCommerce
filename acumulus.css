@@ -3,6 +3,19 @@
   margin-left: 0.5em;
 }
 
+summary {
+  font-size: 1.3em;
+  font-weight: 600;
+  margin: 1em 0;
+  color: #23282d;
+  cursor: pointer;
+}
+
+summary h2 span {
+  margin-left: 0.4em;
+  transform: rotate(-90deg);
+}
+
 .form-table .fieldset-description-label {
   padding-bottom: 0;
   font-size: x-large;
@@ -19,6 +32,10 @@
 
 .form-table {
   border: 1px solid #444;
+}
+
+details .form-table {
+  border: none;
 }
 
 .form-table th {
