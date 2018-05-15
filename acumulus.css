@@ -11,11 +11,6 @@ summary {
   cursor: pointer;
 }
 
-summary h2 span {
-  margin-left: 0.4em;
-  transform: rotate(-90deg);
-}
-
 .form-table .fieldset-description-label {
   padding-bottom: 0;
   font-size: x-large;
@@ -71,22 +66,53 @@ details .form-table {
   margin-bottom: 0;
 }
 
-#acumulus_shop_order_info_box .inside {
-  padding-right: 0;
+label {
+  color: #777;
 }
 
+/* Labels without a form element: do not show a pointer cursor. */
 label:not([for]) {
   cursor: inherit;
 }
 
+/*
+ * Shop order overview "form".
+ */
+#acumulus_shop_order_info_box .inside {
+  padding-right: 0;
+  line-height: 1.4em;
+}
+
+/* Refund overview */
+#acumulus_shop_order_info_box details {
+  font-size: 13px;
+  border: none;
+}
+
+/* Refund overview title */
+#acumulus_shop_order_info_box summary {
+  font-size: 14px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+  margin-bottom: 6px;
+}
+
+#acumulus_shop_order_info_box .label {
+  text-align: left;
+  vertical-align: top;
+  font-weight: normal;
+  display: inline-block;
+  padding-right: 1em;
+}
+
 .pdf {
   display: inline-block;
-  padding-left: 14px;
-  margin-right: 1em;
-  margin-bottom: 0.3em;
+  padding-left: 15px;
+  margin: 0.1em 1.5em 0.2em 0;
   background-image: url('icon-pdf.svg');
   background-size: 12px 16px;
   background-repeat: no-repeat;
+  background-position: left center;
 }
 
 .acumulus-overview .data .notice {
@@ -114,6 +140,44 @@ label:not([for]) {
   color: #bc3232;
 }
 
-.acumulus-overview .data .notice-success {
+.acumulus-overview .data .notice.notice-success {
   color: #46b450;
+}
+
+.acumulus-amount .amount {
+  display: block;
+  width: 6em;
+  text-align: right;
+}
+
+.acumulus-amount .amount:nth-child(2) {
+  display: inline-block;
+}
+
+.acumulus-amount .amount:last-child {
+  border-top: 1px solid #444;
+}
+
+.acumulus-amount .amount .sign,
+.acumulus-amount .amount .currency {
+  float: left;
+  width: 0.25em;
+}
+
+#acumulus_shop_order_info_box > h2::before {
+  content: "Op een bestellingpagina in de backend wordt nu een statusoverzicht getoond van de Acumulusfactuur. In een volgende versie zullen acties als bv. 'Opnieuw verzenden' en 'Op betaald zetten' toegevoegd worden. Laat ons weten wat u hier van vindt. Suggesties en opmerkingen zijn van harte welkom!";
+  display: none;
+  position: absolute;
+  left: -16em;
+  box-sizing: border-box;
+  width: 15em;
+  border: 1px solid #e5e5e5;
+  padding: 1em;
+  background-color: white;
+  font-size: smaller;
+  z-index: 3;
+}
+
+#acumulus_shop_order_info_box > h2:hover::before {
+  display: block;
 }

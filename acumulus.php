@@ -4,13 +4,13 @@
  * Description: Acumulus plugin for WooCommerce 2.4+
  * Author: Buro RaDer, http://www.burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 5.4.1
+ * Version: 5.4.2
  * LICENCE: GPLv3
  * Requires at least: 4.2.3
  * Tested up to: 4.9
  * WC requires at least: 2.4
  * WC tested up to: 3.3
- * libAcumulus requires at least: 5.4.1
+ * libAcumulus requires at least: 5.4.2
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -74,7 +74,7 @@ class Acumulus {
     add_action('woocommerce_order_status_changed', array($this, 'woocommerceOrderStatusChanged'), 10, 3);
     add_action('woocommerce_order_refunded', array($this, 'woocommerceOrderRefunded'), 10, 2);
     add_filter('acumulus_invoice_created', array($this, 'acumulusInvoiceCreated'), 10, 3);
-    //add_action('add_meta_boxes', array($this, 'addMetaBoxes'));
+    add_action('add_meta_boxes', array($this, 'addMetaBoxes'));
   }
 
   /**
@@ -306,7 +306,7 @@ class Acumulus {
    *   The rendered notice.
    */
   protected function renderNotice($message, $type) {
-      return sprintf('<div class="notice notice-%s is-dismissble"><p>%s</p></div>', $type, $message);
+      return sprintf('<div class="notice notice-%s is-dismissible"><p>%s</p></div>', $type, $message);
   }
 
   /**
@@ -353,7 +353,7 @@ class Acumulus {
   /**
    * Hook to correct the behavior of WC_Abstract_Order::needs_payment().
    *
-   * WooCommerce thinks that orders in the on-hold state are to be seen as
+   * WooCommerce thinks that orders in the on-hold status are to be seen as
    * paid, whereas for Acumulus they are seen as due.
    *
    * @param array $statuses
@@ -407,8 +407,10 @@ class Acumulus {
     public function addMetaBoxes($postType) {
       if ($postType === 'shop_order') {
         $this->init();
+        // Load overview form translations.
+        $this->getForm('shop_order');
         add_meta_box('acumulus_shop_order_info_box',
-          $this->t('shop_order_title'),
+          $this->t('acumulus_invoice_title'),
           array($this, 'renderShopOrderInfoBox'),
           'shop_order',
           'side',
@@ -417,19 +419,18 @@ class Acumulus {
   }
 
   /**
-   * Renders the content of the Acumulusinfo box.
+   * Renders the content of the Acumulus info box.
    *
    * @param WP_Post|null $shopOrderPost
    *   The post for the current order.
-   *
    */
   public function renderShopOrderInfoBox($shopOrderPost = null) {
-      $orderId = $shopOrderPost->ID;
+    $orderId = $shopOrderPost->ID;
 
     $this->init();
     $source = $this->container->getSource(Source::Order, $orderId);
     $type = 'shop_order';
-    $url = admin_url("admin.php?page=acumulus_{$type}");
+//    $url = admin_url("admin.php?page=acumulus_{$type}");
 
     $pluginUrl = plugins_url('/acumulus');
     wp_enqueue_style('acumulus_css_admin', $pluginUrl . '/acumulus.css');
@@ -440,19 +441,19 @@ class Acumulus {
     $form->setSource($source);
     // And kick off rendering the sections.
     $output = '';
-    $output .= '<div id="acumulus-' . $type . '" class="acumulus-overview" method="post" action="' . $url . '">';
-    $output .= "<input type=\"hidden\" name=\"action\" value=\"acumulus_{$type}\"/>";
-    $output .= wp_nonce_field("acumulus_{$type}_nonce", '_wpnonce', true, false);
-//    $output .= "<table id=\"acumulus_{$type}\" class=\"acumulus-overview\"/>";
+//    $output .= '<form id="acumulus-' . $type . '" class="acumulus-overview" method="post" action="' . $url . '">';
+    $output .= '<div id="acumulus-' . $type . '" class="acumulus-overview">';
+//    $output .= "<input type=\"hidden\" name=\"action\" value=\"acumulus_{$type}\"/>";
+//    $output .= wp_nonce_field("acumulus_{$type}_nonce", '_wpnonce', true, false);
     $output .= $this->container->getFormRenderer()
-                               ->setProperty('usePopupDescription', true)
-                               ->setProperty('fieldsetContentWrapperClass', 'data')
-                               ->setProperty('labelWrapperClass', 'label')
-                               ->setProperty('inputDescriptionWrapperClass', 'value')
-                               ->render($form);
-//    $output .= '</table>';
-//    $output .= get_submit_button($type === 'batch' ? $this->t('button_send') : '');
+      ->setProperty('usePopupDescription', true)
+      ->setProperty('fieldsetContentWrapperClass', 'data')
+      ->setProperty('detailsWrapperClass', '')
+      ->setProperty('labelWrapperClass', 'label')
+      ->setProperty('inputDescriptionWrapperClass', 'value')
+      ->render($form);
     $output .= '</div>';
+//    $output .= '</form>';
     echo $output;
   }
 

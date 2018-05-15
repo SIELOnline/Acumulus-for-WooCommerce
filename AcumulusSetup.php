@@ -157,7 +157,7 @@ class AcumulusSetup {
    *   The rendered notice.
    */
   protected function renderNotice($message, $type) {
-    return sprintf('<div class="notice notice-%s is-dismissble"><p>%s</p></div>', $type, $message);
+    return sprintf('<div class="notice notice-%s is-dismissible"><p>%s</p></div>', $type, $message);
   }
 
   /**
