@@ -219,12 +219,18 @@ class Acumulus {
     if ($form->isSubmitted()) {
       check_admin_referer("acumulus_{$type}_nonce");
       if ($type === 'batch') {
+        // WC 3.x: we use WC_Order::is_paid() to determine the payment status,
+        // but the default states as returned by wc_get_is_paid_statuses() are
+        // not as we define "is paid".
+        add_action('woocommerce_order_is_paid_statuses', array($this, 'woocommerceOrderIsPaidStatuses'), 10, 2);
+        // WC 2.x: we use WC_Order::needs_payment()
         add_action('woocommerce_valid_order_statuses_for_payment', array($this, 'woocommerceValidOrderStatusesForPayment'), 10, 2);
         $doRemoveAction = true;
       }
     }
     $form->process();
     if ($doRemoveAction) {
+      remove_action('woocommerce_order_is_paid_statuses', array($this, 'woocommerceOrderIsPaidStatuses'), 10);
       remove_action('woocommerce_valid_order_statuses_for_payment', array($this, 'woocommerceValidOrderStatusesForPayment'), 10);
     }
     $this->renderForm($type, $capability);
@@ -332,9 +338,15 @@ class Acumulus {
    */
   public function woocommerceOrderStatusChanged($orderId/*, $status, $newStatus*/) {
     $this->init();
+    // WC 3.x: we use WC_Order::is_paid() to determine the payment status,
+    // but the default states as returned by wc_get_is_paid_statuses() are
+    // not as we define "is paid".
+    add_action('woocommerce_order_is_paid_statuses', array($this, 'woocommerceOrderIsPaidStatuses'), 10, 2);
+    // WC 2.x: we use WC_Order::needs_payment()
     add_action('woocommerce_valid_order_statuses_for_payment', array($this, 'woocommerceValidOrderStatusesForPayment'), 10, 2);
     $source = $this->container->getSource(Source::Order, $orderId);
     $this->container->getInvoiceManager()->sourceStatusChange($source);
+    remove_action('woocommerce_valid_order_statuses_for_payment', array($this, 'woocommerceOrderIsPaidStatuses'), 10);
     remove_action('woocommerce_valid_order_statuses_for_payment', array($this, 'woocommerceValidOrderStatusesForPayment'), 10);
   }
 
@@ -351,18 +363,44 @@ class Acumulus {
   }
 
   /**
-   * Hook to correct the behavior of WC_Abstract_Order::needs_payment().
+   * Hook to correct the behaviour of WC_Order::is_paid().
    *
-   * WooCommerce thinks that orders in the on-hold status are to be seen as
-   * paid, whereas for Acumulus they are seen as due.
+   * Note: this is used when running with WC 3.x.
+   *
+   * WooCommerce thinks that only orders in the processing or completed statuses
+   * are to be seen as paid, whereas for Acumulus, refunded orders are also
+   * paid. (if an order is refunded, a separate credit note invoice will be
+   * created in Acumulus and thus the invoice for the original order remains
+   * "paid".)
    *
    * @param array $statuses
-   * param WC_Abstract_Order $order
+   * param WC_Order $order
    *
    * @return array
    */
-  public function woocommerceValidOrderStatusesForPayment(array $statuses/*, WC_Abstract_Order $order*/) {
-      return array_merge($statuses, array('on-hold'));
+  public function woocommerceOrderIsPaidStatuses(array $statuses/*, WC_Order $order*/) {
+      return array_merge($statuses, array('refunded'));
+  }
+
+  /**
+   * Hook to correct the behaviour of WC_Order::needs_payment().
+   *
+   * Note: this is only used when running with WC 2.x.
+   *
+   * WooCommerce thinks that orders in the on-hold status are to be seen as
+   * paid, whereas for Acumulus they are seen as due. (On-hold means waiting for
+   * bank transfer to be booked on our account.)
+   *
+   * We also add the the cancelled and failed statuses, although for a cancelled
+   * no invoice should be created. But if 1 gets created, mark it as due.
+   *
+   * @param array $statuses
+   * param WC_Order $order
+   *
+   * @return array
+   */
+  public function woocommerceValidOrderStatusesForPayment(array $statuses/*, WC_Order $order*/) {
+      return array_merge($statuses, array('on-hold', 'cancelled', 'failed'));
   }
 
   /**
@@ -435,26 +473,36 @@ class Acumulus {
     $pluginUrl = plugins_url('/acumulus');
     wp_enqueue_style('acumulus_css_admin', $pluginUrl . '/acumulus.css');
 
+    // WC 3.x: we use WC_Order::is_paid() to determine the payment status,
+    // but the default states as returned by wc_get_is_paid_statuses() are
+    // not as we define "is paid".
+    add_action('woocommerce_order_is_paid_statuses', array($this, 'woocommerceOrderIsPaidStatuses'), 10, 2);
+    // WC 2.x: we use WC_Order::needs_payment()
+    add_action('woocommerce_valid_order_statuses_for_payment', array($this, 'woocommerceValidOrderStatusesForPayment'), 10, 2);
     // Get our form.
     /** @var \Siel\Acumulus\WooCommerce\Shop\ShopOrderOverviewForm $form */
     $form = $this->getForm($type);
     $form->setSource($source);
-    // And kick off rendering the sections.
-    $output = '';
-//    $output .= '<form id="acumulus-' . $type . '" class="acumulus-overview" method="post" action="' . $url . '">';
-    $output .= '<div id="acumulus-' . $type . '" class="acumulus-overview">';
-//    $output .= "<input type=\"hidden\" name=\"action\" value=\"acumulus_{$type}\"/>";
-//    $output .= wp_nonce_field("acumulus_{$type}_nonce", '_wpnonce', true, false);
-    $output .= $this->container->getFormRenderer()
-      ->setProperty('usePopupDescription', true)
+    $formOutput = $this->container->getFormRenderer()
+      ->setProperty('usePopupDescription', TRUE)
       ->setProperty('fieldsetContentWrapperClass', 'data')
       ->setProperty('detailsWrapperClass', '')
       ->setProperty('labelWrapperClass', 'label')
       ->setProperty('inputDescriptionWrapperClass', 'value')
       ->render($form);
+    // And kick off rendering the sections.
+    $output = '';
+//    // No form for now, actions will be added later.
+//    $output .= '<form id="acumulus-' . $type . '" class="acumulus-overview" method="post" action="' . $url . '">';
+    $output .= '<div id="acumulus-' . $type . '" class="acumulus-overview">';
+//    $output .= "<input type=\"hidden\" name=\"action\" value=\"acumulus_{$type}\"/>";
+//    $output .= wp_nonce_field("acumulus_{$type}_nonce", '_wpnonce', true, false);
+    $output .= $formOutput;
     $output .= '</div>';
 //    $output .= '</form>';
     echo $output;
+    remove_action('woocommerce_valid_order_statuses_for_payment', array($this, 'woocommerceOrderIsPaidStatuses'), 10);
+    remove_action('woocommerce_valid_order_statuses_for_payment', array($this, 'woocommerceValidOrderStatusesForPayment'), 10);
   }
 
   /**
