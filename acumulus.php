@@ -4,12 +4,12 @@
  * Description: Acumulus plugin for WooCommerce 2.4+
  * Author: Buro RaDer, http://www.burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 5.4.2
+ * Version: 5.4.3
  * LICENCE: GPLv3
  * Requires at least: 4.2.3
  * Tested up to: 4.9
  * WC requires at least: 2.4
- * WC tested up to: 3.3
+ * WC tested up to: 3.4
  * libAcumulus requires at least: 5.4.2
  */
 
@@ -296,7 +296,7 @@ class Acumulus {
             $output .= $this->renderNotice($message, 'warning');
         }
         foreach ($form->getSuccessMessages() as $message) {
-            $output .= $this->renderNotice($message, 'updated');
+            $output .= $this->renderNotice($message, 'success');
         }
     }
     return $output;
