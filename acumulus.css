@@ -89,6 +89,16 @@ label:not([for]) {
   border: none;
 }
 
+#acumulus_shop_order_info_box .invoice-sent-concept {
+  float: left;
+  width: 85%;
+}
+
+#acumulus_shop_order_info_box .invoice-sent-concept + .woocommerce-help-tip {
+  float: left;
+}
+
+
 /* Refund overview title */
 #acumulus_shop_order_info_box summary {
   font-size: 14px;
