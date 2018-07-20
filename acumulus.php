@@ -4,7 +4,7 @@
  * Description: Acumulus plugin for WooCommerce 2.4+
  * Author: Buro RaDer, http://www.burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 5.4.4
+ * Version: 5.4.7
  * LICENCE: GPLv3
  * Requires at least: 4.2.3
  * Tested up to: 4.9
@@ -346,7 +346,7 @@ class Acumulus {
     add_action('woocommerce_valid_order_statuses_for_payment', array($this, 'woocommerceValidOrderStatusesForPayment'), 10, 2);
     $source = $this->container->getSource(Source::Order, $orderId);
     $this->container->getInvoiceManager()->sourceStatusChange($source);
-    remove_action('woocommerce_valid_order_statuses_for_payment', array($this, 'woocommerceOrderIsPaidStatuses'), 10);
+    remove_action('woocommerce_order_is_paid_statuses', array($this, 'woocommerceOrderIsPaidStatuses'), 10);
     remove_action('woocommerce_valid_order_statuses_for_payment', array($this, 'woocommerceValidOrderStatusesForPayment'), 10);
   }
 
@@ -501,7 +501,7 @@ class Acumulus {
     $output .= '</div>';
 //    $output .= '</form>';
     echo $output;
-    remove_action('woocommerce_valid_order_statuses_for_payment', array($this, 'woocommerceOrderIsPaidStatuses'), 10);
+    remove_action('woocommerce_order_is_paid_statuses', array($this, 'woocommerceOrderIsPaidStatuses'), 10);
     remove_action('woocommerce_valid_order_statuses_for_payment', array($this, 'woocommerceValidOrderStatusesForPayment'), 10);
   }
 
