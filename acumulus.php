@@ -1,15 +1,15 @@
 <?php
 /*
  * Plugin Name: Acumulus
- * Description: Acumulus plugin for WooCommerce 2.4+
+ * Description: Acumulus plugin for WooCommerce 3+
  * Author: Buro RaDer, http://www.burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 5.4.8
+ * Version: 5.5.0
  * LICENCE: GPLv3
  * Requires at least: 4.2.3
- * Tested up to: 4.9
+ * Tested up to: 5.0
  * WC requires at least: 2.4
- * WC tested up to: 3.4
+ * WC tested up to: 3.5
  * libAcumulus requires at least: 5.4.8
  */
 
@@ -67,6 +67,7 @@ class Acumulus {
     register_uninstall_hook($this->file, array('Acumulus', 'uninstall'));
 
     // Actions.
+    add_action('admin_notices', array($this, 'showAdminNotices'));
     add_action('admin_menu', array($this, 'addMenuLinks'), 900);
     add_action('admin_post_acumulus_config', array($this, 'processConfigForm'));
     add_action('admin_post_acumulus_advanced', array($this, 'processAdvancedForm'));
@@ -129,10 +130,41 @@ class Acumulus {
       // Get WC version to set the shop namespace.
       /** @var \WooCommerce $woocommerce */
       global $woocommerce;
-      $shopNamespace = version_compare($woocommerce->version, '3', '>=') ? 'WooCommerce' : 'WooCommerce\WooCommerce2';
+      if (version_compare($woocommerce->version, '3', '>=')) {
+        $shopNamespace = 'WooCommerce';
+      }
+      else {
+        $shopNamespace = 'WooCommerce\WooCommerce2';
+        // Show message about stopping support for WC2
+        $lastShown = get_transient('acumulus_stop_support_woocommerce2');
+        // Show the message if we did not already show it or if it has been
+        // more than 2 days.
+        if (empty($lastShown) || (is_numeric($lastShown) && time() > (int) $lastShown + 2 * 24 * 60 * 60)) {
+          set_transient('acumulus_stop_support_woocommerce2', 'show now');
+        }
+      }
 
       $this->container = new Container($shopNamespace, $languageCode);
       $this->container->getTranslator()->add(new ModuleTranslations());
+
+      // Check for any updates to perform.
+      $this->upgrade();
+    }
+  }
+
+  /**
+   * Show planned admin notices.
+   *
+   * Due to the order of execution and the habit of redirecting at the end of
+   * an action, just adding a notice may not work. Therefore we work with
+   * transients.
+   */
+  public function showAdminNotices() {
+    // Check the transient to see if we should display a notice.
+    if(get_transient('acumulus_stop_support_woocommerce2') === 'show now') {
+      echo '<div class="notice notice-warning is-dismissible"><p>' . $this->t('wc2_end_support') . '</p></div>';
+      // Log the time we are displaying it. We will show it again in 2 days.
+      set_transient('acumulus_stop_support_woocommerce2', time());
     }
   }
 
@@ -209,11 +241,6 @@ class Acumulus {
       wp_die(__('You do not have sufficient permissions to access this page.'));
     }
     $form = $this->getForm($type);
-
-    // Trigger auto update before each form invocation.
-    if (!$this->upgrade()) {
-      $form->addErrorMessages(sprintf($this->t('update_failed'), $this->getVersionNumber()));
-    }
 
     $doRemoveAction = false;
     if ($form->isSubmitted()) {
@@ -439,8 +466,6 @@ class Acumulus {
      * Action handler for the add_meta_boxes action.
      *
      * @param string $postType
-     *
-     *
      */
     public function addMetaBoxes($postType) {
       if ($postType === 'shop_order') {
@@ -465,7 +490,7 @@ class Acumulus {
   public function renderShopOrderInfoBox($shopOrderPost = null) {
     $orderId = $shopOrderPost->ID;
 
-    $this->init();
+    $this->init(); // @todo: necessary? has already run on addMetaBoxes?
     $source = $this->container->getSource(Source::Order, $orderId);
     $type = 'shop_order';
 //    $url = admin_url("admin.php?page=acumulus_{$type}");
@@ -484,7 +509,7 @@ class Acumulus {
     $form = $this->getForm($type);
     $form->setSource($source);
     $formOutput = $this->container->getFormRenderer()
-      ->setProperty('usePopupDescription', TRUE)
+      ->setProperty('usePopupDescription', true)
       ->setProperty('fieldsetContentWrapperClass', 'data')
       ->setProperty('detailsWrapperClass', '')
       ->setProperty('labelWrapperClass', 'label')
@@ -513,19 +538,23 @@ class Acumulus {
     require_once('AcumulusSetup.php');
     $setup = new AcumulusSetup($this->container, $this->getVersionNumber());
     $setup->activate();
-    $setup->upgrade();
   }
 
   /**
    * Forwards the call to an instance of the setup class.
    *
+   * To keep the lazy loading we do check the version number here.
+   *
    * @return bool
    */
   public function upgrade() {
-    $this->init();
-    require_once('AcumulusSetup.php');
-    $setup = new AcumulusSetup($this->container, $this->getVersionNumber());
-    return $setup->upgrade();
+    $dbVersion = get_option('acumulus_version');
+    if (empty($dbVersion) || version_compare($dbVersion, $this->getVersionNumber(), '<')) {
+      require_once('AcumulusSetup.php');
+      $setup = new AcumulusSetup($this->container, $this->getVersionNumber());
+      return $setup->upgrade($dbVersion);
+    }
+    return true;
   }
 
   /**

@@ -34,7 +34,7 @@ class AcumulusSetup {
    *   Success.
    */
   public function activate() {
-    $result = FALSE;
+    $result = false;
     // Check user access.
     if (current_user_can('activate_plugins')) {
       $plugin = isset($_REQUEST['plugin']) ? $_REQUEST['plugin'] : '';
@@ -54,24 +54,26 @@ class AcumulusSetup {
   /**
    * Upgrades the plugin.
    *
+   * @param string $dbVersion
+   *
    * @return bool
    *   Success.
    */
-  public function upgrade() {
-    $result = TRUE;
+  public function upgrade($dbVersion) {
+    $result = true;
 
     // Only execute if we are really upgrading.
-    $dbVersion = get_option('acumulus_version');
-    if (!empty($dbVersion) && version_compare($dbVersion, $this->version, '<')) {
+    if (empty($dbVersion)) {
+      // Set it so we can compare it in the future.
+      update_option('acumulus_version', $this->version);
+    }
+    else {
       $result = $this->container->getConfig()->upgrade($dbVersion);
       if (version_compare($dbVersion, '4.7.2', '<')) {
         $result = $this->upgrade472() && $result;
       } elseif (version_compare($dbVersion, '5.0.1', '<')) {
         $result = $this->upgrade501() && $result;
       }
-      update_option('acumulus_version', $this->version);
-    } else if (empty($dbVersion)) {
-      // Set it so we can compare it in the future.
       update_option('acumulus_version', $this->version);
     }
 
@@ -86,14 +88,14 @@ class AcumulusSetup {
    */
   public function deactivate() {
     if (!current_user_can('activate_plugins')) {
-      return FALSE;
+      return false;
     }
     $plugin = isset($_REQUEST['plugin']) ? $_REQUEST['plugin'] : '';
     check_admin_referer("deactivate-plugin_{$plugin}");
 
     // Deactivate.
     // None so far.
-    return TRUE;
+    return true;
   }
 
   /**
@@ -104,7 +106,7 @@ class AcumulusSetup {
    */
   public function uninstall() {
     if (!current_user_can('delete_plugins')) {
-      return FALSE;
+      return false;
     }
 
     // Uninstall.
@@ -186,7 +188,7 @@ class AcumulusSetup {
 
   protected function upgrade501() {
     add_action('admin_notices', array($this, 'removeLibrariesFolder'));
-    return TRUE;
+    return true;
   }
 
   public function removeLibrariesFolder() {
