@@ -2,7 +2,7 @@
 Contributors: SIEL Acumulus.
 Tags: WooCommerce, Acumulus, financial, bookkeeping, accounting, administratie, bank, boekhouden, boekhoudpakket, boekhoudprogramma, e-commerce, free, gratis, koppeling, online boekhouden
 Requires at least: 4.2.3
-Tested up to: 4.9
+Tested up to: 5.0
 Stable tag: trunk
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl.html

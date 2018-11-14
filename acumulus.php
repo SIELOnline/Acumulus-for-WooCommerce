@@ -10,7 +10,7 @@
  * Tested up to: 5.0
  * WC requires at least: 2.4
  * WC tested up to: 3.5
- * libAcumulus requires at least: 5.4.8
+ * libAcumulus requires at least: 5.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
