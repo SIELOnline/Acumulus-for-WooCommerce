@@ -2,9 +2,9 @@
 /*
  * Plugin Name: Acumulus
  * Description: Acumulus plugin for WooCommerce 3+
- * Author: Buro RaDer, http://www.burorader.com/
+ * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 5.5.0
+ * Version: 5.5.1
  * LICENCE: GPLv3
  * Requires at least: 4.2.3
  * Tested up to: 5.0
