@@ -75,7 +75,7 @@ class Acumulus {
     add_action('woocommerce_order_status_changed', array($this, 'woocommerceOrderStatusChanged'), 10, 3);
     add_action('woocommerce_order_refunded', array($this, 'woocommerceOrderRefunded'), 10, 2);
     add_filter('acumulus_invoice_created', array($this, 'acumulusInvoiceCreated'), 10, 3);
-    add_action('add_meta_boxes', array($this, 'addMetaBoxes'));
+    add_action('add_meta_boxes_shop_order', array($this, 'addShopOrderMetaBox'));
   }
 
   /**
@@ -463,34 +463,30 @@ class Acumulus {
   }
 
     /**
-     * Action handler for the add_meta_boxes action.
+     * Action handler for the add_meta_boxes_(post_type} action.
      *
-     * @param string $postType
+     * param WP_Post $post
      */
-    public function addMetaBoxes($postType) {
-      if ($postType === 'shop_order') {
-        $this->init();
-        // Load overview form translations.
-        $this->getForm('shop_order');
-        add_meta_box('acumulus_shop_order_info_box',
-          $this->t('acumulus_invoice_title'),
-          array($this, 'renderShopOrderInfoBox'),
-          'shop_order',
-          'side',
-          'default');
-      }
+  public function addShopOrderMetaBox(/*WP_Post $post*/) {
+    $this->init();
+    // Load overview form translations.
+    $this->getForm('shop_order');
+    add_meta_box('acumulus_shop_order_info_box',
+      $this->t('acumulus_invoice_title'),
+      array($this, 'renderShopOrderInfoBox'),
+      'shop_order',
+      'side',
+      'default');
   }
 
   /**
    * Renders the content of the Acumulus info box.
    *
-   * @param WP_Post|null $shopOrderPost
+   * @param WP_Post $shopOrderPost
    *   The post for the current order.
    */
-  public function renderShopOrderInfoBox($shopOrderPost = null) {
+  public function renderShopOrderInfoBox(WP_Post $shopOrderPost) {
     $orderId = $shopOrderPost->ID;
-
-    $this->init(); // @todo: necessary? has already run on addMetaBoxes?
     $source = $this->container->getSource(Source::Order, $orderId);
     $type = 'shop_order';
 //    $url = admin_url("admin.php?page=acumulus_{$type}");
