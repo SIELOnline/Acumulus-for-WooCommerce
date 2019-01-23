@@ -1,6 +1,6 @@
-=== Plugin Name ===
+=== Acumulus ===
 Contributors: SIEL Acumulus.
-Tags: WooCommerce, Acumulus, financial, bookkeeping, accounting, administratie, bank, boekhouden, boekhoudpakket, boekhoudprogramma, e-commerce, free, gratis, koppeling, online boekhouden
+Tags: Acumulus, administratie, boekhouding, boekhoudpakket, boekhoudsoftware
 Requires at least: 4.2.3
 Tested up to: 5.0
 Stable tag: trunk
@@ -11,12 +11,17 @@ The Acumulus plugin connects your Woocommerce store to the Dutch [SIEL Acumulus 
 
 == Description ==
 
+Over deze plugin.
+
+== WooCommerce boekhouden plugin voor Acumulus ==
+
 The Acumulus plugin connects your Woocommerce store to the Dutch SIEL Acumulus online financial administration application. It can add your invoices automatically or via a batch send form to your administration, saving you a lot of manual, error prone work.
 
 The Acumulus plugin:
 
 * Reacts to order status changes via actions.
 * Does have 3 admin screens: a settings, advanced settings, and a batch send screen.
+* Offers a meta box with an overview of the status of the invoice in Acumulus on the edit order screen.
 * Does not in any way interfere with the front-end UI.
 
 The Acumulus plugin assumes that:
@@ -41,6 +46,7 @@ If not, this plugin is useless and will not do anything.
 1. Settings form (1 of 2)
 2. Settings form (2 of 2)
 3. Batch form
+4. Acumulus invoice status overview
 
 == Changelog ==
 The Acumulus plugin exists for multiple eCommerce solutions and are all built on a common library. Most changes take place in that common library, therefore there's only 1 changelog that is part of the library, see [changelog.txt](https://plugins.svn.wordpress.org/acumulus/trunk/lib/siel/acumulus/changelog.txt).

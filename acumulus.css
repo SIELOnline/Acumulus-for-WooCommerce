@@ -76,38 +76,38 @@ label:not([for]) {
 }
 
 /*
- * Shop order overview "form".
+ * Acumulus invoice status overview "form".
  */
-#acumulus_shop_order_info_box .inside {
+#acumulus_invoice_status_overview_info_box .inside {
   padding-right: 0;
   line-height: 1.4em;
 }
 
 /* Refund overview */
-#acumulus_shop_order_info_box details {
+#acumulus_invoice_status_overview_info_box details {
   font-size: 13px;
   border: none;
 }
 
-#acumulus_shop_order_info_box .invoice-sent-concept {
+#acumulus_invoice_status_overview_info_box .invoice-sent-concept {
   float: left;
   width: 85%;
 }
 
-#acumulus_shop_order_info_box .invoice-sent-concept + .woocommerce-help-tip {
+#acumulus_invoice_status_overview_info_box .invoice-sent-concept + .woocommerce-help-tip {
   float: left;
 }
 
 
 /* Refund overview title */
-#acumulus_shop_order_info_box summary {
+#acumulus_invoice_status_overview_info_box summary {
   font-size: 14px;
   border-bottom: 1px solid #eee;
   padding-bottom: 8px;
   margin-bottom: 6px;
 }
 
-#acumulus_shop_order_info_box .label {
+#acumulus_invoice_status_overview_info_box .label {
   text-align: left;
   vertical-align: top;
   font-weight: normal;
@@ -115,7 +115,7 @@ label:not([for]) {
   padding-right: 1em;
 }
 
-.pdf {
+#acumulus_invoice_status_overview_info_box .pdf {
   display: inline-block;
   padding-left: 15px;
   margin: 0.1em 1.5em 0.2em 0;
@@ -125,32 +125,32 @@ label:not([for]) {
   background-position: left center;
 }
 
-.acumulus-overview .data .notice {
+.acumulus-invoice-status-overview .data .notice {
   box-shadow: none;
   margin: 0;
 }
 
-.acumulus-overview .data th.notice {
+.acumulus-invoice-status-overview .data th.notice {
   padding: 0;
 }
 
-.acumulus-overview .data .notice .notice {
+.acumulus-invoice-status-overview .data .notice .notice {
   border: none;
 }
 
-.acumulus-overview .data .notice-info {
+.acumulus-invoice-status-overview .data .notice-info {
   color: #00a0d2;
 }
 
-.acumulus-overview .data .notice-warning {
+.acumulus-invoice-status-overview .data .notice-warning {
   color: #ffb900;
 }
 
-.acumulus-overview .data .notice-error {
+.acumulus-invoice-status-overview .data .notice-error {
   color: #bc3232;
 }
 
-.acumulus-overview .data .notice.notice-success {
+.acumulus-invoice-status-overview .data .notice.notice-success {
   color: #46b450;
 }
 
@@ -172,22 +172,4 @@ label:not([for]) {
 .acumulus-amount .amount .currency {
   float: left;
   width: 0.25em;
-}
-
-#acumulus_shop_order_info_box > h2::before {
-  content: "Op een bestellingpagina in de backend wordt nu een statusoverzicht getoond van de Acumulusfactuur. In een volgende versie zullen acties als bv. 'Opnieuw verzenden' en 'Op betaald zetten' toegevoegd worden. Laat ons weten wat u hier van vindt. Suggesties en opmerkingen zijn van harte welkom!";
-  display: none;
-  position: absolute;
-  left: -16em;
-  box-sizing: border-box;
-  width: 15em;
-  border: 1px solid #e5e5e5;
-  padding: 1em;
-  background-color: white;
-  font-size: smaller;
-  z-index: 3;
-}
-
-#acumulus_shop_order_info_box > h2:hover::before {
-  display: block;
 }
