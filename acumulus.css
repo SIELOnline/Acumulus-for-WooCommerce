@@ -128,6 +128,9 @@ label:not([for]) {
 .acumulus-invoice-status-overview .data .notice {
   box-shadow: none;
   margin: 0;
+  border-top-width: 0;
+  border-right-width: 0;
+  border-bottom-width:  0;
 }
 
 .acumulus-invoice-status-overview .data th.notice {

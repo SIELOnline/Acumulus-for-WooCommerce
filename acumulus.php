@@ -1,16 +1,16 @@
-<?php
+<?php /** @noinspection PhpUnused */
 /*
  * Plugin Name: Acumulus
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 5.7.4
+ * Version: 5.8.1
  * LICENCE: GPLv3
  * Requires at least: 4.2.3
- * Tested up to: 5.1
+ * Tested up to: 5.3
  * WC requires at least: 2.4
- * WC tested up to: 3.6
- * libAcumulus requires at least: 5.7
+ * WC tested up to: 3.8
+ * libAcumulus requires at least: 5.8
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -79,7 +79,7 @@ class Acumulus {
     add_action('admin_post_acumulus_advanced', array($this, 'processAdvancedForm'));
     add_action('admin_post_acumulus_batch', array($this, 'processBatchForm'));
     // - WooCommerce order/refund events.
-    add_action('woocommerce_order_status_changed', array($this, 'woocommerceOrderStatusChanged'), 10, 3);
+    add_action('plugins_loaded', array($this, 'pluginsLoaded'));
     add_action('woocommerce_order_refunded', array($this, 'woocommerceOrderRefunded'), 10, 2);
     // - Our own invoice related events.
     add_filter('acumulus_invoice_created', array($this, 'acumulusInvoiceCreated'), 10, 3);
@@ -97,8 +97,7 @@ class Acumulus {
     if (function_exists('get_plugin_data')) {
       $plugin_data = get_plugin_data($this->file);
       $version = $plugin_data['Version'];
-    }
-    else {
+    } else {
       $version = get_option('acumulus_version');
     }
     return $version;
@@ -139,8 +138,7 @@ class Acumulus {
       global $woocommerce;
       if (version_compare($woocommerce->version, '3', '>=')) {
         $shopNamespace = 'WooCommerce';
-      }
-      else {
+      } else {
         $shopNamespace = 'WooCommerce\WooCommerce2';
         // Show message about stopping support for WC2
         $lastShown = get_transient('acumulus_stop_support_woocommerce2');
@@ -528,15 +526,40 @@ class Acumulus {
   }
 
   /**
+   * Defines an order status changed action for each status.
+   */
+  public function pluginsLoaded() {
+    $this->init();
+    // Get WC version to set the shop namespace.
+    /** @var \WooCommerce $woocommerce */
+    global $woocommerce;
+    if (version_compare($woocommerce->version, '3', '>=')) {
+      $statuses = $this->container->getShopCapabilities()->getShopOrderStatuses();
+      foreach ($statuses as $status => $label) {
+        add_action('woocommerce_order_status_' . $status, array($this, 'woocommerceOrderStatusChanged'), 10, 1);
+      }
+    } else {
+      add_action('woocommerce_order_status_changed', array($this, 'woocommerceOrderStatusChanged'), 10, 1);
+    }
+  }
+
+  /**
    * Filter function for the 'woocommerce_order_status_changed' action,
    *
    * This action gets called when the status of an order changes.
    *
    * @param int $orderId
-   * param int $status
-   * param int $newStatus
+   * - For WC3+ on 'woocommerce_order_status_...'
+   *   param WC_Order $order
+   * - For WC3+ on 'woocommerce_order_status_changed'
+   *   param int $status
+   *   param int $newStatus
+   *   param WC_Order $Order
+   * - For WC2 on 'woocommerce_order_status_changed'
+   *   param int $status
+   *   param int $newStatus
    */
-  public function woocommerceOrderStatusChanged($orderId/*, $status, $newStatus*/) {
+  public function woocommerceOrderStatusChanged($orderId) {
     $this->init();
     // WC 3.x: we use WC_Order::is_paid() to determine the payment status,
     // but the default states as returned by wc_get_is_paid_statuses() are
