@@ -68,13 +68,13 @@ class Acumulus {
     register_uninstall_hook($this->file, array('Acumulus', 'uninstall'));
 
     // Actions:
-    // - Backend actions we use.
-    add_action('admin_notices', array($this, 'showAdminNotices'));
+    // - Add our forms to the admin menu.
     add_action('admin_menu', array($this, 'addMenuLinks'), 900);
-    // - Meta box and ajax request for invoice status overview form.
-    add_action('wp_ajax_acumulus_ajax_action', array($this, 'handleAjaxRequest'));
+    // - Admin notices , meta boxes, and ajax requests from them.
+    add_action('admin_notices', array($this, 'showAdminNotices'));
     add_action('add_meta_boxes_shop_order', array($this, 'addShopOrderMetaBox'));
-    // - Our own forms.
+    add_action('wp_ajax_acumulus_ajax_action', array($this, 'handleAjaxRequest'));
+    // - To process our own forms.
     add_action('admin_post_acumulus_config', array($this, 'processConfigForm'));
     add_action('admin_post_acumulus_advanced', array($this, 'processAdvancedForm'));
     add_action('admin_post_acumulus_batch', array($this, 'processBatchForm'));
@@ -140,36 +140,12 @@ class Acumulus {
         $shopNamespace = 'WooCommerce';
       } else {
         $shopNamespace = 'WooCommerce\WooCommerce2';
-        // Show message about stopping support for WC2
-        $lastShown = get_transient('acumulus_stop_support_woocommerce2');
-        // Show the message if we did not already show it or if it has been
-        // more than 7 days.
-        if (empty($lastShown) || (is_numeric($lastShown) && time() > (int) $lastShown + 7 * 24 * 60 * 60)) {
-          set_transient('acumulus_stop_support_woocommerce2', 'show now');
-        }
       }
-
       $this->container = new Container($shopNamespace, $languageCode);
       $this->container->getTranslator()->add(new ModuleTranslations());
 
       // Check for any updates to perform.
       $this->upgrade();
-    }
-  }
-
-  /**
-   * Show planned admin notices.
-   *
-   * Due to the order of execution and the habit of redirecting at the end of
-   * an action, just adding a notice may not work. Therefore we work with
-   * transients.
-   */
-  public function showAdminNotices() {
-    // Check the transient to see if we should display a notice.
-    if(get_transient('acumulus_stop_support_woocommerce2') === 'show now') {
-      echo '<div class="notice notice-warning is-dismissible"><p>' . $this->t('wc2_end_support') . '</p></div>';
-      // Log the time we are displaying it. We will show it again in 2 days.
-      set_transient('acumulus_stop_support_woocommerce2', time());
     }
   }
 
@@ -207,16 +183,100 @@ class Acumulus {
   }
 
   /**
+   * Shows admin notices.
+   *
+   * Due to the order of execution and the habit of redirecting at the end of
+   * an action, just adding a notice may not work. Therefore we work with
+   * transients.
+   */
+  public function showAdminNotices() {
+    $screen = get_current_screen();
+    // These notices should only show on the main dashboard. (@todo: and the acumulus screens)
+    if ($screen && $screen->id === 'dashboard') {
+      // Check the transients to see if we should display notices.
+
+      // Notice about rating our plugin.
+      $value = get_transient('acumulus_rate_plugin');
+      if (empty($value) || ctype_digit($value) && time() >= $value) {
+        echo $this->processRatePluginForm();
+      }
+
+      // Notice about ending support for WooCommerce 2.
+      /** @var \WooCommerce $woocommerce */
+      global $woocommerce;
+      if (version_compare($woocommerce->version, '3', '>=')) {
+        // WooCommerce has been upgraded to a version >= 3. We do no longer need
+        // this transient.
+        delete_transient('acumulus_stop_support_woocommerce2');
+      } else {
+        $value = get_transient('acumulus_stop_support_woocommerce2');
+        if (empty($value) || time() >= $value + 2 * 24 * 60 * 60) {
+          echo '<div class="notice notice-warning is-dismissible"><p>' . $this->t('wc2_end_support') . '</p></div>';
+          // Store the next time we are displaying it: in 2 days.
+          set_transient('acumulus_stop_support_woocommerce2', time() + 2 * 24 * 60 * 60);
+        }
+      }
+    }
+  }
+
+  /**
    * Handles ajax requests for this plugin.
    *
-   * For now, only the invoice status overview form uses ajax requests to
-   * perform actions on the Acumulus invoice.
+   * The invoice status overview and the rate plugin form use ajax requests.
    */
   public function handleAjaxRequest()
   {
     check_ajax_referer('acumulus_ajax_action', 'security');
 
     $this->init();
+    // Check where the ajax call came from.
+    if (isset($_POST['form'])) {
+      switch ($_POST['form']) {
+        case 'invoice':
+          $content = $this->handleInvoiceStatusOverviewFormRequest();
+          break;
+        case 'rate':
+          $content = $this->handleRatePluginFormRequest();
+          break;
+        default:
+          $content = $this->renderNotice('Form parameter of ajax request unknown to Acumulus.', 'error');
+      }
+    } else {
+      $content = $this->renderNotice('No form parameter in ajax request for Acumulus.', 'error');
+    }
+    wp_send_json(array(
+      'id' => 'acumulus-rate-plugin',
+      'content' => $content,
+    ));
+  }
+
+  /**
+   * Handles an ajax request from the metabox on the view/edit order screen that
+   * shows the status in acumulus of the invoice for the current order.
+   *
+   * @return string
+   *   The rendered form (embedded in any necessary html).
+   */
+  private function handleRatePluginFormRequest() {
+    $content = $this->processRatePluginForm();
+    // Processing the form may result in that the form should be removed.
+    $value = get_transient('acumulus_rate_plugin');
+    if (ctype_digit($value) || time() < $value) {
+      $content = '';
+    } elseif ($value === 'done') {
+      $content = $this->renderNotice($this->t('done_thanks'), 'success');
+    }
+    return $content;
+  }
+
+  /**
+   * Handles an ajax request from the meta box on the view/edit order screen
+   * that shows the status in acumulus of the invoice for the current order.
+   *
+   * @return string
+   *   The rendered form (embedded in any necessary html).
+   */
+  private function handleInvoiceStatusOverviewFormRequest() {
     /** @var \Siel\Acumulus\WooCommerce\Shop\InvoiceStatusOverviewForm $form */
     $form = $this->getForm('invoice');
 
@@ -230,10 +290,7 @@ class Acumulus {
     } else {
       $content = sprintf($this->t('unknown_source'), strtolower($parentType), $parentId);
     }
-    wp_send_json(array(
-      'id' => 'acumulus-invoice-status-overview',
-      'content' => $content,
-    ));
+    return $content;
   }
 
   /**
@@ -317,9 +374,26 @@ class Acumulus {
    * Either called via:
    * - Callback that renders the contents of the Acumulus invoice info box.
    * - Ajax request handler.
+   *
+   * @return string
+   *   The rendered form (embedded in any necessary html).
    */
   public function processInvoiceStatusOverviewForm() {
     return $this->processForm('invoice');
+  }
+
+  /**
+   * Processes and renders the Rate Acumulus plugin form.
+   *
+   * Either called via:
+   * - Render admin notice.
+   * - Ajax request handler.
+   *
+   * @return string
+   *   The rendered form (embedded in any necessary html).
+   */
+  public function processRatePluginForm() {
+    return $this->processForm('rate');
   }
 
   /**
@@ -430,7 +504,25 @@ class Acumulus {
           ->setProperty('fieldsetContentWrapperClass', 'data')
           ->setProperty('detailsWrapperClass', '')
           ->setProperty('labelWrapperClass', 'label')
-          ->setProperty('inputDescriptionWrapperClass', 'value');
+          ->setProperty('inputDescriptionWrapperClass', 'value')
+          ->setProperty('markupWrapperTag', '');
+        break;
+      case 'rate':
+        // Add some js.
+        wp_enqueue_script('acumulus.js', $pluginUrl . '/' . 'acumulus.js');
+        wp_enqueue_script('acumulus-ajax.js', $pluginUrl . '/' . 'acumulus-ajax.js');
+        wp_localize_script('acumulus-ajax.js', 'acumulus_data',
+          array('ajax_nonce' => wp_create_nonce('acumulus_ajax_action')));
+
+        // The invoice status overview is not rendered as other forms, therefore
+        // we change some properties of the form renderer.
+        $this->container->getFormRenderer()
+          ->setProperty('fieldsetContentWrapperTag', 'div')
+          ->setProperty('fieldsetContentWrapperClass', '')
+          ->setProperty('elementWrapperTag', '')
+          ->setProperty('inputDescriptionWrapperTag', '')
+          ->setProperty('renderEmptyLabel', false)
+          ->setProperty('markupWrapperTag', '');
         break;
     }
     // Add our own css.
@@ -472,6 +564,10 @@ class Acumulus {
         $output .= $this->showNotices($form);
         $output .= '</div>';
         break;
+      case 'rate':
+        $output .= $this->showNotices($form);
+        $output .= $this->renderNotice($formOutput, 'success', 'acumulus-rate-plugin', true);
+        break;
     }
     return $output;
   }
@@ -499,17 +595,36 @@ class Acumulus {
     return $output;
   }
 
-  /**
-   * Renders a notice.
-   *
-   * @param string $message
-   * @param string $type
-   *
-   * @return string
-   *   The rendered notice.
-   */
-  protected function renderNotice($message, $type) {
-      return sprintf('<div class="notice notice-%s is-dismissible"><p>%s</p></div>', $type, $message);
+    /**
+     * Renders a notice.
+     *
+     * @param string $message
+     * @param string $type
+     *   The type of notice, used to construct css classes to distinguish the
+     *   different types of messages. error, warning, info, etc.
+     * @param string $id
+     *   An optional id to use for the outer tag.
+     * @param bool $isHtml
+     *   Indicates whether $message is html or plain text. plain text will be
+     *   embedded in a <p>.
+     *
+     * @return string
+     *   The rendered notice.
+     */
+  protected function renderNotice($message, $type, $id = '', $isHtml = false) {
+      if (!empty($id)) {
+          $id = ' id="' . $id . '"';
+      }
+      $result = "<div$id class=\"notice notice-$type is-dismissible\">";
+      if (!$isHtml) {
+        $result .= '<p>';
+      }
+      $result .= $message;
+      if (!$isHtml) {
+        $result .= '</p>';
+      }
+      $result .= '</div>';
+      return $result;
   }
 
   /**

@@ -47,6 +47,9 @@ class AcumulusSetup {
         $result = $model->install();
         add_option('acumulus_version', $this->version);
       }
+
+      // In 1 week time we will ask the user to rate this plugin.
+      set_transient('acumulus_rate_plugin', time() + 7 * 24 * 60 * 60);
     }
     return $result;
   }

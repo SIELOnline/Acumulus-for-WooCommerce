@@ -4,18 +4,23 @@
     $(".acumulus-ajax").click(function() {
       var elt = $(this);
       elt.val("Please wait").prop("disabled", true);
-      // noinspection JSUnresolvedVariable
-      var data = {
+      let data = {
         action: "acumulus_ajax_action",
-        service: elt.data("acumulus-service"),
-        parent_type: elt.data("acumulus-parent_type"),
-        parent_source: elt.data("acumulus-parent_source"),
-        type: elt.data("acumulus-type"),
-        source: elt.data("acumulus-source"),
-        value:  elt.data("acumulus-value"),
         // Variable acumulus_data has been set via a wp_localize_script() call.
         security: acumulus_data.ajax_nonce
       };
+      const eltData = elt.data();
+      let key = '';
+      for (let eltKey in eltData) {
+        if (eltData.hasOwnProperty(eltKey)) {
+          if (eltKey.startsWith('acumulus')) {
+            // jQuery changes keys with - to camelCase: 'acumulus-service' =>
+            // 'acumulusService', we want to extract 'service' out of that.
+            key = eltKey.substr('acumulus'.length, 1).toLowerCase() + eltKey.substr('acumulus'.length + 1);
+            data[key] = eltData[eltKey];
+          }
+        }
+      }
 
       // Additional data from input elements (this works also for checkboxes and
       // radio buttons).

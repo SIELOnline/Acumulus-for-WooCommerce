@@ -176,3 +176,12 @@ label:not([for]) {
   float: left;
   width: 0.25em;
 }
+
+#acumulus-rate-plugin div:first-child {
+  float: left;
+}
+
+#acumulus-rate-plugin input {
+  margin: 0 2em 0.5em 0;
+}
+
