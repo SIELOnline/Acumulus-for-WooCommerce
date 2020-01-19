@@ -4,7 +4,7 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 5.8.1
+ * Version: 5.8.2
  * LICENCE: GPLv3
  * Requires at least: 4.2.3
  * Tested up to: 5.3
@@ -234,9 +234,11 @@ class Acumulus {
       switch ($_POST['form']) {
         case 'invoice':
           $content = $this->handleInvoiceStatusOverviewFormRequest();
+          $id = 'acumulus-invoice-status-overview';
           break;
         case 'rate':
           $content = $this->handleRatePluginFormRequest();
+            $id = 'acumulus-rate-plugin';
           break;
         default:
           $content = $this->renderNotice('Form parameter of ajax request unknown to Acumulus.', 'error');
@@ -245,7 +247,7 @@ class Acumulus {
       $content = $this->renderNotice('No form parameter in ajax request for Acumulus.', 'error');
     }
     wp_send_json(array(
-      'id' => 'acumulus-rate-plugin',
+      'id' => $id,
       'content' => $content,
     ));
   }

@@ -30,9 +30,13 @@
 
       // since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
       $.post(ajaxurl, data, function(response) {
-        $("#" + response.id).replaceWith(response.content);
-        addAcumulusEvents();
-        $(document.body).trigger("post-load");
+        if (response.id === 'wrap') {
+          $("#" + response.id + " h1:first-of-type").before(response.content);
+        } else {
+          $("#" + response.id).replaceWith(response.content);
+          addAcumulusEvents();
+          $(document.body).trigger("post-load");
+        }
       });
     });
   }
