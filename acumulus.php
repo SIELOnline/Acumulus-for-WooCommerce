@@ -4,12 +4,12 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 5.8.3-beta1
+ * Version: 5.8.3
  * LICENCE: GPLv3
  * Requires at least: 4.2.3
  * Tested up to: 5.3
  * WC requires at least: 2.4
- * WC tested up to: 3.9
+ * WC tested up to: 4.0
  * libAcumulus requires at least: 5.8
  */
 
@@ -647,7 +647,7 @@ class Acumulus {
    */
   public function pluginsLoaded() {
     $this->init();
-    // Get WC version to set the shop namespace.
+    // Get WC version to determine the action to listen to.
     /** @var \WooCommerce $woocommerce */
     global $woocommerce;
     if (version_compare($woocommerce->version, '3', '>=')) {
