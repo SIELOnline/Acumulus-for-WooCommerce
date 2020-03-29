@@ -4,13 +4,13 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 5.8.3
+ * Version: 5.9.0
  * LICENCE: GPLv3
  * Requires at least: 4.2.3
  * Tested up to: 5.3
  * WC requires at least: 2.4
  * WC tested up to: 4.0
- * libAcumulus requires at least: 5.8
+ * libAcumulus requires at least: 5.9
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -104,6 +104,27 @@ class Acumulus {
   }
 
   /**
+   * Returns the WooCommerce version.
+   *
+   * @return string
+   *   The WooCommerce version.
+   */
+  private function getWooCommerceVersion() {
+    global $woocommerce;
+    return $woocommerce->version;
+  }
+
+  /**
+   * Returns whether the WooCommerce version is 3 or higher.
+   *
+   * @return bool
+   *   Whether the WooCommerce version is 3 or higher
+   */
+  private function isWooCommerce3plus() {
+      return version_compare($this->getWooCommerceVersion(), '3', '>=');
+  }
+
+  /**
    * Helper method to translate strings.
    *
    * @param string $key
@@ -134,9 +155,7 @@ class Acumulus {
       $languageCode = substr($languageCode, 0, 2);
 
       // Get WC version to set the shop namespace.
-      /** @var \WooCommerce $woocommerce */
-      global $woocommerce;
-      if (version_compare($woocommerce->version, '3', '>=')) {
+      if ($this->isWooCommerce3plus()) {
         $shopNamespace = 'WooCommerce';
       } else {
         $shopNamespace = 'WooCommerce\WooCommerce2';
@@ -191,7 +210,7 @@ class Acumulus {
    */
   public function showAdminNotices() {
     $screen = get_current_screen();
-    // These notices should only show on the main dashboard. (@todo: and the acumulus screens)
+    // These notices should only show on the main dashboard. (@todo: and on acumulus screens)
     if ($screen && $screen->id === 'dashboard') {
       // Check the transients to see if we should display notices.
 
@@ -202,9 +221,7 @@ class Acumulus {
       }
 
       // Notice about ending support for WooCommerce 2.
-      /** @var \WooCommerce $woocommerce */
-      global $woocommerce;
-      if (version_compare($woocommerce->version, '3', '>=')) {
+      if ($this->isWooCommerce3plus()) {
         // WooCommerce has been upgraded to a version >= 3. We do no longer need
         // this transient.
         delete_transient('acumulus_stop_support_woocommerce2');
@@ -233,7 +250,7 @@ class Acumulus {
     if (isset($_POST['form'])) {
       switch ($_POST['form']) {
         case 'invoice':
-          $content = $this->handleInvoiceStatusOverviewFormRequest();
+          $content = $this->handleInvoiceStatusFormRequest();
           $id = 'acumulus-invoice-status-overview';
           break;
         case 'rate':
@@ -247,7 +264,7 @@ class Acumulus {
       $content = $this->renderNotice('No form parameter in ajax request for Acumulus.', 'error');
     }
     wp_send_json(array(
-      'id' => $id,
+      'id' => isset($id) ? $id : 'acumulus',
       'content' => $content,
     ));
   }
@@ -278,8 +295,8 @@ class Acumulus {
    * @return string
    *   The rendered form (embedded in any necessary html).
    */
-  private function handleInvoiceStatusOverviewFormRequest() {
-    /** @var \Siel\Acumulus\WooCommerce\Shop\InvoiceStatusOverviewForm $form */
+  private function handleInvoiceStatusFormRequest() {
+    /** @var \Siel\Acumulus\Shop\InvoiceStatusForm $form */
     $form = $this->getForm('invoice');
 
     $parentType = $_POST['parent_type'] === Source::Order ? Source::Order : Source::CreditNote;
@@ -288,7 +305,7 @@ class Acumulus {
     if ($shopOrderPost instanceof WP_Post && get_post_type($shopOrderPost) === 'shop_order') {
       $parentSource = $this->container->getSource($parentType, $parentId);
       $form->setSource($parentSource);
-      $content = $this->processInvoiceStatusOverviewForm();
+      $content = $this->processInvoiceStatusForm();
     } else {
       $content = sprintf($this->t('unknown_source'), strtolower($parentType), $parentId);
     }
@@ -303,14 +320,14 @@ class Acumulus {
   public function addShopOrderMetaBox(WP_Post $shopOrderPost) {
     $this->init();
     // Already load form translations and set Source.
-    /** @var \Siel\Acumulus\WooCommerce\Shop\InvoiceStatusOverviewForm $form */
+    /** @var \Siel\Acumulus\Shop\InvoiceStatusForm $form */
     $form = $this->getForm('invoice');
     $orderId = $shopOrderPost->ID;
     $source = $this->container->getSource(Source::Order, $orderId);
     $form->setSource($source);
     add_meta_box('acumulus_invoice_status_overview_info_box',
       $this->t('acumulus_invoice_title'),
-      array($this, 'outputInvoiceStatusOverviewInfoBox'),
+      array($this, 'outputInvoiceStatusInfoBox'),
       'shop_order',
       'side',
       'default');
@@ -322,8 +339,8 @@ class Acumulus {
    * param WP_Post $shopOrderPost
    *   The post for the current order.
    */
-  public function outputInvoiceStatusOverviewInfoBox(/*WP_Post $shopOrderPost*/) {
-    echo $this->processInvoiceStatusOverviewForm();
+  public function outputInvoiceStatusInfoBox(/*WP_Post $shopOrderPost*/) {
+    echo $this->processInvoiceStatusForm();
   }
 
   /**
@@ -380,7 +397,7 @@ class Acumulus {
    * @return string
    *   The rendered form (embedded in any necessary html).
    */
-  public function processInvoiceStatusOverviewForm() {
+  public function processInvoiceStatusForm() {
     return $this->processForm('invoice');
   }
 
@@ -648,9 +665,7 @@ class Acumulus {
   public function pluginsLoaded() {
     $this->init();
     // Get WC version to determine the action to listen to.
-    /** @var \WooCommerce $woocommerce */
-    global $woocommerce;
-    if (version_compare($woocommerce->version, '3', '>=')) {
+    if ($this->isWooCommerce3plus()) {
       $statuses = $this->container->getShopCapabilities()->getShopOrderStatuses();
       foreach ($statuses as $status => $label) {
         add_action('woocommerce_order_status_' . $status, array($this, 'woocommerceOrderStatusChanged'), 10, 1);
@@ -764,9 +779,7 @@ class Acumulus {
     if ($invoice !== null) {
       $this->init();
       // Get WC version: only for WC 3+ do we support the other plugins.
-      /** @var \WooCommerce $woocommerce */
-      global $woocommerce;
-      if (version_compare($woocommerce->version, '3', '>=')) {
+      if ($this->isWooCommerce3plus()) {
         /** @var \Siel\Acumulus\WooCommerce\Invoice\CreatorPluginSupport $pluginSupport */
         $pluginSupport = $this->container->getInstance('CreatorPluginSupport', 'Invoice');
         $invoice = $pluginSupport->acumulusInvoiceCreated($invoice, $invoiceSource, $localResult);
