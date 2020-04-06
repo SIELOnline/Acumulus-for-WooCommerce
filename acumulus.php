@@ -7,7 +7,7 @@
  * Version: 5.9.0
  * LICENCE: GPLv3
  * Requires at least: 4.2.3
- * Tested up to: 5.3
+ * Tested up to: 5.4
  * WC requires at least: 2.4
  * WC tested up to: 4.0
  * libAcumulus requires at least: 5.9
@@ -134,7 +134,7 @@ class Acumulus {
    *   The translation for the given key or the key itself if no translation
    *   could be found.
    */
-  protected function t($key) {
+  private function t($key) {
     return $this->container->getTranslator()->get($key);
   }
 
@@ -243,28 +243,25 @@ class Acumulus {
    */
   public function handleAjaxRequest()
   {
-    check_ajax_referer('acumulus_ajax_action', 'security');
+    check_ajax_referer('acumulus_ajax_action', 'acumulus_nonce');
 
     $this->init();
     // Check where the ajax call came from.
-    if (isset($_POST['form'])) {
-      switch ($_POST['form']) {
-        case 'invoice':
+    if (isset($_POST['area'])) {
+      switch ($_POST['area']) {
+        case 'acumulus-invoice-status-overview':
           $content = $this->handleInvoiceStatusFormRequest();
-          $id = 'acumulus-invoice-status-overview';
           break;
-        case 'rate':
+        case 'acumulus-rate-plugin':
           $content = $this->handleRatePluginFormRequest();
-            $id = 'acumulus-rate-plugin';
           break;
         default:
-          $content = $this->renderNotice('Form parameter of ajax request unknown to Acumulus.', 'error');
+          $content = $this->renderNotice('Area parameter of ajax request unknown to Acumulus.', 'error');
       }
     } else {
-      $content = $this->renderNotice('No form parameter in ajax request for Acumulus.', 'error');
+      $content = $this->renderNotice('No area parameter in ajax request for Acumulus.', 'error');
     }
     wp_send_json(array(
-      'id' => isset($id) ? $id : 'acumulus',
       'content' => $content,
     ));
   }
@@ -296,20 +293,7 @@ class Acumulus {
    *   The rendered form (embedded in any necessary html).
    */
   private function handleInvoiceStatusFormRequest() {
-    /** @var \Siel\Acumulus\Shop\InvoiceStatusForm $form */
-    $form = $this->getForm('invoice');
-
-    $parentType = $_POST['parent_type'] === Source::Order ? Source::Order : Source::CreditNote;
-    $parentId = (int) $_POST['parent_source'];
-    $shopOrderPost = get_post($parentId);
-    if ($shopOrderPost instanceof WP_Post && get_post_type($shopOrderPost) === 'shop_order') {
-      $parentSource = $this->container->getSource($parentType, $parentId);
-      $form->setSource($parentSource);
-      $content = $this->processInvoiceStatusForm();
-    } else {
-      $content = sprintf($this->t('unknown_source'), strtolower($parentType), $parentId);
-    }
-    return $content;
+      return $this->processInvoiceStatusForm();
   }
 
   /**
@@ -350,7 +334,7 @@ class Acumulus {
    *
    * @return \Siel\Acumulus\Helpers\Form
    */
-  protected function getForm($type) {
+  private function getForm($type) {
     $this->init();
     return $this->container->getForm($type);
   }
@@ -442,7 +426,7 @@ class Acumulus {
    * @return string
    *   the form html to output.
    */
-  protected function renderForm(Form $form) {
+  private function renderForm(Form $form) {
     $this->preRenderForm($form);
 
     // Render the form first before wrapping it in its final format, so that any
@@ -457,7 +441,7 @@ class Acumulus {
    * @param \Siel\Acumulus\Helpers\Form $form
    *   The form that is going to be processed.
    */
-  protected function preProcessForm(Form $form) {
+  private function preProcessForm(Form $form) {
     $type = $form->getType();
 
     // Check nonce.
@@ -482,7 +466,7 @@ class Acumulus {
    * @param \Siel\Acumulus\Helpers\Form $form
    *   The form that has been processed.
    */
-  protected function postProcessForm(Form $form) {
+  private function postProcessForm(Form $form) {
     $type = $form->getType();
 
     // Remove our actions that redefine "is paid".
@@ -498,7 +482,7 @@ class Acumulus {
    * @param \Siel\Acumulus\Helpers\Form $form
    *   The form that is going to be rendered.
    */
-  protected function preRenderForm(Form $form) {
+  private function preRenderForm(Form $form) {
     // Add our own js.
     $type = $form->getType();
     $pluginUrl = plugins_url('/acumulus');
@@ -514,7 +498,11 @@ class Acumulus {
         wp_enqueue_script('acumulus.js', $pluginUrl . '/' . 'acumulus.js');
         wp_enqueue_script('acumulus-ajax.js', $pluginUrl . '/' . 'acumulus-ajax.js');
         wp_localize_script('acumulus-ajax.js', 'acumulus_data',
-          array('ajax_nonce' => wp_create_nonce('acumulus_ajax_action')));
+          array(
+            'ajax_nonce' => wp_create_nonce('acumulus_ajax_action'),
+            'wait' => $this->t('wait'),
+          )
+        );
 
         // The invoice status overview is not rendered as other forms, therefore
         // we change some properties of the form renderer.
@@ -531,7 +519,11 @@ class Acumulus {
         wp_enqueue_script('acumulus.js', $pluginUrl . '/' . 'acumulus.js');
         wp_enqueue_script('acumulus-ajax.js', $pluginUrl . '/' . 'acumulus-ajax.js');
         wp_localize_script('acumulus-ajax.js', 'acumulus_data',
-          array('ajax_nonce' => wp_create_nonce('acumulus_ajax_action')));
+          array(
+            'ajax_nonce' => wp_create_nonce('acumulus_ajax_action'),
+            'wait' => $this->t('wait'),
+          )
+        );
 
         // The invoice status overview is not rendered as other forms, therefore
         // we change some properties of the form renderer.
@@ -559,7 +551,7 @@ class Acumulus {
    * @return string
    *   The rendered form with any wrapping around it.
    */
-  protected function postRenderForm(Form $form, $formOutput) {
+  private function postRenderForm(Form $form, $formOutput) {
     $output = '';
     $type = $form->getType();
     switch ($type) {
@@ -570,7 +562,8 @@ class Acumulus {
         $output .= '<div class="wrap">';
         $output .= $this->showNotices($form);
         $output .= '<form method="post" action="' . $url . '">';
-        $output .= "<input type=\"hidden\" name=\"action\" value=\"acumulus_{$type}\"/>";
+        // @todo: does this field the same as the form action. If so, is it needed?
+        $output .= "<input type='hidden' name='action' value='acumulus_{$type}'/>";
         $output .= wp_nonce_field("acumulus_{$type}_nonce", '_wpnonce', true, false);
         $output .= $formOutput;
         $output .= get_submit_button($type === 'batch' ? $this->t('button_send') : '');
@@ -578,14 +571,14 @@ class Acumulus {
         $output .= '</div>';
         break;
       case 'invoice':
-        $output .= '<div id="acumulus-invoice-status-overview" class="acumulus-invoice-status-overview">';
+        $output .= '<div id="acumulus-invoice-status-overview" class="acumulus-area">';
         $output .= $formOutput;
         $output .= $this->showNotices($form);
         $output .= '</div>';
         break;
       case 'rate':
         $output .= $this->showNotices($form);
-        $output .= $this->renderNotice($formOutput, 'success', 'acumulus-rate-plugin', true);
+        $output .= $this->renderNotice($formOutput, 'success', 'acumulus-rate-plugin', 'acumulus-area', true);
         break;
     }
     return $output;
@@ -623,6 +616,9 @@ class Acumulus {
      *   different types of messages. error, warning, info, etc.
      * @param string $id
      *   An optional id to use for the outer tag.
+     * @param string $class
+     *   Optional css classes to add (besides those that are already added to
+     *   get a (dismissible) notice in WP style.
      * @param bool $isHtml
      *   Indicates whether $message is html or plain text. plain text will be
      *   embedded in a <p>.
@@ -630,11 +626,15 @@ class Acumulus {
      * @return string
      *   The rendered notice.
      */
-  protected function renderNotice($message, $type, $id = '', $isHtml = false) {
+  private function renderNotice($message, $type, $id = '', $class = '', $isHtml = false) {
       if (!empty($id)) {
           $id = ' id="' . $id . '"';
       }
-      $result = "<div$id class=\"notice notice-$type is-dismissible\">";
+      if (!empty($class)) {
+          $class = " $class";
+      }
+
+      $result = "<div$id class='notice notice-$type is-dismissible$class'>";
       if (!$isHtml) {
         $result .= '<p>';
       }
@@ -652,7 +652,7 @@ class Acumulus {
    * @param string $capability
    *   The access right to check for.
    */
-  protected function checkCapability($capability)
+  private function checkCapability($capability)
   {
     if (!empty($capability) && !current_user_can($capability)) {
       wp_die(__('You do not have sufficient permissions to access this page.'));

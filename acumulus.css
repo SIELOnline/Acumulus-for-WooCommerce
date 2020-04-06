@@ -125,7 +125,7 @@ label:not([for]) {
   background-position: left center;
 }
 
-.acumulus-invoice-status-overview .data .notice {
+#acumulus-invoice-status-overview .data .notice {
   box-shadow: none;
   margin: 0;
   border-top-width: 0;
@@ -133,27 +133,31 @@ label:not([for]) {
   border-bottom-width:  0;
 }
 
-.acumulus-invoice-status-overview .data th.notice {
+#acumulus-invoice-status-overview .data th.notice {
   padding: 0;
 }
 
-.acumulus-invoice-status-overview .data .notice .notice {
+#acumulus-invoice-status-overview .data .notice .notice {
   border: none;
 }
 
-.acumulus-invoice-status-overview .data .notice-info {
+#acumulus-invoice-status-overview .data .notice-info {
   color: #00a0d2;
 }
 
-.acumulus-invoice-status-overview .data .notice-warning {
+#acumulus-invoice-status-overview .data .notice-warning {
   color: #ffb900;
 }
 
-.acumulus-invoice-status-overview .data .notice-error {
+#acumulus-invoice-status-overview .data label.notice-warning {
+  font-weight: 900;
+}
+
+#acumulus-invoice-status-overview .data .notice-error {
   color: #bc3232;
 }
 
-.acumulus-invoice-status-overview .data .notice.notice-success {
+#acumulus-invoice-status-overview .data .notice.notice-success {
   color: #46b450;
 }
 

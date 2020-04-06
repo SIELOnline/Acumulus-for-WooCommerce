@@ -1,47 +1,52 @@
 "use strict";
 (function($) {
-  function addAcumulusEvents() {
-    $(".acumulus-ajax").click(function() {
-      var elt = $(this);
-      elt.val("Please wait").prop("disabled", true);
-      let data = {
+  function addAcumulusAjaxHandling() {
+    $(".acumulus-ajax").click(function() { // jQuery
+      const clickedElt = this;
+      //noinspection JSUnresolvedVariable
+      clickedElt.value = acumulus_data.wait
+      clickedElt.disabled = true;
+
+      // Area is the element that is going to be replaced and serves as the
+      // parent in which we will search for form elements.
+      const area = $(this).parents(".acumulus-area").get(0); // jQuery
+
+      // The data we are going to send consists of:
+      // - action: WP ajax action, used to route the request on the server to
+      //   our plugin.
+      // - acumulus_nonce: WP ajax form nonce.
+      // - clicked: the name of the element that was clicked, the name should
+      //   make clear what action is requested on the server and, optionally, on
+      //   what object.
+      // - {values}: values of all form elements in area: input, select and
+      //   textarea, except buttons (inputs with type="button"). If multiple
+      //   buttons exist in the area, the naming will
+      //noinspection JSUnresolvedVariable
+      const data = {
         action: "acumulus_ajax_action",
         // Variable acumulus_data has been set via a wp_localize_script() call.
-        security: acumulus_data.ajax_nonce
+        acumulus_nonce: acumulus_data.ajax_nonce,
+        clicked: clickedElt.name,
+        area: area.id,
       };
-      const eltData = elt.data();
-      let key = '';
-      for (let eltKey in eltData) {
-        if (eltData.hasOwnProperty(eltKey)) {
-          if (eltKey.startsWith('acumulus')) {
-            // jQuery changes keys with - to camelCase: 'acumulus-service' =>
-            // 'acumulusService', we want to extract 'service' out of that.
-            key = eltKey.substr('acumulus'.length, 1).toLowerCase() + eltKey.substr('acumulus'.length + 1);
-            data[key] = eltData[eltKey];
-          }
-        }
+      const form = document.createElement('form');
+      form.appendChild(area.cloneNode(true));
+      const formData = new FormData(form);
+      for(let entry of formData.entries()) {
+        data[entry[0]] = entry[1];
       }
 
-      // Additional data from input elements (this works also for checkboxes and
-      // radio buttons).
-      jQuery.each($(".acumulus-ajax-data").serializeArray(), function(i, field) {
-        data[field.name] = field.value;
-      });
-
-      // since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
-      $.post(ajaxurl, data, function(response) {
-        if (response.id === 'wrap') {
-          $("#" + response.id + " h1:first-of-type").before(response.content);
-        } else {
-          $("#" + response.id).replaceWith(response.content);
-          addAcumulusEvents();
-          $(document.body).trigger("post-load");
-        }
+      // ajaxurl is defined in the admin header and points to admin-ajax.php.
+      $.post(ajaxurl, data, function(response) { // jQuery
+        area.insertAdjacentHTML('beforebegin', response.content);
+        area.parentNode.removeChild(area);
+        addAcumulusAjaxHandling();
+        $(document.body).trigger("post-load"); // jQuery
       });
     });
   }
 
-  $(document).ready(function() {
-    addAcumulusEvents();
+  $(document).ready(function() { // jQuery
+    addAcumulusAjaxHandling();
   });
 }(jQuery));
