@@ -23,7 +23,6 @@ use Siel\Acumulus\Invoice\Result;
 use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Shop\BatchFormTranslations;
 use Siel\Acumulus\Shop\ConfigFormTranslations;
-use Siel\Acumulus\Shop\ModuleTranslations;
 
 /**
  * Class Acumulus is the base plugin class.
@@ -161,7 +160,6 @@ class Acumulus {
         $shopNamespace = 'WooCommerce\WooCommerce2';
       }
       $this->container = new Container($shopNamespace, $languageCode);
-      $this->container->getTranslator()->add(new ModuleTranslations());
 
       // Check for any updates to perform.
       $this->upgrade();
@@ -309,7 +307,7 @@ class Acumulus {
     $orderId = $shopOrderPost->ID;
     $source = $this->container->getSource(Source::Order, $orderId);
     $form->setSource($source);
-    add_meta_box('acumulus_invoice_status_overview_info_box',
+    add_meta_box('acumulus-invoice-status-overview',
       $this->t('acumulus_invoice_title'),
       array($this, 'outputInvoiceStatusInfoBox'),
       'shop_order',
@@ -572,8 +570,8 @@ class Acumulus {
         break;
       case 'invoice':
         $output .= '<div id="acumulus-invoice-status-overview" class="acumulus-area">';
-        $output .= $formOutput;
         $output .= $this->showNotices($form);
+        $output .= $formOutput;
         $output .= '</div>';
         break;
       case 'rate':

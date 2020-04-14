@@ -78,36 +78,47 @@ label:not([for]) {
 /*
  * Acumulus invoice status overview "form".
  */
-#acumulus_invoice_status_overview_info_box .inside {
+#acumulus-invoice-status-overview .inside {
   padding-right: 0;
   line-height: 1.4em;
 }
 
 /* Refund overview */
-#acumulus_invoice_status_overview_info_box details {
+#acumulus-invoice-status-overview details {
   font-size: 13px;
   border: none;
 }
 
-#acumulus_invoice_status_overview_info_box .invoice-sent-concept {
+#acumulus-invoice-status-overview .invoice-sent-concept {
   float: left;
   width: 85%;
 }
 
-#acumulus_invoice_status_overview_info_box .invoice-sent-concept + .woocommerce-help-tip {
+#acumulus-invoice-status-overview .invoice-sent-concept + .woocommerce-help-tip {
   float: left;
 }
 
+#acumulus-invoice-status-overview input[type=button] {
+  background: #f1f1f1;
+  border-color: #016087;
+  color: #016087;
+  border-radius: 3px;
+  border-width: 1px;
+  padding: 0 10px;
+  line-height: 2.15384615;
+  min-height: 30px;
+  cursor: pointer;
+}
 
 /* Refund overview title */
-#acumulus_invoice_status_overview_info_box summary {
+#acumulus-invoice-status-overview summary {
   font-size: 14px;
   border-bottom: 1px solid #eee;
   padding-bottom: 8px;
   margin-bottom: 6px;
 }
 
-#acumulus_invoice_status_overview_info_box .label {
+#acumulus-invoice-status-overview .label {
   text-align: left;
   vertical-align: top;
   font-weight: normal;
@@ -115,7 +126,7 @@ label:not([for]) {
   padding-right: 1em;
 }
 
-#acumulus_invoice_status_overview_info_box .pdf {
+#acumulus-invoice-status-overview .pdf {
   display: inline-block;
   padding-left: 15px;
   margin: 0.1em 1.5em 0.2em 0;
@@ -131,14 +142,6 @@ label:not([for]) {
   border-top-width: 0;
   border-right-width: 0;
   border-bottom-width:  0;
-}
-
-#acumulus-invoice-status-overview .data th.notice {
-  padding: 0;
-}
-
-#acumulus-invoice-status-overview .data .notice .notice {
-  border: none;
 }
 
 #acumulus-invoice-status-overview .data .notice-info {
@@ -157,7 +160,7 @@ label:not([for]) {
   color: #bc3232;
 }
 
-#acumulus-invoice-status-overview .data .notice.notice-success {
+#acumulus-invoice-status-overview .data .notice-success {
   color: #46b450;
 }
 

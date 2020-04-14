@@ -18,9 +18,13 @@
       // - clicked: the name of the element that was clicked, the name should
       //   make clear what action is requested on the server and, optionally, on
       //   what object.
+      // - area: the id of the area from which this request originates, the
+      //   "acumulus form part" (though not necessarily a form node). This is
+      //   used for further routing the request to the correct Acumulus form as
+      //   'ajaxurl' is just 1 common url for all ajax requests and 'action' is
+      //   just one hook for all Acumulus ajax requests.
       // - {values}: values of all form elements in area: input, select and
-      //   textarea, except buttons (inputs with type="button"). If multiple
-      //   buttons exist in the area, the naming will
+      //   textarea, except buttons (inputs with type="button").
       //noinspection JSUnresolvedVariable
       const data = {
         action: "acumulus_ajax_action",
@@ -29,6 +33,9 @@
         clicked: clickedElt.name,
         area: area.id,
       };
+
+      // area is not necessarily a form node, in which case FormData will not
+      // work. So we clone area into a temporary form node.
       const form = document.createElement('form');
       form.appendChild(area.cloneNode(true));
       const formData = new FormData(form);
