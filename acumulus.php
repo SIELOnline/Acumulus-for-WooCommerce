@@ -124,6 +124,27 @@ class Acumulus {
   }
 
   /**
+   * Returns whether the current page being rendered is the dashboard.
+   *
+   * @return bool
+   */
+  private function isDashboard() {
+    $screen = get_current_screen();
+    return $screen && $screen->id === 'dashboard';
+  }
+
+  /**
+   * Returns whether the current page being rendered is one of our own pages.
+   *
+   * @return bool
+   */
+  private function isOwnPage() {
+    $screenIds = array('settings_page_acumulus_config', 'settings_page_acumulus_advanced', 'woocommerce_page_acumulus_batch');
+    $screen = get_current_screen();
+    return $screen && in_array($screen->id, $screenIds);
+  }
+
+  /**
    * Helper method to translate strings.
    *
    * @param string $key
@@ -207,14 +228,10 @@ class Acumulus {
    * transients.
    */
   public function showAdminNotices() {
-    $screen = get_current_screen();
-    // These notices should only show on the main dashboard. (@todo: and on acumulus screens)
-    if ($screen && $screen->id === 'dashboard') {
-      // Check the transients to see if we should display notices.
-
+    // These notices should only show on the main dashboard and our own screens.
+    if ($this->isDashboard() || $this->isOwnPage()) {
       // Notice about rating our plugin.
-      $value = get_transient('acumulus_rate_plugin');
-      if (empty($value) || ctype_digit($value) && time() >= $value) {
+      if (time() >= $this->container->getConfig()->getShowRatePluginMessage()) {
         echo $this->processRatePluginForm();
       }
 
@@ -248,10 +265,10 @@ class Acumulus {
     if (isset($_POST['area'])) {
       switch ($_POST['area']) {
         case 'acumulus-invoice-status-overview':
-          $content = $this->handleInvoiceStatusFormRequest();
+          $content = $this->processInvoiceStatusForm();
           break;
         case 'acumulus-rate-plugin':
-          $content = $this->handleRatePluginFormRequest();
+          $content = $this->processRatePluginForm();
           break;
         default:
           $content = $this->renderNotice('Area parameter of ajax request unknown to Acumulus.', 'error');
@@ -262,36 +279,6 @@ class Acumulus {
     wp_send_json(array(
       'content' => $content,
     ));
-  }
-
-  /**
-   * Handles an ajax request from the metabox on the view/edit order screen that
-   * shows the status in acumulus of the invoice for the current order.
-   *
-   * @return string
-   *   The rendered form (embedded in any necessary html).
-   */
-  private function handleRatePluginFormRequest() {
-    $content = $this->processRatePluginForm();
-    // Processing the form may result in that the form should be removed.
-    $value = get_transient('acumulus_rate_plugin');
-    if (ctype_digit($value) || time() < $value) {
-      $content = '';
-    } elseif ($value === 'done') {
-      $content = $this->renderNotice($this->t('done_thanks'), 'success');
-    }
-    return $content;
-  }
-
-  /**
-   * Handles an ajax request from the meta box on the view/edit order screen
-   * that shows the status in acumulus of the invoice for the current order.
-   *
-   * @return string
-   *   The rendered form (embedded in any necessary html).
-   */
-  private function handleInvoiceStatusFormRequest() {
-      return $this->processInvoiceStatusForm();
   }
 
   /**
@@ -426,7 +413,6 @@ class Acumulus {
    */
   private function renderForm(Form $form) {
     $this->preRenderForm($form);
-
     // Render the form first before wrapping it in its final format, so that any
     // messages added during rendering can be shown on top.
     $formOutput = $this->container->getFormRenderer()->render($form);
@@ -481,6 +467,10 @@ class Acumulus {
    *   The form that is going to be rendered.
    */
   private function preRenderForm(Form $form) {
+    // Get a new FormRenderer as the rate plugin message may be shown inside our
+    // pages and that one has different settings.
+    $this->container->getFormRenderer(true);
+
     // Add our own js.
     $type = $form->getType();
     $pluginUrl = plugins_url('/acumulus');
@@ -493,6 +483,7 @@ class Acumulus {
         break;
       case 'invoice':
         // Add some js.
+        wp_enqueue_script('jquery-ui-datepicker');
         wp_enqueue_script('acumulus.js', $pluginUrl . '/' . 'acumulus.js');
         wp_enqueue_script('acumulus-ajax.js', $pluginUrl . '/' . 'acumulus-ajax.js');
         wp_localize_script('acumulus-ajax.js', 'acumulus_data',
@@ -514,7 +505,6 @@ class Acumulus {
         break;
       case 'rate':
         // Add some js.
-        wp_enqueue_script('acumulus.js', $pluginUrl . '/' . 'acumulus.js');
         wp_enqueue_script('acumulus-ajax.js', $pluginUrl . '/' . 'acumulus-ajax.js');
         wp_localize_script('acumulus-ajax.js', 'acumulus_data',
           array(
@@ -575,8 +565,9 @@ class Acumulus {
         $output .= '</div>';
         break;
       case 'rate':
+        $extraClasses = 'acumulus-area' . ($this->isOwnPage() ? ' inline' : '');
         $output .= $this->showNotices($form);
-        $output .= $this->renderNotice($formOutput, 'success', 'acumulus-rate-plugin', 'acumulus-area', true);
+        $output .= $this->renderNotice($formOutput, 'success', 'acumulus-rate-plugin', $extraClasses, true);
         break;
     }
     return $output;

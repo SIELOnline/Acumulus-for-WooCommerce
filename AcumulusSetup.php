@@ -49,7 +49,7 @@ class AcumulusSetup {
       }
 
       // In 1 week time we will ask the user to rate this plugin.
-      set_transient('acumulus_rate_plugin', time() + 7 * 24 * 60 * 60);
+      $this->container->getConfig()->save(array('showRatePluginMessage' => time() + 7 * 24 * 60 * 60));
     }
     return $result;
   }
@@ -74,8 +74,12 @@ class AcumulusSetup {
       $result = $this->container->getConfig()->upgrade($dbVersion);
       if (version_compare($dbVersion, '4.7.2', '<')) {
         $result = $this->upgrade472() && $result;
-      } elseif (version_compare($dbVersion, '5.0.1', '<')) {
+      }
+      if (version_compare($dbVersion, '5.0.1', '<')) {
         $result = $this->upgrade501() && $result;
+      }
+      if (version_compare($dbVersion, '5.9.0', '<')) {
+        $result = $this->upgrade590() && $result;
       }
       update_option('acumulus_version', $this->version);
     }
@@ -189,8 +193,33 @@ class AcumulusSetup {
     return update_option('acumulus', $result);
   }
 
+  /**
+   * 5.0.1 upgrade.
+   *
+   * - Show message about explicitly removing old lib folder.
+   */
   protected function upgrade501() {
     add_action('admin_notices', array($this, 'removeLibrariesFolder'));
+    return true;
+  }
+
+  /**
+   * 5.9.0 upgrade.
+   *
+   * - Move transient 'acumulus_rate_plugin' to a config value.
+   */
+  protected function upgrade590() {
+    $value = get_transient('acumulus_rate_plugin');
+    if (empty($value)) {
+        // Apparently we are upgrading from a version that did not yet contain
+        // the rate plugin message: start asking immediately.
+        $value = time();
+    } elseif ($value === 'done') {
+        // 'done' is replaced by PHP_INT_MAX, meaning effectively: never again.
+        $value = PHP_INT_MAX;
+    }
+    $this->container->getConfig()->save(array('showRatePluginMessage' => $value));
+    delete_transient('acumulus_rate_plugin');
     return true;
   }
 

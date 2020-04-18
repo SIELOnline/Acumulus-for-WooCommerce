@@ -184,8 +184,16 @@ label:not([for]) {
   width: 0.25em;
 }
 
-#acumulus-rate-plugin div:first-child {
+/*
+ * Ensures that the rate plugin message gets aligned with the fieldsets.
+ */
+#acumulus-rate-plugin {
+  margin-left: 0;
+}
+
+#acumulus-rate-plugin > div > img {
   float: left;
+  margin-right: 12px;
 }
 
 #acumulus-rate-plugin input {
