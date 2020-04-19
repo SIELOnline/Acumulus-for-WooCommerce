@@ -288,18 +288,21 @@ class Acumulus {
    */
   public function addShopOrderMetaBox(WP_Post $shopOrderPost) {
     $this->init();
-    // Already load form translations and set Source.
-    /** @var \Siel\Acumulus\Shop\InvoiceStatusForm $form */
-    $form = $this->getForm('invoice');
-    $orderId = $shopOrderPost->ID;
-    $source = $this->container->getSource(Source::Order, $orderId);
-    $form->setSource($source);
-    add_meta_box('acumulus-invoice-status-overview',
-      $this->t('acumulus_invoice_title'),
-      array($this, 'outputInvoiceStatusInfoBox'),
-      'shop_order',
-      'side',
-      'default');
+    $invoiceStatusSettings = $this->container->getConfig()->getInvoiceStatusSettings();
+    if ($invoiceStatusSettings['showInvoiceStatus']) {
+      // Create form to already load form translations and to set the Source.
+      /** @var \Siel\Acumulus\Shop\InvoiceStatusForm $form */
+      $form = $this->getForm('invoice');
+      $orderId = $shopOrderPost->ID;
+      $source = $this->container->getSource(Source::Order, $orderId);
+      $form->setSource($source);
+      add_meta_box('acumulus-invoice-status-overview',
+        $this->t('acumulus_invoice_title'),
+        array($this, 'outputInvoiceStatusInfoBox'),
+        'shop_order',
+        'side',
+        'default');
+    }
   }
 
   /**
