@@ -4,12 +4,12 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 5.9.0
+ * Version: 5.10.0
  * LICENCE: GPLv3
  * Requires at least: 4.2.3
  * Tested up to: 5.4
  * WC requires at least: 2.4
- * WC tested up to: 4.0
+ * WC tested up to: 4.1
  * libAcumulus requires at least: 5.9
  */
 
@@ -19,10 +19,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use Siel\Acumulus\Helpers\Container;
 use Siel\Acumulus\Helpers\Form;
+use Siel\Acumulus\Helpers\Message;
+use Siel\Acumulus\Helpers\Severity;
 use Siel\Acumulus\Invoice\Result;
 use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Shop\BatchFormTranslations;
 use Siel\Acumulus\Shop\ConfigFormTranslations;
+use Siel\Acumulus\Shop\RegistrationFormTranslations as RegistrationFormTranslations;
 
 /**
  * Class Acumulus is the base plugin class.
@@ -77,6 +80,7 @@ class Acumulus {
     add_action('admin_post_acumulus_config', array($this, 'processConfigForm'));
     add_action('admin_post_acumulus_advanced', array($this, 'processAdvancedForm'));
     add_action('admin_post_acumulus_batch', array($this, 'processBatchForm'));
+    add_action('admin_post_acumulus_registration', array($this, 'processRegistrationForm'));
     // - WooCommerce order/refund events.
     add_action('plugins_loaded', array($this, 'pluginsLoaded'));
     add_action('woocommerce_order_refunded', array($this, 'woocommerceOrderRefunded'), 10, 2);
@@ -184,6 +188,8 @@ class Acumulus {
 
       // Check for any updates to perform.
       $this->upgrade();
+
+      $this->container->getLog()->setLogLevel(Severity::Log);
     }
   }
 
@@ -193,6 +199,14 @@ class Acumulus {
   public function addMenuLinks() {
     // Start with creating a config form, so we can use the translations.
     $this->init();
+    $this->container->getTranslator()->add(new RegistrationFormTranslations());
+    add_submenu_page('acumulus_config',
+      $this->t('registration_form_title'),
+      $this->t('registration_form_header'),
+      'manage_options',
+      'acumulus_registration',
+      array($this, 'processRegistrationForm')
+    );
     $this->container->getTranslator()->add(new ConfigFormTranslations());
     add_submenu_page('options-general.php',
       $this->t('config_form_title'),
@@ -325,6 +339,17 @@ class Acumulus {
   private function getForm($type) {
     $this->init();
     return $this->container->getForm($type);
+  }
+
+  /**
+   * Implements the admin_post_acumulus_registration action.
+   *
+   * Processes and renders the batch form.
+   */
+  public function processRegistrationForm() {
+      $this->checkCapability('manage_options');
+      $this->checkCapability('manage_woocommerce');
+      echo $this->processForm('registration');
   }
 
   /**
@@ -545,32 +570,34 @@ class Acumulus {
   private function postRenderForm(Form $form, $formOutput) {
     $output = '';
     $type = $form->getType();
+    $id = "acumulus-$type";
     switch ($type) {
+      case 'registration':
       case 'config':
       case 'advanced':
       case 'batch':
-        $url = admin_url("admin.php?page=acumulus_{$type}");
-        $output .= '<div class="wrap">';
+        case 'invoice':
+        $id = "acumulus-$type";
+        // Wrap should actually be based on a property isFullPage or something like that.
+        $wrap = $form->needsFormAndSubmitButton();
+        $url = admin_url("admin.php?page=acumulus_$type");
+        $output .= $wrap ? '<div class="wrap">' : '<div id="' . $id . '" class="acumulus-area">';
         $output .= $this->showNotices($form);
-        $output .= '<form method="post" action="' . $url . '">';
-        // @todo: does this field the same as the form action. If so, is it needed?
-        $output .= "<input type='hidden' name='action' value='acumulus_{$type}'/>";
-        $output .= wp_nonce_field("acumulus_{$type}_nonce", '_wpnonce', true, false);
+        if ($form->needsFormAndSubmitButton()) {
+            $output .= '<form id="' . $id . '" method="post" action="' . $url . '">';
+            $output .= wp_nonce_field("acumulus_{$type}_nonce", '_wpnonce', true, false);
+        }
         $output .= $formOutput;
-        $output .= get_submit_button($type === 'batch' ? $this->t('button_send') : '');
-        $output .= '</form>';
-        $output .= '</div>';
-        break;
-      case 'invoice':
-        $output .= '<div id="acumulus-invoice-status-overview" class="acumulus-area">';
-        $output .= $this->showNotices($form);
-        $output .= $formOutput;
+        if ($form->needsFormAndSubmitButton()) {
+            $output .= get_submit_button(!in_array($type, ['config', 'advanced']) ? $this->t("button_submit_$type") : '');
+            $output .= '</form>';
+        }
         $output .= '</div>';
         break;
       case 'rate':
         $extraClasses = 'acumulus-area' . ($this->isOwnPage() ? ' inline' : '');
         $output .= $this->showNotices($form);
-        $output .= $this->renderNotice($formOutput, 'success', 'acumulus-rate-plugin', $extraClasses, true);
+        $output .= $this->renderNotice($formOutput, 'success', $id, $extraClasses, true);
         break;
     }
     return $output;
@@ -586,39 +613,71 @@ class Acumulus {
   public function showNotices($form) {
     $output = '';
     if (isset($form)) {
-        foreach ($form->getErrorMessages() as $message) {
-            $output .= $this->renderNotice($message, 'error');
-        }
-        foreach ($form->getWarningMessages() as $message) {
-            $output .= $this->renderNotice($message, 'warning');
-        }
-        foreach ($form->getSuccessMessages() as $message) {
-            $output .= $this->renderNotice($message, 'success');
+        foreach ($form->getMessages() as $message) {
+            $output .= $this->renderNotice($message->format(Message::Format_PlainWithSeverity), $this->SeverityToNoticeClass($message->getSeverity()), $message->getField());
         }
     }
     return $output;
   }
 
-    /**
-     * Renders a notice.
-     *
-     * @param string $message
-     * @param string $type
-     *   The type of notice, used to construct css classes to distinguish the
-     *   different types of messages. error, warning, info, etc.
-     * @param string $id
-     *   An optional id to use for the outer tag.
-     * @param string $class
-     *   Optional css classes to add (besides those that are already added to
-     *   get a (dismissible) notice in WP style.
-     * @param bool $isHtml
-     *   Indicates whether $message is html or plain text. plain text will be
-     *   embedded in a <p>.
-     *
-     * @return string
-     *   The rendered notice.
-     */
+  /**
+   * Converts a Severity constant into a WP notice class.
+   *
+   * @param int $severity
+   *
+   * @return string
+   *
+   */
+  private function SeverityToNoticeClass($severity) {
+    switch ($severity) {
+      case Severity::Success:
+        $class = 'success';
+        break;
+      case Severity::Info:
+      case Severity::Notice:
+        $class = 'info';
+        break;
+      case Severity::Warning:
+        $class = 'warning';
+        break;
+      case Severity::Error:
+      case Severity::Exception:
+        $class = 'error';
+        break;
+      default:
+        $class = '';
+        break;
+    }
+    return $class;
+  }
+
+  /**
+   * Renders a notice.
+   *
+   * @param string $message
+   * @param string $type
+   *   The type of notice, used to construct css classes to distinguish the
+   *   different types of messages. error, warning, info, etc.
+   * @param string $id
+   *   An optional id to use for the outer tag.
+   * @param string $class
+   *   Optional css classes to add (besides those that are already added to
+   *   get a (dismissible) notice in WP style.
+   * @param bool $isHtml
+   *   Indicates whether $message is html or plain text. plain text will be
+   *   embedded in a <p>.
+   *
+   * @return string
+   *   The rendered notice.
+   */
   private function renderNotice($message, $type, $id = '', $class = '', $isHtml = false) {
+      $for = '';
+      if (func_num_args() === 3 && $id !== '') {
+          // Make it a clickable label.
+          $for = $id;
+          $id = '';
+      }
+
       if (!empty($id)) {
           $id = ' id="' . $id . '"';
       }
@@ -630,7 +689,13 @@ class Acumulus {
       if (!$isHtml) {
         $result .= '<p>';
       }
+      if ($for) {
+        $result .= "<label for='$for'>";
+      }
       $result .= $message;
+      if ($for) {
+          $result .= '</label>';
+      }
       if (!$isHtml) {
         $result .= '</p>';
       }
@@ -655,9 +720,11 @@ class Acumulus {
    * Defines an order status changed action for each status.
    */
   public function pluginsLoaded() {
-    $this->init();
-    // Get WC version to determine the action to listen to.
+    // Get WC version to determine the action(s) to listen to.
     if ($this->isWooCommerce3plus()) {
+      // @nth: can we prevent this init on each page load: cache or copy code of
+      //   getShopOrderStatuses()?
+      $this->init();
       $statuses = $this->container->getShopCapabilities()->getShopOrderStatuses();
       foreach ($statuses as $status => $label) {
         add_action('woocommerce_order_status_' . $status, array($this, 'woocommerceOrderStatusChanged'), 10, 1);

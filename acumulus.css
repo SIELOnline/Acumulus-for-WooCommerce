@@ -42,6 +42,10 @@ details .form-table {
   display: block;
 }
 
+textarea {
+  width: 100%;
+}
+
 .property-name strong{
   font-size: larger;
   font-weight: 700;
@@ -75,30 +79,63 @@ label:not([for]) {
   cursor: inherit;
 }
 
+input.error {
+  border-color: #bc3232;
+}
+
+input.warning {
+  border-color: #ffb900;
+}
+
+input.notice,
+input.info {
+  border-color: #00a0d2;
+}
+
+input.success {
+  border-color: #46b450;
+}
+
+#acumulus-registration .button:not([id]) {
+  padding: 1.5em 2.5em;
+  border: 1px solid #0a73bc;
+  border-radius: 5px;
+  font-weight: bolder;
+}
+
+#acumulus-registration h2 {
+  margin-top: 2em;
+}
+
+#acumulus-registration details {
+  width: 50em;
+  max-width: 99%;
+}
+
 /*
  * Acumulus invoice status overview "form".
  */
-#acumulus-invoice-status-overview .inside {
+#acumulus-invoice .inside {
   padding-right: 0;
   line-height: 1.4em;
 }
 
 /* Refund overview */
-#acumulus-invoice-status-overview details {
+#acumulus-invoice details {
   font-size: 13px;
   border: none;
 }
 
-#acumulus-invoice-status-overview .invoice-sent-concept {
+#acumulus-invoice .invoice-sent-concept {
   float: left;
   width: 85%;
 }
 
-#acumulus-invoice-status-overview .invoice-sent-concept + .woocommerce-help-tip {
+#acumulus-invoice .invoice-sent-concept + .woocommerce-help-tip {
   float: left;
 }
 
-#acumulus-invoice-status-overview input[type=button] {
+#acumulus-invoice input[type=button] {
   background: #f1f1f1;
   border-color: #016087;
   color: #016087;
@@ -111,14 +148,14 @@ label:not([for]) {
 }
 
 /* Refund overview title */
-#acumulus-invoice-status-overview summary {
+#acumulus-invoice summary {
   font-size: 14px;
   border-bottom: 1px solid #eee;
   padding-bottom: 8px;
   margin-bottom: 6px;
 }
 
-#acumulus-invoice-status-overview .label {
+#acumulus-invoice .label {
   text-align: left;
   vertical-align: top;
   font-weight: normal;
@@ -126,7 +163,7 @@ label:not([for]) {
   padding-right: 1em;
 }
 
-#acumulus-invoice-status-overview .pdf {
+#acumulus-invoice .pdf {
   display: inline-block;
   padding-left: 15px;
   margin: 0.1em 1.5em 0.2em 0;
@@ -136,7 +173,7 @@ label:not([for]) {
   background-position: left center;
 }
 
-#acumulus-invoice-status-overview .data .notice {
+#acumulus-invoice .data .notice {
   box-shadow: none;
   margin: 0;
   border-top-width: 0;
@@ -144,23 +181,23 @@ label:not([for]) {
   border-bottom-width:  0;
 }
 
-#acumulus-invoice-status-overview .data .notice-info {
+#acumulus-invoice .data .notice-info {
   color: #00a0d2;
 }
 
-#acumulus-invoice-status-overview .data .notice-warning {
+#acumulus-invoice .data .notice-warning {
   color: #ffb900;
 }
 
-#acumulus-invoice-status-overview .data label.notice-warning {
+#acumulus-invoice .data label.notice-warning {
   font-weight: 900;
 }
 
-#acumulus-invoice-status-overview .data .notice-error {
+#acumulus-invoice .data .notice-error {
   color: #bc3232;
 }
 
-#acumulus-invoice-status-overview .data .notice-success {
+#acumulus-invoice .data .notice-success {
   color: #46b450;
 }
 
@@ -187,16 +224,19 @@ label:not([for]) {
 /*
  * Ensures that the rate plugin message gets aligned with the fieldsets.
  */
-#acumulus-rate-plugin {
+#acumulus-rate {
   margin-left: 0;
 }
 
-#acumulus-rate-plugin > div > img {
+#acumulus-rate > div > img {
   float: left;
   margin-right: 12px;
 }
 
-#acumulus-rate-plugin input {
+#acumulus-rate input {
   margin: 0 2em 0.5em 0;
 }
 
+#acumulus-registration summary {
+  font-size: inherit
+}
