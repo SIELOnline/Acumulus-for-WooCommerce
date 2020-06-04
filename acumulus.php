@@ -4,13 +4,13 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 5.10.0
+ * Version: 6.0.0
  * LICENCE: GPLv3
  * Requires at least: 4.2.3
  * Tested up to: 5.4
- * WC requires at least: 2.4
+ * WC requires at least: 3.0
  * WC tested up to: 4.1
- * libAcumulus requires at least: 5.9
+ * libAcumulus requires at least: 6.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -113,6 +113,7 @@ class Acumulus {
    *   The WooCommerce version.
    */
   private function getWooCommerceVersion() {
+    /** @var \WooCommerce $woocommerce */
     global $woocommerce;
     return $woocommerce->version;
   }
@@ -278,10 +279,10 @@ class Acumulus {
     // Check where the ajax call came from.
     if (isset($_POST['area'])) {
       switch ($_POST['area']) {
-        case 'acumulus-invoice-status-overview':
+        case 'acumulus-invoice':
           $content = $this->processInvoiceStatusForm();
           break;
-        case 'acumulus-rate-plugin':
+        case 'acumulus-rate':
           $content = $this->processRatePluginForm();
           break;
         default:
@@ -583,12 +584,12 @@ class Acumulus {
         $url = admin_url("admin.php?page=acumulus_$type");
         $output .= $wrap ? '<div class="wrap">' : '<div id="' . $id . '" class="acumulus-area">';
         $output .= $this->showNotices($form);
-        if ($form->needsFormAndSubmitButton()) {
+        if ($wrap) {
             $output .= '<form id="' . $id . '" method="post" action="' . $url . '">';
             $output .= wp_nonce_field("acumulus_{$type}_nonce", '_wpnonce', true, false);
         }
         $output .= $formOutput;
-        if ($form->needsFormAndSubmitButton()) {
+        if ($wrap) {
             $output .= get_submit_button(!in_array($type, ['config', 'advanced']) ? $this->t("button_submit_$type") : '');
             $output .= '</form>';
         }

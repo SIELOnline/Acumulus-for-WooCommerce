@@ -96,7 +96,7 @@ input.success {
   border-color: #46b450;
 }
 
-#acumulus-registration .button:not([id]) {
+[id|="acumulus"] .button:not([id]) {
   padding: 1.5em 2.5em;
   border: 1px solid #0a73bc;
   border-radius: 5px;
@@ -110,6 +110,23 @@ input.success {
 #acumulus-registration details {
   width: 50em;
   max-width: 99%;
+}
+
+/* Acumulus information */
+.form-table h3 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+[id$="Information"] ul {
+  list-style-position: outside;
+  list-style-type: initial;
+  margin-bottom: 0;
+  margin-left: 1em;
+}
+
+[id$="Information"] ul li {
+  margin-left: 1em;
 }
 
 /*
