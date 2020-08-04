@@ -112,6 +112,10 @@ input.success {
   max-width: 99%;
 }
 
+#acumulus-registration summary {
+  font-size: inherit
+}
+
 /* Acumulus information */
 .form-table h3 {
   margin-top: 0;
@@ -252,8 +256,4 @@ input.success {
 
 #acumulus-rate input {
   margin: 0 2em 0.5em 0;
-}
-
-#acumulus-registration summary {
-  font-size: inherit
 }

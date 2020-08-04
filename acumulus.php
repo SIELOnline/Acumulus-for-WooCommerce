@@ -7,9 +7,9 @@
  * Version: 6.0.0
  * LICENCE: GPLv3
  * Requires at least: 4.2.3
- * Tested up to: 5.4
+ * Tested up to: 5.5
  * WC requires at least: 3.0
- * WC tested up to: 4.1
+ * WC tested up to: 4.3
  * libAcumulus requires at least: 6.0
  */
 
