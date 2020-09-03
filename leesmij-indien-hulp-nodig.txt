@@ -8,9 +8,14 @@ koppeling niet naar verwachting kunnen werken.
 
 Mocht u in deze situatie, of in een standaardomgeving problemen met de
 installatie of werking ondervinden dan kunt u:
-- een ticket openen door uw probleem te sturen naar hikashop@acumulus.nl,
-  magento@acumulus.nl, oencart@acumulus.nl, prestashop@acumulus.nl,
-  virtuemart@acumulus.nl, respectievelijk woocommerce@acumulus.nl.
+- een ticket openen door uw probleem te sturen naar het e-mailadres hieronder
+  waarin de naam van het door u gebruikte webshoppakket is verwerkt:
+  * hikashop@acumulus.nl
+  * magento@acumulus.nl
+  * opencart@acumulus.nl
+  * prestashop@acumulus.nl
+  * virtuemart@acumulus.nl
+  * woocommerce@acumulus.nl
 - een vraag stellen op het Acumulus forum op
   https://forum.acumulus.nl/index.php?board=17.0.
 

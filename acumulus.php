@@ -4,13 +4,13 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 6.0.0
+ * Version: 6.0.1
  * LICENCE: GPLv3
  * Requires at least: 4.2.3
  * Tested up to: 5.5
  * WC requires at least: 3.0
- * WC tested up to: 4.3
- * libAcumulus requires at least: 6.0
+ * WC tested up to: 4.3b
+ * libAcumulus requires at least: 6.0.1
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -25,7 +25,7 @@ use Siel\Acumulus\Invoice\Result;
 use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Shop\BatchFormTranslations;
 use Siel\Acumulus\Shop\ConfigFormTranslations;
-use Siel\Acumulus\Shop\RegistrationFormTranslations as RegistrationFormTranslations;
+use Siel\Acumulus\Shop\RegisterFormTranslations as RegisterFormTranslations;
 
 /**
  * Class Acumulus is the base plugin class.
@@ -80,7 +80,9 @@ class Acumulus {
     add_action('admin_post_acumulus_config', array($this, 'processConfigForm'));
     add_action('admin_post_acumulus_advanced', array($this, 'processAdvancedForm'));
     add_action('admin_post_acumulus_batch', array($this, 'processBatchForm'));
-    add_action('admin_post_acumulus_registration', array($this, 'processRegistrationForm'));
+    add_action('admin_post_acumulus_register', array($this,
+      'processRegisterForm'
+    ));
     // - WooCommerce order/refund events.
     add_action('plugins_loaded', array($this, 'pluginsLoaded'));
     add_action('woocommerce_order_refunded', array($this, 'woocommerceOrderRefunded'), 10, 2);
@@ -113,7 +115,6 @@ class Acumulus {
    *   The WooCommerce version.
    */
   private function getWooCommerceVersion() {
-    /** @var \WooCommerce $woocommerce */
     global $woocommerce;
     return $woocommerce->version;
   }
@@ -200,13 +201,13 @@ class Acumulus {
   public function addMenuLinks() {
     // Start with creating a config form, so we can use the translations.
     $this->init();
-    $this->container->getTranslator()->add(new RegistrationFormTranslations());
+    $this->container->getTranslator()->add(new RegisterFormTranslations());
     add_submenu_page('acumulus_config',
-      $this->t('registration_form_title'),
-      $this->t('registration_form_header'),
+      $this->t('register_form_title'),
+      $this->t('register_form_header'),
       'manage_options',
-      'acumulus_registration',
-      array($this, 'processRegistrationForm')
+      'acumulus_register',
+      array($this, 'processRegisterForm')
     );
     $this->container->getTranslator()->add(new ConfigFormTranslations());
     add_submenu_page('options-general.php',
@@ -343,14 +344,14 @@ class Acumulus {
   }
 
   /**
-   * Implements the admin_post_acumulus_registration action.
+   * Implements the admin_post_acumulus_register action.
    *
    * Processes and renders the batch form.
    */
-  public function processRegistrationForm() {
+  public function processRegisterForm() {
       $this->checkCapability('manage_options');
       $this->checkCapability('manage_woocommerce');
-      echo $this->processForm('registration');
+      echo $this->processForm('register');
   }
 
   /**
@@ -573,11 +574,11 @@ class Acumulus {
     $type = $form->getType();
     $id = "acumulus-$type";
     switch ($type) {
-      case 'registration':
+      case 'register':
       case 'config':
       case 'advanced':
       case 'batch':
-        case 'invoice':
+      case 'invoice':
         $id = "acumulus-$type";
         // Wrap should actually be based on a property isFullPage or something like that.
         $wrap = $form->needsFormAndSubmitButton();

@@ -103,16 +103,16 @@ input.success {
   font-weight: bolder;
 }
 
-#acumulus-registration h2 {
+#acumulus-register h2 {
   margin-top: 2em;
 }
 
-#acumulus-registration details {
+#acumulus-register details {
   width: 50em;
   max-width: 99%;
 }
 
-#acumulus-registration summary {
+#acumulus-register summary {
   font-size: inherit
 }
 
