@@ -20,7 +20,7 @@ The Acumulus plugin connects your Woocommerce store to the Dutch SIEL Acumulus o
 The Acumulus plugin:
 
 * Reacts to order status changes via actions.
-* Does have 3 admin screens: a settings, advanced settings, and a batch send screen.
+* Does have 4 admin screens: a register, settings, advanced settings, and a batch send screen.
 * Offers a meta box with an overview of the status of the invoice in Acumulus on the edit order screen.
 * Does not in any way interfere with the front-end UI.
 
@@ -36,10 +36,12 @@ If not, this plugin is useless and will not do anything.
 1. Install the plugin through the WordPress plugins screen directly or, alternatively, upload the plugin files to the `/wp-content/plugins/acumulus` directory manually.
 2. Activate the plugin through the 'Plugins' screen in WordPress.
 3. Go to the 'Settings - Acumulus' page (`wp-admin/options-general.php?page=acumulus_config`) to configure the plugin.
-4. Go to the 'Settings - Acumulus advanced settings' page (`wp-admin/options-general.php?page=acumulus_advanced`) to configure the plugin.
-5. If you have set so, invoices for new orders are now automatically sent to your administration at Acumulus.
-6. You can use the 'Woocommerce - Acumulus' page (`wp-admin/admin.php?page=acumulus_batch`) to send a batch of (older) orders to Acumulus.
-7. To cater for specific use cases, the plugin does define some filters and actions, so you can intercept and influence the actions it performs. See the separate [filters.txt](http://plugins.svn.wordpress.org/acumulus/trunk/filters.txt) for more information.
+4. If you do not have yet an account with Acumulus, you can apply for one by clicking on the register now button.
+5. Complete the (basic) configuration of the plugin.
+6. Go to the 'Settings - Acumulus advanced settings' page (`wp-admin/options-general.php?page=acumulus_advanced`) to configure the plugin.
+7. If you have set so, invoices for new orders are now automatically sent to your administration at Acumulus.
+8. You can use the 'Woocommerce - Acumulus' page (`wp-admin/admin.php?page=acumulus_batch`) to send a batch of (older) orders to Acumulus.
+9. To cater for specific use cases, the plugin does define some filters and actions, so you can intercept and influence the actions it performs. See the separate [filters.txt](http://plugins.svn.wordpress.org/acumulus/trunk/filters.txt) for more information.
 
 == Screenshots ==
 
