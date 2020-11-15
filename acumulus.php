@@ -4,13 +4,13 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 6.0.3
+ * Version: 6.0.4
  * LICENCE: GPLv3
  * Requires at least: 4.2.3
  * Tested up to: 5.5
  * WC requires at least: 3.0
- * WC tested up to: 4.3b
- * libAcumulus requires at least: 6.0.3
+ * WC tested up to: 4.7
+ * libAcumulus requires at least: 6.0.4
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -199,16 +199,8 @@ class Acumulus {
    * Adds our pages to the admin menu.
    */
   public function addMenuLinks() {
-    // Start with creating a config form, so we can use the translations.
     $this->init();
-    $this->container->getTranslator()->add(new RegisterFormTranslations());
-    add_submenu_page('acumulus_config',
-      $this->t('register_form_title'),
-      $this->t('register_form_header'),
-      'manage_options',
-      'acumulus_register',
-      array($this, 'processRegisterForm')
-    );
+    // Add the (advanced) config form translations.
     $this->container->getTranslator()->add(new ConfigFormTranslations());
     add_submenu_page('options-general.php',
       $this->t('config_form_title'),
@@ -224,8 +216,17 @@ class Acumulus {
       'acumulus_advanced',
       array($this, 'processAdvancedForm')
     );
+    // Add the register form translations.
+    $this->container->getTranslator()->add(new RegisterFormTranslations());
+    add_submenu_page('acumulus_config',
+      $this->t('register_form_title'),
+      $this->t('register_form_header'),
+     'manage_options',
+     'acumulus_register',
+      array($this, 'processRegisterForm')
+    );
 
-    // Start with creating the batch form, so we can use the translations.
+    // Add the batch form translations.
     $this->container->getTranslator()->add(new BatchFormTranslations());
     add_submenu_page('woocommerce',
       $this->t('batch_form_title'),
