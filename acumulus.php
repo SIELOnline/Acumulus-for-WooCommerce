@@ -509,13 +509,11 @@ class Acumulus {
       case 'batch':
         // Add some js.
         wp_enqueue_script('jquery-ui-datepicker');
-        wp_enqueue_script('acumulus.js', $pluginUrl . '/' . 'acumulus.js');
         wp_enqueue_style('jquery-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css');
         break;
       case 'invoice':
         // Add some js.
         wp_enqueue_script('jquery-ui-datepicker');
-        wp_enqueue_script('acumulus.js', $pluginUrl . '/' . 'acumulus.js');
         wp_enqueue_script('acumulus-ajax.js', $pluginUrl . '/' . 'acumulus-ajax.js');
         wp_localize_script('acumulus-ajax.js', 'acumulus_data',
           array(
