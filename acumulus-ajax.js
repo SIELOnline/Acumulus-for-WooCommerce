@@ -1,15 +1,18 @@
 "use strict";
 (function($) {
   function addAcumulusAjaxHandling() {
+    // @todo: Herstel dit als we de rate plugin message in een div in de notice
+    //  plaatsen en we dus niet meer het kruisje rechtboven meenemen.
+    //const buttonSelector = "button, input[type=button], input[type=submit]";
+    const buttonSelector = "input[type=button], input[type=submit]";
+    $(buttonSelector, ".acumulus-area").addClass("button button-primary"); // jQuery
     $(".acumulus-ajax").click(function() { // jQuery
-      const clickedElt = this;
-      //noinspection JSUnresolvedVariable
-      clickedElt.value = acumulus_data.wait
-      clickedElt.disabled = true;
-
       // Area is the element that is going to be replaced and serves as the
       // parent in which we will search for form elements.
-      const area = $(this).parents(".acumulus-area").get(0); // jQuery
+      const clickedElt = this;
+      const area = $(clickedElt).parents(".acumulus-area").get(0); // jQuery
+      $(buttonSelector, area).prop("disabled", true); // jQuery
+      clickedElt.value = area.getAttribute('data-acumulus-wait');
 
       // The data we are going to send consists of:
       // - action: WP ajax action, used to route the request on the server to
@@ -28,8 +31,7 @@
       //noinspection JSUnresolvedVariable
       const data = {
         action: "acumulus_ajax_action",
-        // Variable acumulus_data has been set via a wp_localize_script() call.
-        acumulus_nonce: acumulus_data.ajax_nonce,
+        acumulus_nonce: area.getAttribute('data-acumulus-nonce'),
         clicked: clickedElt.name,
         area: area.id,
       };
@@ -55,5 +57,6 @@
 
   $(document).ready(function() { // jQuery
     addAcumulusAjaxHandling();
+    $(".acumulus-auto-click").click(); // jQuery
   });
 }(jQuery));

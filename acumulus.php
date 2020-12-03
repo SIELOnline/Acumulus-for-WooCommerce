@@ -314,7 +314,7 @@ class Acumulus {
       $source = $this->container->getSource(Source::Order, $orderId);
       $form->setSource($source);
       add_meta_box('acumulus-invoice-status-overview',
-        $this->t('acumulus_invoice_title'),
+        $this->t('invoice_form_title'),
         array($this, 'outputInvoiceStatusInfoBox'),
         'shop_order',
         'side',
@@ -506,21 +506,10 @@ class Acumulus {
     $type = $form->getType();
     $pluginUrl = plugins_url('/acumulus');
     switch ($type) {
-      case 'batch':
-        // Add some js.
-        wp_enqueue_script('jquery-ui-datepicker');
-        wp_enqueue_style('jquery-style', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css');
-        break;
       case 'invoice':
         // Add some js.
         wp_enqueue_script('jquery-ui-datepicker');
         wp_enqueue_script('acumulus-ajax.js', $pluginUrl . '/' . 'acumulus-ajax.js');
-        wp_localize_script('acumulus-ajax.js', 'acumulus_data',
-          array(
-            'ajax_nonce' => wp_create_nonce('acumulus_ajax_action'),
-            'wait' => $this->t('wait'),
-          )
-        );
 
         // The invoice status overview is not rendered as other forms, therefore
         // we change some properties of the form renderer.
@@ -572,17 +561,17 @@ class Acumulus {
     $output = '';
     $type = $form->getType();
     $id = "acumulus-$type";
+    $wait = $this->t('wait');
+    $nonce = wp_create_nonce('acumulus_ajax_action');
+    $url = admin_url("admin.php?page=acumulus_$type");
     switch ($type) {
       case 'register':
       case 'config':
       case 'advanced':
       case 'batch':
       case 'invoice':
-        $id = "acumulus-$type";
-        // Wrap should actually be based on a property isFullPage or something like that.
-        $wrap = $form->needsFormAndSubmitButton();
-        $url = admin_url("admin.php?page=acumulus_$type");
-        $output .= $wrap ? '<div class="wrap">' : '<div id="' . $id . '" class="acumulus-area">';
+        $wrap = $form->isFullPage();
+        $output .= $wrap ? '<div class="wrap">' : "<div id='$id' class='acumulus-area' data-acumulus-wait='$wait' data-acumulus-nonce='$nonce'>";
         $output .= $this->showNotices($form);
         if ($wrap) {
             $output .= '<form id="' . $id . '" method="post" action="' . $url . '">';
@@ -596,6 +585,7 @@ class Acumulus {
         $output .= '</div>';
         break;
       case 'rate':
+          // @todo: Plaats de rate plugin message in een div in de notice (en gebruik code hierboven).
         $extraClasses = 'acumulus-area' . ($this->isOwnPage() ? ' inline' : '');
         $output .= $this->showNotices($form);
         $output .= $this->renderNotice($formOutput, 'success', $id, $extraClasses, true);

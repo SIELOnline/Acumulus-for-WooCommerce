@@ -156,18 +156,6 @@ input.success {
   float: left;
 }
 
-#acumulus-invoice input[type=button] {
-  background: #f1f1f1;
-  border-color: #016087;
-  color: #016087;
-  border-radius: 3px;
-  border-width: 1px;
-  padding: 0 10px;
-  line-height: 2.15384615;
-  min-height: 30px;
-  cursor: pointer;
-}
-
 /* Refund overview title */
 #acumulus-invoice summary {
   font-size: 14px;
