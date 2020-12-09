@@ -11,6 +11,12 @@ summary {
   cursor: pointer;
 }
 
+summary span {
+  display: inline-block;
+  font-size: smaller;
+  padding-left: 1em;
+}
+
 .form-table .fieldset-description-label {
   padding-bottom: 0;
   font-size: x-large;
