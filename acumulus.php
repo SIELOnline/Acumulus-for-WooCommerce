@@ -4,13 +4,13 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 6.0.4
+ * Version: 6.1.0
  * LICENCE: GPLv3
  * Requires at least: 4.2.3
- * Tested up to: 5.5
+ * Tested up to: 5.6
  * WC requires at least: 3.0
- * WC tested up to: 4.7
- * libAcumulus requires at least: 6.0.4
+ * WC tested up to: 4.8
+ * libAcumulus requires at least: 6.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
