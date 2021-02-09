@@ -4,13 +4,13 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 6.1.2
+ * Version: 6.2.0
  * LICENCE: GPLv3
  * Requires at least: 4.2.3
  * Tested up to: 5.6
- * WC requires at least: 3.0
- * WC tested up to: 4.8
- * libAcumulus requires at least: 6.1.2
+ * WC requires at least: 3.7
+ * WC tested up to: 4.9
+ * libAcumulus requires at least: 6.2.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -564,15 +564,15 @@ class Acumulus {
     $wait = $this->t('wait');
     $nonce = wp_create_nonce('acumulus_ajax_action');
     $url = admin_url("admin.php?page=acumulus_$type");
+    $wrap = $form->isFullPage();
+    $output .= $wrap ? '<div class="wrap">' : "<div id='$id' class='acumulus-area' data-acumulus-wait='$wait' data-acumulus-nonce='$nonce'>";
+    $output .= $this->showNotices($form);
     switch ($type) {
       case 'register':
       case 'config':
       case 'advanced':
       case 'batch':
       case 'invoice':
-        $wrap = $form->isFullPage();
-        $output .= $wrap ? '<div class="wrap">' : "<div id='$id' class='acumulus-area' data-acumulus-wait='$wait' data-acumulus-nonce='$nonce'>";
-        $output .= $this->showNotices($form);
         if ($wrap) {
             $output .= '<form id="' . $id . '" method="post" action="' . $url . '">';
             $output .= wp_nonce_field("acumulus_{$type}_nonce", '_wpnonce', true, false);
@@ -582,15 +582,13 @@ class Acumulus {
             $output .= get_submit_button(!in_array($type, ['config', 'advanced']) ? $this->t("button_submit_$type") : '');
             $output .= '</form>';
         }
-        $output .= '</div>';
         break;
       case 'rate':
-          // @todo: Plaats de rate plugin message in een div in de notice (en gebruik code hierboven).
-        $extraClasses = 'acumulus-area' . ($this->isOwnPage() ? ' inline' : '');
-        $output .= $this->showNotices($form);
+        $extraClasses = $this->isOwnPage() ? 'inline' : '';
         $output .= $this->renderNotice($formOutput, 'success', $id, $extraClasses, true);
         break;
     }
+    $output .= '</div>';
     return $output;
   }
 
