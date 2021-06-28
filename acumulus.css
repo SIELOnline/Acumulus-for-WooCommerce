@@ -139,6 +139,47 @@ input.success {
   margin-left: 1em;
 }
 
+.acumulus-progressbar, .acumulus-progress, .acumulus-threshold {
+  display: inline-block;
+}
+
+.acumulus-progressbar {
+  box-sizing: border-box;
+  position: relative;
+  width: 75%;
+  max-width: 20em;
+  height: 2em;
+  border-radius: 16px;
+  background-color: lightgrey;
+}
+
+.acumulus-progress {
+  box-sizing: border-box;
+  padding: 2px 0.5em 0;
+  border-radius: inherit;
+  height: 100%;
+}
+
+.acumulus-error {
+  background-color: #bc3232;
+  color: white;
+}
+
+.acumulus-warning {
+  background-color: #ffb900;
+}
+
+.acumulus-ok {
+  background-color: #46b450;
+}
+
+.acumulus-threshold {
+  box-sizing: border-box;
+  padding-left: 0.3em;
+  width: 24%;
+  height: 2em;
+}
+
 /*
  * Acumulus invoice status overview "form".
  */
