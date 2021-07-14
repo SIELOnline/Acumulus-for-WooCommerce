@@ -1,4 +1,5 @@
-<?php /** @noinspection PhpUnused */
+<?php
+/** @noinspection PhpUnused */
 /*
  * Plugin Name: Acumulus
  * Description: Acumulus plugin for WooCommerce
@@ -9,7 +10,7 @@
  * Requires at least: 4.2.3
  * Tested up to: 5.7
  * WC requires at least: 3.7
- * WC tested up to: 4.9
+ * WC tested up to: 5.5
  * libAcumulus requires at least: 6.3.0
  */
 
@@ -29,6 +30,8 @@ use Siel\Acumulus\Shop\RegisterFormTranslations as RegisterFormTranslations;
 
 /**
  * Class Acumulus is the base plugin class.
+ *
+ * @noinspection PhpIllegalPsrClassPathInspection
  */
 class Acumulus {
 
@@ -460,7 +463,7 @@ class Acumulus {
     $type = $form->getType();
 
     // Check nonce.
-    if (!is_ajax() && $form->isSubmitted()) {
+    if (!wp_doing_ajax() && $form->isSubmitted()) {
         check_admin_referer("acumulus_{$type}_nonce");
     }
 

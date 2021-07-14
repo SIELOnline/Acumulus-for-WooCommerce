@@ -2,7 +2,7 @@
 Contributors: SIEL Acumulus.
 Tags: Acumulus, administratie, boekhouding, boekhoudpakket, boekhoudsoftware
 Requires at least: 4.2.3
-Tested up to: 5.6
+Tested up to: 5.7
 Stable tag: trunk
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl.html

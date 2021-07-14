@@ -139,7 +139,9 @@ input.success {
   margin-left: 1em;
 }
 
-/* EU Commerce threshold progress bar */
+/*
+ * EU Commerce threshold progress bar
+ */
 .acumulus-progressbar, .acumulus-progress, .acumulus-threshold {
   display: inline-block;
 }
