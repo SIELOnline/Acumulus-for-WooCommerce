@@ -5,13 +5,13 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 6.3.0
+ * Version: 6.3.1
  * LICENCE: GPLv3
  * Requires at least: 4.2.3
- * Tested up to: 5.7
+ * Tested up to: 5.8
  * WC requires at least: 3.7
  * WC tested up to: 5.5
- * libAcumulus requires at least: 6.3.0
+ * libAcumulus requires at least: 6.3.1
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -26,7 +26,7 @@ use Siel\Acumulus\Invoice\Result;
 use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Shop\BatchFormTranslations;
 use Siel\Acumulus\Shop\ConfigFormTranslations;
-use Siel\Acumulus\Shop\RegisterFormTranslations as RegisterFormTranslations;
+use Siel\Acumulus\Shop\RegisterFormTranslations;
 
 /**
  * Class Acumulus is the base plugin class.
@@ -664,7 +664,7 @@ class Acumulus {
    */
   private function renderNotice($message, $type, $id = '', $class = '', $isHtml = false) {
       $for = '';
-      if (func_num_args() === 3 && $id !== '') {
+      if ($id !== '' && func_num_args()) {
           // Make it a clickable label.
           $for = $id;
           $id = '';
@@ -704,7 +704,8 @@ class Acumulus {
   private function checkCapability($capability)
   {
     if (!empty($capability) && !current_user_can($capability)) {
-      wp_die(__('You do not have sufficient permissions to access this page.'));
+        /** @noinspection ForgottenDebugOutputInspection */
+        wp_die(__('You do not have sufficient permissions to access this page.'));
     }
   }
 
