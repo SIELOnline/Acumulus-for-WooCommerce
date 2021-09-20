@@ -1,12 +1,12 @@
 "use strict";
 (function($) {
-  function addAcumulusAjaxHandling() {
+  function addAcumulusAjaxHandling(elt) {
     // @todo: Herstel dit als we de rate plugin message in een div in de notice
     //  plaatsen en we dus niet meer het kruisje rechtboven meenemen.
     //const buttonSelector = "button, input[type=button], input[type=submit]";
     const buttonSelector = "input[type=button], input[type=submit]";
     $(buttonSelector, ".acumulus-area").addClass("button button-primary"); // jQuery
-    $(".acumulus-ajax").click(function() { // jQuery
+    $(".acumulus-ajax", elt).click(function() { // jQuery
       // Area is the element that is going to be replaced and serves as the
       // parent in which we will search for form elements.
       const clickedElt = this;
@@ -48,15 +48,16 @@
       // ajaxurl is defined in the admin header and points to admin-ajax.php.
       $.post(ajaxurl, data, function(response) { // jQuery
         area.insertAdjacentHTML('beforebegin', response.content);
+        const newArea = area.previousElementSibling;
         area.parentNode.removeChild(area);
-        addAcumulusAjaxHandling();
+        addAcumulusAjaxHandling(newArea);
         $(document.body).trigger("post-load"); // jQuery
       });
     });
   }
 
   $(document).ready(function() { // jQuery
-    addAcumulusAjaxHandling();
+    addAcumulusAjaxHandling(document);
     $(".acumulus-auto-click").click(); // jQuery
   });
 }(jQuery));
