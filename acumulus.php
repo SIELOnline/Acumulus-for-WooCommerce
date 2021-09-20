@@ -5,13 +5,13 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 6.3.1
+ * Version: 6.3.2
  * LICENCE: GPLv3
  * Requires at least: 4.2.3
  * Tested up to: 5.8
  * WC requires at least: 3.7
  * WC tested up to: 5.5
- * libAcumulus requires at least: 6.3.1
+ * libAcumulus requires at least: 6.3.2
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -50,7 +50,7 @@ class Acumulus {
    * @return Acumulus
    */
   public static function create() {
-    if (self::$instance === NULL) {
+    if (self::$instance === null) {
       self::$instance = new self();
     }
     return self::$instance;
@@ -171,7 +171,7 @@ class Acumulus {
    * Loads our library and creates a configuration object.
    */
   public function init() {
-    if ($this->container === NULL) {
+    if ($this->container === null) {
       // Load autoloader
       require_once __DIR__ . '/lib/siel/acumulus/SielAcumulusAutoloader.php';
       SielAcumulusAutoloader::register();
