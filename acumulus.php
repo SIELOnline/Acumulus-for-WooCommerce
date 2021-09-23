@@ -5,7 +5,7 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 6.3.2
+ * Version: 6.3.3
  * LICENCE: GPLv3
  * Requires at least: 4.2.3
  * Tested up to: 5.8
@@ -596,9 +596,6 @@ class Acumulus
         $wait = $this->t('wait');
         $nonce = wp_create_nonce('acumulus_ajax_action');
         $url = admin_url("admin.php?page=acumulus_$type");
-        $wrap = $form->isFullPage();
-        //    $output .= $wrap ? '<div class="wrap">' : "<div id='$id' class='acumulus-area notice' data-acumulus-wait='$wait' data-acumulus-nonce='$nonce'>";
-        $output .= $wrap ? '<div class="wrap">' : "";
         $output .= $this->showNotices($form);
         switch ($type) {
             case 'register':
@@ -606,14 +603,19 @@ class Acumulus
             case 'advanced':
             case 'batch':
             case 'invoice':
+                $wrap = $form->isFullPage();
                 if ($wrap) {
-                    $output .= '<form id="' . $id . '" method="post" action="' . $url . '">';
+                    $output .= '<div class="wrap"><form id="' . $id . '" method="post" action="' . $url . '">';
                     $output .= wp_nonce_field("acumulus_{$type}_nonce", '_wpnonce', true, false);
+                } else {
+                    $output .= "<div id='$id' class='acumulus-area' data-acumulus-wait='$wait' data-acumulus-nonce='$nonce'>";
                 }
                 $output .= $formOutput;
                 if ($wrap) {
                     $output .= get_submit_button(!in_array($type, ['config', 'advanced']) ? $this->t("button_submit_$type") : '');
-                    $output .= '</form>';
+                    $output .= '</form></div>';
+                } else {
+                    $output .= '</div>';
                 }
                 break;
             case 'rate':
@@ -628,9 +630,7 @@ class Acumulus
                 $output .= $this->renderNotice($formOutput, 'success', $id, $extraAttributes, true);
                 break;
         }
-        $output .= $wrap ? '</div>' : "";
 
-        //    $output .= '</div>';
         return $output;
     }
 
@@ -722,7 +722,7 @@ class Acumulus
         }
 
         $class = '';
-        if ($extraAttributes['class'] !== '') {
+        if (!empty($extraAttributes['class'])) {
             $class = ' ' . $extraAttributes['class'];
             unset($extraAttributes['class']);
         }
