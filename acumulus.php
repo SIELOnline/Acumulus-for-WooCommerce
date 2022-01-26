@@ -5,13 +5,13 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 6.3.6
+ * Version: 6.3.8
  * LICENCE: GPLv3
  * Requires at least: 5.0
- * Tested up to: 5.8
+ * Tested up to: 5.9
  * WC requires at least: 5.0
- * WC tested up to: 6.0
- * libAcumulus requires at least: 6.3.6
+ * WC tested up to: 6.1
+ * libAcumulus requires at least: 6.3.8
  */
 
 if (!defined('ABSPATH')) {
@@ -90,7 +90,10 @@ class Acumulus
         add_action('admin_post_acumulus_batch', [$this, 'processBatchForm']);
         add_action('admin_post_acumulus_register', [$this, 'processRegisterForm']);
         // - WooCommerce order/refund events.
-        add_action('plugins_loaded', [$this, 'pluginsLoaded']);
+        add_action('woocommerce_new_order', [$this, 'woocommerceOrderChanged'], 10, 2);
+        // This could be an alternative for 'woocommerce_order_status_changed'
+        //add_action('woocommerce_update_order', [$this, 'woocommerceOrderStatusChanged'], 10, 2);
+        add_action('woocommerce_order_status_changed', [$this, 'woocommerceOrderChanged'], 10, 4);
         add_action('woocommerce_order_refunded', [$this, 'woocommerceOrderRefunded'], 10, 2);
         // - Our own invoice related events.
         add_filter('acumulus_invoice_created', [$this, 'acumulusInvoiceCreated'], 10, 3);
@@ -202,10 +205,13 @@ class Acumulus
             }
             $this->container = new Container($shopNamespace, $languageCode);
 
+            // Start with a high log level, will be corrected when the config is
+            // loaded.
+            $this->container->getLog()->setLogLevel(Severity::Log);
+
             // Check for any updates to perform.
             $this->upgrade();
 
-            $this->container->getLog()->setLogLevel(Severity::Log);
         }
     }
 
@@ -766,50 +772,39 @@ class Acumulus
     }
 
     /**
-     * Defines an order status changed action for each status.
-     */
-    public function pluginsLoaded()
-    {
-        // Get WC version to determine the action(s) to listen to.
-        if ($this->isWooCommerce3plus()) {
-            // @nth: can we prevent this init on each page load: cache or copy code of
-            //   getShopOrderStatuses()?
-            $this->init();
-            $statuses = $this->container->getShopCapabilities()->getShopOrderStatuses();
-            foreach ($statuses as $status => $label) {
-                add_action('woocommerce_order_status_' . $status, [$this, 'woocommerceOrderStatusChanged'], 10, 1);
-            }
-        } else {
-            add_action('woocommerce_order_status_changed', [$this, 'woocommerceOrderStatusChanged'], 10, 1);
-        }
-    }
-
-    /**
-     * Filter function for the 'woocommerce_order_status_changed' action,
+     * Action function for the 'woocommerce_new_order' and
+     * 'woocommerce_order_status_changed' actions.
      *
-     * This action gets called when the status of an order changes.
+     * This action gets called when an order is created resp. when the status of
+     * an order changes.
      *
      * @param int $orderId
-     * - For WC3+ on 'woocommerce_order_status_...'
-     *   param WC_Order $order
-     * - For WC3+ on 'woocommerce_order_status_changed'
-     *   param int $status
-     *   param int $newStatus
+     * - For 'woocommerce_new_order'
      *   param WC_Order $Order
-     * - For WC2 on 'woocommerce_order_status_changed'
+     * - For 'woocommerce_order_status_changed'
+     *   param int $fromStatus
+     *   param int $toStatus
+     *   param WC_Order $Order
+     * - For WC2 'woocommerce_order_status_changed'
      *   param int $status
      *   param int $newStatus
      */
-    public function woocommerceOrderStatusChanged($orderId)
+    public function woocommerceOrderChanged($orderId)
     {
         $this->init();
+
+        /** @var WC_Order|null $order */
+        $order = null;
+        if (func_num_args() === 2) {
+            $order = func_get_arg(1);
+        } elseif (func_num_args() === 4) {
+            $order = func_get_arg(3);
+        }
         // WC 3.x: we use WC_Order::is_paid() to determine the payment status,
         // but the default states as returned by wc_get_is_paid_statuses() are
         // not as we define "is paid".
         add_action('woocommerce_order_is_paid_statuses', [$this, 'woocommerceOrderIsPaidStatuses'], 10, 2);
-        // WC 2.x: we use WC_Order::needs_payment()
-        add_action('woocommerce_valid_order_statuses_for_payment', [$this, 'woocommerceValidOrderStatusesForPayment'], 10, 2);
-        $source = $this->container->getSource(Source::Order, $orderId);
+        $source = $this->container->getSource(Source::Order, $order instanceof WC_Order ? $order : $orderId);
         $this->container->getInvoiceManager()->sourceStatusChange($source);
         remove_action('woocommerce_order_is_paid_statuses', [$this, 'woocommerceOrderIsPaidStatuses']);
         remove_action('woocommerce_valid_order_statuses_for_payment', [$this, 'woocommerceValidOrderStatusesForPayment']);
