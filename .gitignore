@@ -11,3 +11,10 @@ svn/*
 
 # Resulting installer files
 /*.zip
+
+# Resources shared with other modules
+icon-pdf.svg
+siel-logo.svg
+leesmij-indien-hulp-nodig.txt
+license.txt
+licentie-nl.pdf
