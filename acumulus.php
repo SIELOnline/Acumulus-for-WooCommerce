@@ -1,23 +1,30 @@
 <?php
-/** @noinspection PhpUnused */
 /*
  * Plugin Name: Acumulus
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 6.4.0
+ * Version: 7.0.0
  * LICENCE: GPLv3
  * Requires at least: 5.0
  * Tested up to: 5.9
  * WC requires at least: 5.0
  * WC tested up to: 6.1
- * libAcumulus requires at least: 6.4.0
+ * libAcumulus requires at least: 7.0.0-alpha2
+ */
+/**
+ * @noinspection PhpMissingParamTypeInspection
+ * @noinspection PhpMissingReturnTypeInspection
+ * @noinspection PhpMissingFieldTypeInspection
+ * @noinspection PhpMissingVisibilityInspection
+ * @noinspection PhpUnused
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
+use Siel\Acumulus\Config\Config;
 use Siel\Acumulus\Helpers\Container;
 use Siel\Acumulus\Helpers\Form;
 use Siel\Acumulus\Helpers\Message;
@@ -55,7 +62,6 @@ class Acumulus
         if (self::$instance === null) {
             self::$instance = new self();
         }
-
         return self::$instance;
     }
 
@@ -68,7 +74,7 @@ class Acumulus
     }
 
     /**
-     * Setup the environment for the plugin
+     * Set up the environment for the plugin.
      */
     public function bootstrap()
     {
@@ -905,28 +911,32 @@ class Acumulus
     {
         $this->init();
         require_once 'AcumulusSetup.php';
-        $setup = new AcumulusSetup($this->container, $this->getVersionNumber());
+        $setup = new AcumulusSetup($this->container);
         $setup->activate();
     }
 
     /**
-     * Forwards the call to an instance of the setup class.
+     * Checks if we may have to upgrade.
      *
-     * To keep the lazy loading we do check the version number here.
+     * This will convert the separate 'acumulus_version' option, if still
+     * existing, to the 7.0+ 'configVersion' config value.
+     *
+     * WP specific updates (to metadata definitions) should also be placed here.
      *
      * @return bool
+     *   Success.
      */
     public function upgrade()
     {
-        $dbVersion = get_option('acumulus_version');
-        if (empty($dbVersion) || version_compare($dbVersion, $this->getVersionNumber(), '<')) {
-            require_once 'AcumulusSetup.php';
-            $setup = new AcumulusSetup($this->container, $this->getVersionNumber());
+        $result = true;
 
-            return $setup->upgrade($dbVersion);
+        $dbVersion = get_option('acumulus_version');
+        if (!empty($dbVersion) && empty($this->container->getConfig()->get(Config::configVersion))) {
+            $result = $this->container->getConfig()->save([Config::configVersion => $dbVersion]);
+            delete_option('acumulus_version');
         }
 
-        return true;
+        return $result;
     }
 
     /**
