@@ -42,7 +42,6 @@ use Siel\Acumulus\Shop\RegisterFormTranslations;
  */
 class Acumulus
 {
-
     /** @var Acumulus */
     private static $instance;
 
@@ -97,8 +96,6 @@ class Acumulus
         add_action('admin_post_acumulus_register', [$this, 'processRegisterForm']);
         // - WooCommerce order/refund events.
         add_action('woocommerce_new_order', [$this, 'woocommerceOrderChanged'], 10, 2);
-        // This could be an alternative for 'woocommerce_order_status_changed'
-        //add_action('woocommerce_update_order', [$this, 'woocommerceOrderStatusChanged'], 10, 2);
         add_action('woocommerce_order_status_changed', [$this, 'woocommerceOrderChanged'], 10, 4);
         add_action('woocommerce_order_refunded', [$this, 'woocommerceOrderRefunded'], 10, 2);
         // - Our own invoice related events.
@@ -122,30 +119,6 @@ class Acumulus
             $version = get_option('acumulus_version');
         }
         return $version;
-    }
-
-    /**
-     * Returns the WooCommerce version.
-     *
-     * @return string
-     *   The WooCommerce version.
-     */
-    private function getWooCommerceVersion()
-    {
-        global $woocommerce;
-
-        return $woocommerce->version;
-    }
-
-    /**
-     * Returns whether the WooCommerce version is 3 or higher.
-     *
-     * @return bool
-     *   Whether the WooCommerce version is 3 or higher
-     */
-    private function isWooCommerce3plus()
-    {
-        return version_compare($this->getWooCommerceVersion(), '3', '>=');
     }
 
     /**
@@ -203,12 +176,7 @@ class Acumulus
             }
             $languageCode = substr($languageCode, 0, 2);
 
-            // Get WC version to set the shop namespace.
-            if ($this->isWooCommerce3plus()) {
-                $shopNamespace = 'WooCommerce';
-            } else {
-                $shopNamespace = 'WooCommerce\WooCommerce2';
-            }
+            $shopNamespace = 'WooCommerce';
             $this->container = new Container($shopNamespace, $languageCode);
 
             // Start with a high log level, will be corrected when the config is
@@ -278,20 +246,6 @@ class Acumulus
             // Notice about rating our plugin.
             if (time() >= $this->container->getConfig()->getShowRatePluginMessage()) {
                 echo $this->processRatePluginForm();
-            }
-
-            // Notice about ending support for WooCommerce 2.
-            if ($this->isWooCommerce3plus()) {
-                // WooCommerce has been upgraded to a version >= 3. We do no longer need
-                // this transient.
-                delete_transient('acumulus_stop_support_woocommerce2');
-            } else {
-                $value = get_transient('acumulus_stop_support_woocommerce2');
-                if (empty($value) || time() >= $value + 2 * 24 * 60 * 60) {
-                    echo '<div class="notice notice-warning is-dismissible"><p>' . $this->t('wc2_end_support') . '</p></div>';
-                    // Store the next time we are displaying it: in 2 days.
-                    set_transient('acumulus_stop_support_woocommerce2', time() + 2 * 24 * 60 * 60);
-                }
             }
         }
     }
@@ -506,13 +460,11 @@ class Acumulus
         }
 
         // Form processing may depend on determining the payment status, but the
-        // default states as returned by wc_get_is_paid_statuses() are not how we
-        // would define "is paid".
+        // default states as returned by wc_get_is_paid_statuses() are not how
+        // we would define "is paid".
         if (in_array($type, ['batch', 'invoice'])) {
-            // WC 3.x: we use WC_Order::is_paid()
+            // We use WC_Order::is_paid()
             add_action('woocommerce_order_is_paid_statuses', [$this, 'woocommerceOrderIsPaidStatuses'], 10, 2);
-            // WC 2.x: we use WC_Order::needs_payment()
-            add_action('woocommerce_valid_order_statuses_for_payment', [$this, 'woocommerceValidOrderStatusesForPayment'], 10, 2);
         }
     }
 
@@ -529,7 +481,6 @@ class Acumulus
         // Remove our actions that redefine "is paid".
         if (in_array($type, ['batch', 'invoice'])) {
             remove_action('woocommerce_order_is_paid_statuses', [$this, 'woocommerceOrderIsPaidStatuses']);
-            remove_action('woocommerce_valid_order_statuses_for_payment', [$this, 'woocommerceValidOrderStatusesForPayment']);
         }
     }
 
@@ -786,14 +737,11 @@ class Acumulus
      *
      * @param int $orderId
      * - For 'woocommerce_new_order'
-     *   param WC_Order $Order
+     *   param 2: WC_Order $Order
      * - For 'woocommerce_order_status_changed'
-     *   param int $fromStatus
-     *   param int $toStatus
-     *   param WC_Order $Order
-     * - For WC2 'woocommerce_order_status_changed'
-     *   param int $status
-     *   param int $newStatus
+     *   param 2: int $fromStatus
+     *   param 3: int $toStatus
+     *   param 4: WC_Order $Order
      */
     public function woocommerceOrderChanged($orderId)
     {
@@ -806,14 +754,13 @@ class Acumulus
         } elseif (func_num_args() === 4) {
             $order = func_get_arg(3);
         }
-        // WC 3.x: we use WC_Order::is_paid() to determine the payment status,
-        // but the default states as returned by wc_get_is_paid_statuses() are
-        // not as we define "is paid".
+        // We use WC_Order::is_paid() to determine the payment status, but the
+        // default states as returned by wc_get_is_paid_statuses() are not as we
+        // define "is paid".
         add_action('woocommerce_order_is_paid_statuses', [$this, 'woocommerceOrderIsPaidStatuses'], 10, 2);
         $source = $this->container->getSource(Source::Order, $order instanceof WC_Order ? $order : $orderId);
         $this->container->getInvoiceManager()->sourceStatusChange($source);
         remove_action('woocommerce_order_is_paid_statuses', [$this, 'woocommerceOrderIsPaidStatuses']);
-        remove_action('woocommerce_valid_order_statuses_for_payment', [$this, 'woocommerceValidOrderStatusesForPayment']);
     }
 
     /**
@@ -859,7 +806,7 @@ class Acumulus
      * paid, whereas for Acumulus they are seen as due. (On-hold means waiting for
      * bank transfer to be booked on our account.)
      *
-     * We also add the the cancelled and failed statuses, although for a cancelled
+     * We also add the cancelled and failed statuses, although for a cancelled
      * no invoice should be created. But if 1 gets created, mark it as due.
      *
      * @param array $statuses
@@ -893,12 +840,9 @@ class Acumulus
     {
         if ($invoice !== null) {
             $this->init();
-            // Get WC version: only for WC 3+ do we support the other plugins.
-            if ($this->isWooCommerce3plus()) {
-                /** @var \Siel\Acumulus\WooCommerce\Invoice\CreatorPluginSupport $pluginSupport */
-                $pluginSupport = $this->container->getInstance('CreatorPluginSupport', 'Invoice');
-                $invoice = $pluginSupport->acumulusInvoiceCreated($invoice, $invoiceSource, $localResult);
-            }
+            /** @var \Siel\Acumulus\WooCommerce\Invoice\CreatorPluginSupport $pluginSupport */
+            $pluginSupport = $this->container->getInstance('CreatorPluginSupport', 'Invoice');
+            $invoice = $pluginSupport->acumulusInvoiceCreated($invoice, $invoiceSource, $localResult);
         }
 
         return $invoice;
