@@ -10,7 +10,7 @@
  * Tested up to: 5.9
  * WC requires at least: 5.0
  * WC tested up to: 6.1
- * libAcumulus requires at least: 7.0.0-alpha2
+ * libAcumulus requires at least: 7.0.0
  */
 /**
  * @noinspection PhpMissingParamTypeInspection
@@ -29,7 +29,7 @@ use Siel\Acumulus\Helpers\Container;
 use Siel\Acumulus\Helpers\Form;
 use Siel\Acumulus\Helpers\Message;
 use Siel\Acumulus\Helpers\Severity;
-use Siel\Acumulus\Invoice\Result;
+use Siel\Acumulus\Invoice\InvoiceAddResult;
 use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Shop\BatchFormTranslations;
 use Siel\Acumulus\Shop\ConfigFormTranslations;
@@ -44,9 +44,6 @@ class Acumulus
 {
     /** @var Acumulus */
     private static $instance;
-
-    /** @var string */
-    private $file;
 
     /** @var \Siel\Acumulus\Helpers\Container */
     private $container;
@@ -65,12 +62,9 @@ class Acumulus
     }
 
     /**
-     * Constructor.
+     * Private constructor: use Acumulus::create()
      */
-    private function __construct()
-    {
-        $this->file = str_replace('\\', '/', __FILE__);
-    }
+    private function __construct() {}
 
     /**
      * Set up the environment for the plugin.
@@ -78,9 +72,10 @@ class Acumulus
     public function bootstrap()
     {
         // Install/uninstall actions.
-        register_activation_hook($this->file, [$this, 'activate']);
-        register_deactivation_hook($this->file, [$this, 'deactivate']);
-        register_uninstall_hook($this->file, ['Acumulus', 'uninstall']);
+        $file = str_replace('\\', '/', __FILE__);
+        register_activation_hook($file, [$this, 'activate']);
+        register_deactivation_hook($file, [$this, 'deactivate']);
+        register_uninstall_hook($file, ['Acumulus', 'uninstall']);
 
         // Actions:
         // - Add our forms to the admin menu.
@@ -112,13 +107,7 @@ class Acumulus
      */
     public function getVersionNumber()
     {
-        if (function_exists('get_plugins')) {
-            $plugin_data = get_plugins();
-            $version = $plugin_data['acumulus/acumulus.php']['Version'];
-        } else {
-            $version = get_option('acumulus_version');
-        }
-        return $version;
+        return get_plugins()['acumulus/acumulus.php']['Version'];
     }
 
     /**
@@ -185,17 +174,18 @@ class Acumulus
 
             // Check for any updates to perform.
             $this->upgrade();
-
         }
     }
 
     /**
      * Adds our pages to the admin menu.
+     *
+     * We load the translations for each form to be able to show the translated
+     * form titles and headers.
      */
     public function addMenuLinks()
     {
         $this->init();
-        // Add the (advanced) config form translations.
         $this->container->getTranslator()->add(new ConfigFormTranslations());
         add_submenu_page('options-general.php',
             $this->t('config_form_title'),
@@ -211,8 +201,9 @@ class Acumulus
             'acumulus_advanced',
             [$this, 'processAdvancedForm']
         );
-        // Add the register form translations.
         $this->container->getTranslator()->add(new RegisterFormTranslations());
+        // Do not show the registration form in the menu by making it a child of
+        // our config form.
         add_submenu_page('acumulus_config',
             $this->t('register_form_title'),
             $this->t('register_form_header'),
@@ -220,8 +211,6 @@ class Acumulus
             'acumulus_register',
             [$this, 'processRegisterForm']
         );
-
-        // Add the batch form translations.
         $this->container->getTranslator()->add(new BatchFormTranslations());
         add_submenu_page('woocommerce',
             $this->t('batch_form_title'),
@@ -292,7 +281,7 @@ class Acumulus
             /** @var \Siel\Acumulus\Shop\InvoiceStatusForm $form */
             $form = $this->getForm('invoice');
             $orderId = $shopOrderPost->ID;
-            $source = $this->container->getSource(Source::Order, $orderId);
+            $source = $this->container->createSource(Source::Order, $orderId);
             $form->setSource($source);
             add_meta_box('acumulus-invoice-status-overview',
                 $this->t('invoice_form_title'),
@@ -758,7 +747,7 @@ class Acumulus
         // default states as returned by wc_get_is_paid_statuses() are not as we
         // define "is paid".
         add_action('woocommerce_order_is_paid_statuses', [$this, 'woocommerceOrderIsPaidStatuses'], 10, 2);
-        $source = $this->container->getSource(Source::Order, $order instanceof WC_Order ? $order : $orderId);
+        $source = $this->container->createSource(Source::Order, $order instanceof WC_Order ? $order : $orderId);
         $this->container->getInvoiceManager()->sourceStatusChange($source);
         remove_action('woocommerce_order_is_paid_statuses', [$this, 'woocommerceOrderIsPaidStatuses']);
     }
@@ -772,7 +761,7 @@ class Acumulus
     public function woocommerceOrderRefunded(/** @noinspection PhpUnusedParameterInspection */ $orderId, $refundId)
     {
         $this->init();
-        $source = $this->container->getSource(Source::CreditNote, $refundId);
+        $source = $this->container->createSource(Source::CreditNote, $refundId);
         $this->container->getInvoiceManager()->sourceStatusChange($source);
     }
 
@@ -829,14 +818,14 @@ class Acumulus
      * @param \Siel\Acumulus\Invoice\Source $invoiceSource
      *   Wrapper around the original WooCommerce order or refund for which the
      *   invoice has been created.
-     * @param \Siel\Acumulus\Invoice\Result $localResult
+     * @param \Siel\Acumulus\Invoice\InvoiceAddResult $localResult
      *   Any local error or warning messages that were created locally.
      *
      * @return array|null
      *   The changed invoice or null if you do not want the invoice to be sent
      *   to Acumulus.
      */
-    public function acumulusInvoiceCreated($invoice, Source $invoiceSource, Result $localResult)
+    public function acumulusInvoiceCreated($invoice, Source $invoiceSource, InvoiceAddResult $localResult)
     {
         if ($invoice !== null) {
             $this->init();
