@@ -12,6 +12,9 @@ svn/*
 # Resulting installer files
 /*.zip
 
+# Shared library
+lib/siel/*
+
 # Resources shared with other modules
 icon-pdf.svg
 siel-logo.svg
