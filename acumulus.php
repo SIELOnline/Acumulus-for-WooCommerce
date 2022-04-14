@@ -9,7 +9,7 @@
  * Requires at least: 5.0
  * Tested up to: 5.9
  * WC requires at least: 5.0
- * WC tested up to: 6.1
+ * WC tested up to: 6.4
  * libAcumulus requires at least: 7.0.0
  */
 /**
