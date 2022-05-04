@@ -4,13 +4,13 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 7.0.0
+ * Version: 7.2.0
  * LICENCE: GPLv3
  * Requires at least: 5.0
  * Tested up to: 5.9
  * WC requires at least: 5.0
  * WC tested up to: 6.4
- * libAcumulus requires at least: 7.0.0
+ * libAcumulus requires at least: 7.2.0
  */
 /**
  * @noinspection PhpMissingParamTypeInspection
@@ -227,6 +227,8 @@ class Acumulus
      * Due to the order of execution and the habit of redirecting at the end of
      * an action, just adding a notice may not work. Therefore, we work with
      * transients.
+     *
+     * @throws \Throwable
      */
     public function showAdminNotices()
     {
@@ -243,6 +245,8 @@ class Acumulus
      * Handles ajax requests for this plugin.
      *
      * The invoice status overview and the rate plugin form use ajax requests.
+     *
+     * @throws \Throwable
      */
     public function handleAjaxRequest()
     {
@@ -271,24 +275,40 @@ class Acumulus
      * Action handler for the add_meta_boxes_shop_order action.
      *
      * @param WP_Post $shopOrderPost
+     *
+     * @throws \Throwable
      */
     public function addShopOrderMetaBox(WP_Post $shopOrderPost)
     {
         $this->init();
         $invoiceStatusSettings = $this->container->getConfig()->getInvoiceStatusSettings();
         if ($invoiceStatusSettings['showInvoiceStatus']) {
-            // Create form to already load form translations and to set the Source.
+            // Create form to load form translations and set its Source.
             /** @var \Siel\Acumulus\Shop\InvoiceStatusForm $form */
-            $form = $this->getForm('invoice');
-            $orderId = $shopOrderPost->ID;
-            $source = $this->container->createSource(Source::Order, $orderId);
-            $form->setSource($source);
-            add_meta_box('acumulus-invoice-status-overview',
-                $this->t('invoice_form_title'),
-                [$this, 'outputInvoiceStatusInfoBox'],
-                'shop_order',
-                'side',
-                'default');
+            try {
+                $form = $this->getForm('invoice');
+                $orderId = $shopOrderPost->ID;
+                $source = $this->container->createSource(Source::Order, $orderId);
+                $form->setSource($source);
+                add_meta_box('acumulus-invoice-status-overview',
+                    $this->t('invoice_form_title'),
+                    [$this, 'outputInvoiceStatusInfoBox'],
+                    'shop_order',
+                    'side',
+                    'default');
+            } catch (Throwable $e) {
+                // We do not show the meta box, not even a message (though we
+                // could add an action for admin_notices), the mail should
+                // suffice to inform the user.
+                try {
+                    $crashReporter = $this->container->getCrashReporter();
+                    $crashReporter->logAndMail($e);
+                } catch (Throwable $inner) {
+                    // We do not know if we have informed the user per mail or
+                    // screen, so assume not, and rethrow the original exception.
+                    throw $e;
+                }
+            }
         }
     }
 
@@ -297,6 +317,8 @@ class Acumulus
      *
      * param WP_Post $shopOrderPost
      *   The post for the current order.
+     *
+     * @throws \Throwable
      */
     public function outputInvoiceStatusInfoBox(/*WP_Post $shopOrderPost*/)
     {
@@ -313,7 +335,6 @@ class Acumulus
     private function getForm($type)
     {
         $this->init();
-
         return $this->container->getForm($type);
     }
 
@@ -321,6 +342,8 @@ class Acumulus
      * Implements the admin_post_acumulus_register action.
      *
      * Processes and renders the batch form.
+     *
+     * @throws \Throwable
      */
     public function processRegisterForm()
     {
@@ -333,6 +356,8 @@ class Acumulus
      * Implements the admin_post_acumulus_config action.
      *
      * Processes and renders the basic config form.
+     *
+     * @throws \Throwable
      */
     public function processConfigForm()
     {
@@ -345,6 +370,8 @@ class Acumulus
      * Implements the admin_post_acumulus_advanced action.
      *
      * Processes and renders the advanced config form.
+     *
+     * @throws \Throwable
      */
     public function processAdvancedForm()
     {
@@ -357,6 +384,8 @@ class Acumulus
      * Implements the admin_post_acumulus_batch action.
      *
      * Processes and renders the batch form.
+     *
+     * @throws \Throwable
      */
     public function processBatchForm()
     {
@@ -373,6 +402,8 @@ class Acumulus
      *
      * @return string
      *   The rendered form (embedded in any necessary html).
+     *
+     * @throws \Throwable
      */
     public function processInvoiceStatusForm()
     {
@@ -388,6 +419,8 @@ class Acumulus
      *
      * @return string
      *   The rendered form (embedded in any necessary html).
+     *
+     * @throws \Throwable
      */
     public function processRatePluginForm()
     {
@@ -402,35 +435,38 @@ class Acumulus
      *
      * @return string
      *   the form html to output.
+     *
+     * @throws \Throwable
      */
     public function processForm($type)
     {
         $form = $this->getForm($type);
-        $this->preProcessForm($form);
-        $form->process();
-        $output = $this->renderForm($form);
+        try {
+            $this->preProcessForm($form);
+            $form->process();
+            $this->preRenderForm($form);
+            // Render the form first before wrapping it in its final format, so that any
+            // messages added during rendering can be shown on top.
+            $formOutput = $this->container->getFormRenderer()->render($form);
+        } catch (Throwable $e) {
+            // We handle our "own" exceptions and only when we can process them
+            // as we want, i.e. show it as an error at the beginning of the
+            // form. That's why we start catching only after we have a form, and
+            // stop catching just before postRenderForm().
+            try {
+                $crashReporter = $this->container->getCrashReporter();
+                $message = $crashReporter->logAndMail($e);
+                $form->createAndAddMessage($message, Severity::Exception);
+            } catch (Throwable $inner) {
+                // We do not know if we have informed the user per mail or
+                // screen, so assume not, and rethrow the original exception.
+                /** @noinspection PhpUnhandledExceptionInspection */
+                throw $e;
+            }
+        }
+        $output = $this->postRenderForm($form, $formOutput ?? '');
         $this->postProcessForm($form);
-
         return $output;
-    }
-
-    /**
-     * Renders the form of the given $type.
-     *
-     * @param $form
-     *   config, advanced, or batch.
-     *
-     * @return string
-     *   the form html to output.
-     */
-    private function renderForm(Form $form)
-    {
-        $this->preRenderForm($form);
-        // Render the form first before wrapping it in its final format, so that any
-        // messages added during rendering can be shown on top.
-        $formOutput = $this->container->getFormRenderer()->render($form);
-
-        return $this->postRenderForm($form, $formOutput);
     }
 
     /**
@@ -497,12 +533,12 @@ class Acumulus
                 // The invoice status overview is not rendered as other forms, therefore
                 // we change some properties of the form renderer.
                 $this->container->getFormRenderer()
-                                ->setProperty('usePopupDescription', true)
-                                ->setProperty('fieldsetContentWrapperClass', 'data')
-                                ->setProperty('detailsWrapperClass', '')
-                                ->setProperty('labelWrapperClass', 'label')
-                                ->setProperty('inputDescriptionWrapperClass', 'value')
-                                ->setProperty('markupWrapperTag', '');
+                    ->setProperty('usePopupDescription', true)
+                    ->setProperty('fieldsetContentWrapperClass', 'data')
+                    ->setProperty('detailsWrapperClass', '')
+                    ->setProperty('labelWrapperClass', 'label')
+                    ->setProperty('inputDescriptionWrapperClass', 'value')
+                    ->setProperty('markupWrapperTag', '');
                 break;
             case 'rate':
                 // Add some js.
@@ -517,12 +553,12 @@ class Acumulus
                 // The invoice status overview is not rendered as other forms, therefore
                 // we change some properties of the form renderer.
                 $this->container->getFormRenderer()
-                                ->setProperty('fieldsetContentWrapperTag', 'div')
-                                ->setProperty('fieldsetContentWrapperClass', '')
-                                ->setProperty('elementWrapperTag', '')
-                                ->setProperty('inputDescriptionWrapperTag', '')
-                                ->setProperty('renderEmptyLabel', false)
-                                ->setProperty('markupWrapperTag', '');
+                    ->setProperty('fieldsetContentWrapperTag', 'div')
+                    ->setProperty('fieldsetContentWrapperClass', '')
+                    ->setProperty('elementWrapperTag', '')
+                    ->setProperty('inputDescriptionWrapperTag', '')
+                    ->setProperty('renderEmptyLabel', false)
+                    ->setProperty('markupWrapperTag', '');
                 break;
         }
         // Add our own css.
@@ -598,8 +634,11 @@ class Acumulus
         $output = '';
         if (isset($form)) {
             foreach ($form->getMessages() as $message) {
-                $output .= $this->renderNotice($message->format(Message::Format_PlainWithSeverity), $this->SeverityToNoticeClass($message->getSeverity()),
-                    $message->getField());
+                $output .= $this->renderNotice(
+                    $message->format(Message::Format_PlainWithSeverity),
+                    $this->SeverityToNoticeClass($message->getSeverity()),
+                    $message->getField()
+                );
             }
         }
 
@@ -731,11 +770,11 @@ class Acumulus
      *   param 2: int $fromStatus
      *   param 3: int $toStatus
      *   param 4: WC_Order $Order
+     *
+     * @throws \Throwable
      */
     public function woocommerceOrderChanged($orderId)
     {
-        $this->init();
-
         /** @var WC_Order|null $order */
         $order = null;
         if (func_num_args() === 2) {
@@ -747,8 +786,7 @@ class Acumulus
         // default states as returned by wc_get_is_paid_statuses() are not as we
         // define "is paid".
         add_action('woocommerce_order_is_paid_statuses', [$this, 'woocommerceOrderIsPaidStatuses'], 10, 2);
-        $source = $this->container->createSource(Source::Order, $order instanceof WC_Order ? $order : $orderId);
-        $this->container->getInvoiceManager()->sourceStatusChange($source);
+        $this->sourceStatusChange(Source::Order, $order instanceof WC_Order ? $order : $orderId);
         remove_action('woocommerce_order_is_paid_statuses', [$this, 'woocommerceOrderIsPaidStatuses']);
     }
 
@@ -757,12 +795,43 @@ class Acumulus
      *
      * @param int $orderId
      * @param int $refundId
+     *
+     * @throws \Throwable
      */
     public function woocommerceOrderRefunded(/** @noinspection PhpUnusedParameterInspection */ $orderId, $refundId)
     {
+        $this->sourceStatusChange(Source::CreditNote, $refundId);
+    }
+
+    /**
+     * @param string $invoiceSourceType
+     *   The type of the invoice source to create.
+     * @param int|object|array $invoiceSourceOrId
+     *   The invoice source itself or its id to create a
+     *   \Siel\Acumulus\Invoice\Source instance for.
+     *
+     * @return void
+     *
+     * @throws \Throwable
+     */
+    private function sourceStatusChange(string $invoiceSourceType, $invoiceSourceOrId): void
+    {
         $this->init();
-        $source = $this->container->createSource(Source::CreditNote, $refundId);
-        $this->container->getInvoiceManager()->sourceStatusChange($source);
+        try {
+            $source = $this->container->createSource($invoiceSourceType, $invoiceSourceOrId);
+            $this->container->getInvoiceManager()->sourceStatusChange($source);
+        } catch (Throwable $e) {
+            try {
+                $crashReporter = $this->container->getCrashReporter();
+                // We do not know if we are on the admin side, so we should not
+                // try to display the message returned by logAndMail().
+                $crashReporter->logAndMail($e);
+            } catch (Throwable $inner) {
+                // We do not know if we have informed the user per mail or
+                // screen, so assume not, and rethrow the original exception.
+                throw $e;
+            }
+        }
     }
 
     /**
