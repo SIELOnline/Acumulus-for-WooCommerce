@@ -449,7 +449,7 @@ class Acumulus
             // messages added during rendering can be shown on top.
             $formOutput = $this->container->getFormRenderer()->render($form);
         } catch (Throwable $e) {
-            // We handle our "own" exceptions and only when we can process them
+            // We handle our "own" exceptions but only when we can process them
             // as we want, i.e. show it as an error at the beginning of the
             // form. That's why we start catching only after we have a form, and
             // stop catching just before postRenderForm().
@@ -460,7 +460,6 @@ class Acumulus
             } catch (Throwable $inner) {
                 // We do not know if we have informed the user per mail or
                 // screen, so assume not, and rethrow the original exception.
-                /** @noinspection PhpUnhandledExceptionInspection */
                 throw $e;
             }
         }
