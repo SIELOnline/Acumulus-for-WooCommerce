@@ -4,7 +4,7 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 7.2.0
+ * Version: 7.2.1
  * LICENCE: GPLv3
  * Requires at least: 5.0
  * Tested up to: 5.9
@@ -774,6 +774,7 @@ class Acumulus
      */
     public function woocommerceOrderChanged($orderId)
     {
+        $this->init();
         /** @var WC_Order|null $order */
         $order = null;
         if (func_num_args() === 2) {
@@ -799,6 +800,7 @@ class Acumulus
      */
     public function woocommerceOrderRefunded(/** @noinspection PhpUnusedParameterInspection */ $orderId, $refundId)
     {
+        $this->init();
         $this->sourceStatusChange(Source::CreditNote, $refundId);
     }
 
@@ -815,7 +817,6 @@ class Acumulus
      */
     private function sourceStatusChange(string $invoiceSourceType, $invoiceSourceOrId): void
     {
-        $this->init();
         try {
             $source = $this->container->createSource($invoiceSourceType, $invoiceSourceOrId);
             $this->container->getInvoiceManager()->sourceStatusChange($source);
