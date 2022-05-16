@@ -45,8 +45,8 @@ class Acumulus
     /** @var Acumulus */
     private static $instance;
 
-    /** @var \Siel\Acumulus\Helpers\Container */
-    private $container;
+    /** @var \Siel\Acumulus\Helpers\Container|null */
+    private $acumulusContainer = null;
 
     /**
      * Entry point for our plugin.
@@ -145,7 +145,7 @@ class Acumulus
      */
     private function t($key)
     {
-        return $this->container->getTranslator()->get($key);
+        return $this->getAcumulusContainer()->getTranslator()->get($key);
     }
 
     /**
@@ -153,7 +153,7 @@ class Acumulus
      */
     public function init()
     {
-        if ($this->container === null) {
+        if ($this->acumulusContainer === null) {
             // Load autoloader
             require_once __DIR__ . '/lib/siel/acumulus/SielAcumulusAutoloader.php';
             SielAcumulusAutoloader::register();
@@ -166,15 +166,20 @@ class Acumulus
             $languageCode = substr($languageCode, 0, 2);
 
             $shopNamespace = 'WooCommerce';
-            $this->container = new Container($shopNamespace, $languageCode);
+            $this->acumulusContainer = new Container($shopNamespace, $languageCode);
 
             // Start with a high log level, will be corrected when the config is
             // loaded.
-            $this->container->getLog()->setLogLevel(Severity::Log);
+            $this->getAcumulusContainer()->getLog()->setLogLevel(Severity::Log);
 
             // Check for any updates to perform.
             $this->upgrade();
         }
+    }
+
+    public function getAcumulusContainer(): Container
+    {
+        return $this->acumulusContainer;
     }
 
     /**
@@ -186,7 +191,7 @@ class Acumulus
     public function addMenuLinks()
     {
         $this->init();
-        $this->container->getTranslator()->add(new ConfigFormTranslations());
+        $this->getAcumulusContainer()->getTranslator()->add(new ConfigFormTranslations());
         add_submenu_page('options-general.php',
             $this->t('config_form_title'),
             $this->t('config_form_header'),
@@ -201,7 +206,7 @@ class Acumulus
             'acumulus_advanced',
             [$this, 'processAdvancedForm']
         );
-        $this->container->getTranslator()->add(new RegisterFormTranslations());
+        $this->getAcumulusContainer()->getTranslator()->add(new RegisterFormTranslations());
         // Do not show the registration form in the menu by making it a child of
         // our config form.
         add_submenu_page('acumulus_config',
@@ -211,7 +216,7 @@ class Acumulus
             'acumulus_register',
             [$this, 'processRegisterForm']
         );
-        $this->container->getTranslator()->add(new BatchFormTranslations());
+        $this->getAcumulusContainer()->getTranslator()->add(new BatchFormTranslations());
         add_submenu_page('woocommerce',
             $this->t('batch_form_title'),
             $this->t('batch_form_header'),
@@ -235,7 +240,7 @@ class Acumulus
         // These notices should only show on the main dashboard and our own screens.
         if ($this->isDashboard() || $this->isOwnPage()) {
             // Notice about rating our plugin.
-            if (time() >= $this->container->getConfig()->getShowRatePluginMessage()) {
+            if (time() >= $this->getAcumulusContainer()->getConfig()->getShowRatePluginMessage()) {
                 echo $this->processRatePluginForm();
             }
         }
@@ -281,14 +286,14 @@ class Acumulus
     public function addShopOrderMetaBox(WP_Post $shopOrderPost)
     {
         $this->init();
-        $invoiceStatusSettings = $this->container->getConfig()->getInvoiceStatusSettings();
+        $invoiceStatusSettings = $this->getAcumulusContainer()->getConfig()->getInvoiceStatusSettings();
         if ($invoiceStatusSettings['showInvoiceStatus']) {
             // Create form to load form translations and set its Source.
             /** @var \Siel\Acumulus\Shop\InvoiceStatusForm $form */
             try {
                 $form = $this->getForm('invoice');
                 $orderId = $shopOrderPost->ID;
-                $source = $this->container->createSource(Source::Order, $orderId);
+                $source = $this->getAcumulusContainer()->createSource(Source::Order, $orderId);
                 $form->setSource($source);
                 add_meta_box('acumulus-invoice-status-overview',
                     $this->t('invoice_form_title'),
@@ -301,7 +306,7 @@ class Acumulus
                 // could add an action for admin_notices), the mail should
                 // suffice to inform the user.
                 try {
-                    $crashReporter = $this->container->getCrashReporter();
+                    $crashReporter = $this->getAcumulusContainer()->getCrashReporter();
                     $crashReporter->logAndMail($e);
                 } catch (Throwable $inner) {
                     // We do not know if we have informed the user per mail or
@@ -335,7 +340,7 @@ class Acumulus
     private function getForm($type)
     {
         $this->init();
-        return $this->container->getForm($type);
+        return $this->getAcumulusContainer()->getForm($type);
     }
 
     /**
@@ -447,14 +452,14 @@ class Acumulus
             $this->preRenderForm($form);
             // Render the form first before wrapping it in its final format, so that any
             // messages added during rendering can be shown on top.
-            $formOutput = $this->container->getFormRenderer()->render($form);
+            $formOutput = $this->getAcumulusContainer()->getFormRenderer()->render($form);
         } catch (Throwable $e) {
             // We handle our "own" exceptions but only when we can process them
             // as we want, i.e. show it as an error at the beginning of the
             // form. That's why we start catching only after we have a form, and
             // stop catching just before postRenderForm().
             try {
-                $crashReporter = $this->container->getCrashReporter();
+                $crashReporter = $this->getAcumulusContainer()->getCrashReporter();
                 $message = $crashReporter->logAndMail($e);
                 $form->createAndAddMessage($message, Severity::Exception);
             } catch (Throwable $inner) {
@@ -518,7 +523,7 @@ class Acumulus
     {
         // Get a new FormRenderer as the rate plugin message may be shown inside our
         // pages and that one has different settings.
-        $this->container->getFormRenderer(true);
+        $this->getAcumulusContainer()->getFormRenderer(true);
 
         // Add our own js.
         $type = $form->getType();
@@ -531,7 +536,7 @@ class Acumulus
 
                 // The invoice status overview is not rendered as other forms, therefore
                 // we change some properties of the form renderer.
-                $this->container->getFormRenderer()
+                $this->getAcumulusContainer()->getFormRenderer()
                     ->setProperty('usePopupDescription', true)
                     ->setProperty('fieldsetContentWrapperClass', 'data')
                     ->setProperty('detailsWrapperClass', '')
@@ -551,7 +556,7 @@ class Acumulus
 
                 // The invoice status overview is not rendered as other forms, therefore
                 // we change some properties of the form renderer.
-                $this->container->getFormRenderer()
+                $this->getAcumulusContainer()->getFormRenderer()
                     ->setProperty('fieldsetContentWrapperTag', 'div')
                     ->setProperty('fieldsetContentWrapperClass', '')
                     ->setProperty('elementWrapperTag', '')
@@ -818,11 +823,11 @@ class Acumulus
     private function sourceStatusChange(string $invoiceSourceType, $invoiceSourceOrId): void
     {
         try {
-            $source = $this->container->createSource($invoiceSourceType, $invoiceSourceOrId);
-            $this->container->getInvoiceManager()->sourceStatusChange($source);
+            $source = $this->getAcumulusContainer()->createSource($invoiceSourceType, $invoiceSourceOrId);
+            $this->getAcumulusContainer()->getInvoiceManager()->sourceStatusChange($source);
         } catch (Throwable $e) {
             try {
-                $crashReporter = $this->container->getCrashReporter();
+                $crashReporter = $this->getAcumulusContainer()->getCrashReporter();
                 // We do not know if we are on the admin side, so we should not
                 // try to display the message returned by logAndMail().
                 $crashReporter->logAndMail($e);
@@ -899,7 +904,7 @@ class Acumulus
         if ($invoice !== null) {
             $this->init();
             /** @var \Siel\Acumulus\WooCommerce\Invoice\CreatorPluginSupport $pluginSupport */
-            $pluginSupport = $this->container->getInstance('CreatorPluginSupport', 'Invoice');
+            $pluginSupport = $this->getAcumulusContainer()->getInstance('CreatorPluginSupport', 'Invoice');
             $invoice = $pluginSupport->acumulusInvoiceCreated($invoice, $invoiceSource, $localResult);
         }
 
@@ -913,7 +918,7 @@ class Acumulus
     {
         $this->init();
         require_once 'AcumulusSetup.php';
-        $setup = new AcumulusSetup($this->container);
+        $setup = new AcumulusSetup($this->getAcumulusContainer());
         $setup->activate();
     }
 
@@ -933,8 +938,8 @@ class Acumulus
         $result = true;
 
         $dbVersion = get_option('acumulus_version');
-        if (!empty($dbVersion) && empty($this->container->getConfig()->get(Config::configVersion))) {
-            $result = $this->container->getConfig()->save([Config::configVersion => $dbVersion]);
+        if (!empty($dbVersion) && empty($this->getAcumulusContainer()->getConfig()->get(Config::configVersion))) {
+            $result = $this->getAcumulusContainer()->getConfig()->save([Config::configVersion => $dbVersion]);
             delete_option('acumulus_version');
         }
 
@@ -950,7 +955,7 @@ class Acumulus
     {
         $this->init();
         require_once 'AcumulusSetup.php';
-        $setup = new AcumulusSetup($this->container);
+        $setup = new AcumulusSetup($this->getAcumulusContainer());
 
         return $setup->deactivate();
     }
@@ -965,7 +970,7 @@ class Acumulus
         $acumulus = static::create();
         $acumulus->init();
         require_once 'AcumulusSetup.php';
-        $setup = new AcumulusSetup($acumulus->container);
+        $setup = new AcumulusSetup($acumulus->getAcumulusContainer());
 
         return $setup->uninstall();
     }
