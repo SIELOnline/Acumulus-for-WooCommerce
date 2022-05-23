@@ -121,11 +121,12 @@ class AcumulusSetup
             $this->messages[] = "The Acumulus component requires WooCommerce to be installed and enabled.";
         }
 
-        if (count($this->messages) !== 0) {
+        if (count($this->messages) > 0) {
             add_action('admin_notices', [$this, 'adminNotice']);
         }
 
-        return count($this->messages) === 0;
+        reset($this->messages);
+        return count($this->messages) === 0 || (count($this->messages) === 1 && strpos(key($this->messages), 'warning') !== false);
     }
 
     /**
