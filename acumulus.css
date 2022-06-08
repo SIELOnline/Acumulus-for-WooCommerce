@@ -1,3 +1,27 @@
+.acumulus-blue {
+  color: #01a6d4;
+}
+
+.acumulus-light-green {
+  color: #f0fff0;
+}
+
+.button-pro-support {
+  display: inline-block;
+  transition: background-color 0.5s ease;
+  background-color: #f0fff0;
+  border-color: #000000;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 12px;
+  padding: 6px 20px;
+  margin-top: 5px;
+}
+
+.button-pro-support:hover {
+  background: #01a6d4;
+}
+
 .required {
   color: red;
   margin-left: 0.5em;
@@ -128,9 +152,15 @@ input.success {
   margin-bottom: 0;
 }
 
+[id$="Header"] {
+  margin-top: 0;
+  margin-bottom: -2em;
+}
+
 [id$="Information"] ul {
   list-style-position: outside;
   list-style-type: initial;
+  margin-top: 0;
   margin-bottom: 0;
   margin-left: 1em;
 }

@@ -31,6 +31,7 @@ use Siel\Acumulus\Helpers\Message;
 use Siel\Acumulus\Helpers\Severity;
 use Siel\Acumulus\Invoice\InvoiceAddResult;
 use Siel\Acumulus\Invoice\Source;
+use Siel\Acumulus\Shop\ActivateSupportFormTranslations;
 use Siel\Acumulus\Shop\BatchFormTranslations;
 use Siel\Acumulus\Shop\ConfigFormTranslations;
 use Siel\Acumulus\Shop\RegisterFormTranslations;
@@ -205,6 +206,14 @@ class Acumulus
             'manage_options',
             'acumulus_advanced',
             [$this, 'processAdvancedForm']
+        );
+        $this->getAcumulusContainer()->getTranslator()->add(new ActivateSupportFormTranslations());
+        add_submenu_page('options-general.php',
+            $this->t('activate_form_title'),
+            $this->t('activate_form_header'),
+            'manage_options',
+            'acumulus_activate',
+            [$this, 'processActivateForm']
         );
         $this->getAcumulusContainer()->getTranslator()->add(new RegisterFormTranslations());
         // Do not show the registration form in the menu by making it a child of
@@ -383,6 +392,20 @@ class Acumulus
         $this->checkCapability('manage_options');
         $this->checkCapability('manage_woocommerce');
         echo $this->processForm('advanced');
+    }
+
+    /**
+     * Implements the admin_post_acumulus_activate action.
+     *
+     * Processes and renders the "activate pro-support" form.
+     *
+     * @throws \Throwable
+     */
+    public function processActivateForm()
+    {
+        $this->checkCapability('manage_options');
+        $this->checkCapability('manage_woocommerce');
+        echo $this->processForm('activate');
     }
 
     /**
@@ -593,6 +616,7 @@ class Acumulus
             case 'register':
             case 'config':
             case 'advanced':
+            case 'activate':
             case 'batch':
             case 'invoice':
                 $wrap = $form->isFullPage();

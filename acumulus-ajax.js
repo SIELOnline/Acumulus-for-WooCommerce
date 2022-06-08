@@ -52,6 +52,14 @@
         area.parentNode.removeChild(area);
         addAcumulusAjaxHandling(newArea);
         $(document.body).trigger("post-load"); // jQuery
+        // Apparently, this help tip binding is not done on post-load.
+        $(".woocommerce-help-tip", newArea).tipTip({ // jQuery
+          "attribute": "data-tip",
+          "fadeIn": 50,
+          "fadeOut": 50,
+          "delay": 200,
+          "keepAlive": true
+        });
       });
     });
   }
