@@ -325,3 +325,16 @@ input.success {
 #acumulus-rate input {
   margin: 0 2em 0.5em 0;
 }
+
+/**
+ * Order list icons
+ */
+.acumulus-invoice::after {
+  content: url("acumulus-invoice-28.png");
+  margin-top: 0 !important;
+}
+
+.acumulus-packing-slip::after {
+  content: url("acumulus-packing-slip-28.png");
+  margin-top: 0 !important;
+}
