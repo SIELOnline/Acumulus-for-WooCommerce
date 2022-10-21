@@ -16,8 +16,8 @@ svn/*
 lib/siel/*
 
 # Resources shared with other modules
-acumulus-invoice-28.png
-acumulus-packing-slip-28.png
+acumulus-invoice.png
+acumulus-packing-slip.png
 icon-pdf.svg
 siel-logo.svg
 leesmij-indien-hulp-nodig.txt

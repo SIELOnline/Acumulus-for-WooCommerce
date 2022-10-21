@@ -252,16 +252,6 @@ input.success {
   padding-right: 1em;
 }
 
-#acumulus-invoice .pdf {
-  display: inline-block;
-  padding-left: 15px;
-  margin: 0.1em 1.5em 0.2em 0;
-  background-image: url('icon-pdf.svg');
-  background-size: 12px 16px;
-  background-repeat: no-repeat;
-  background-position: left center;
-}
-
 #acumulus-invoice .data .notice {
   box-shadow: none;
   margin: 0;
@@ -311,7 +301,56 @@ input.success {
 }
 
 /*
- * Ensures that the rate plugin message gets aligned with the fieldsets.
+ * Acumulus icons for invoice and packing slip showing or mailing,
+ * on both the order list and detail page.
+ */
+[class*="acumulus-document"] {
+  display: inline-block;
+}
+
+#acumulus-invoice [class*="acumulus-document"] {
+  position: relative;
+  height: 28px;
+  margin-top: 5px;
+  margin-right: 10px;
+  padding-left: 34px;
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-position-x: 6px;
+}
+
+#acumulus-invoice [class*="acumulus-document"]:last-of-type {
+  margin-right: 0;
+}
+
+#acumulus-invoice [class*="acumulus-document-invoice"] {
+  background-image: url("acumulus-invoice.png");
+}
+
+#acumulus-invoice [class*="acumulus-document-packing-slip"] {
+  background-image: url("acumulus-packing-slip.png");
+}
+
+/*
+ * Order list icons
+ */
+.wc_actions [class*="acumulus-document-invoice"]::after {
+  content: url("acumulus-invoice.png");
+}
+
+.wc_actions [class*="acumulus-document-packing-slip"]::after {
+  content: url("acumulus-packing-slip.png");
+}
+
+.wc_actions [class*="acumulus-document"]::after {
+  margin-top: 0 !important;
+  position: absolute;
+  left: 0;
+  top: -7px;
+}
+
+/*
+ * Ensures that the rate plugin message gets aligned with the field sets.
  */
 #acumulus-rate {
   margin-left: 0;
@@ -324,17 +363,4 @@ input.success {
 
 #acumulus-rate input {
   margin: 0 2em 0.5em 0;
-}
-
-/**
- * Order list icons
- */
-.acumulus-invoice::after {
-  content: url("acumulus-invoice-28.png");
-  margin-top: 0 !important;
-}
-
-.acumulus-packing-slip::after {
-  content: url("acumulus-packing-slip-28.png");
-  margin-top: 0 !important;
 }

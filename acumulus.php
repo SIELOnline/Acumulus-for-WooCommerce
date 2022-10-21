@@ -9,7 +9,7 @@
  * Requires at least: 5.9
  * Tested up to: 6.0
  * WC requires at least: 5.0
- * WC tested up to: 6.7
+ * WC tested up to: 7.0
  * libAcumulus requires at least: 7.4.0
  */
 /**
@@ -24,6 +24,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+use Siel\Acumulus\ApiClient\AcumulusResult;
 use Siel\Acumulus\Config\Config;
 use Siel\Acumulus\Helpers\Container;
 use Siel\Acumulus\Helpers\Form;
@@ -34,7 +35,6 @@ use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Shop\ActivateSupportFormTranslations;
 use Siel\Acumulus\Shop\BatchFormTranslations;
 use Siel\Acumulus\Shop\ConfigFormTranslations;
-use Siel\Acumulus\Shop\InvoiceStatusFormTranslations;
 use Siel\Acumulus\Shop\RegisterFormTranslations;
 
 /**
@@ -260,7 +260,13 @@ class Acumulus
     /**
      * Handles ajax requests for this plugin.
      *
-     * The invoice status overview and the rate plugin form use ajax requests.
+     * Uses of ajax:
+     * - Invoice status overview
+     * - Rate plugin message
+     * - Mail invoice/packing slip from order list. This use is not a real ajax
+     *   request but uses admin-ajax.php as entry point like WooCommerce does:
+     *   no need to define a proper admin page and finish with a redirect back to
+     *   the order list.
      *
      * @throws \Throwable
      */
@@ -281,10 +287,49 @@ class Acumulus
                 default:
                     $content = $this->renderNotice('Area parameter of ajax request unknown to Acumulus.', 'error');
             }
+        } elseif (isset($_REQUEST['acumulus_action'])) {
+            // @nth: should we have some visual feedback here, in case of both
+            //   error and success. Given the redirect at the end, this needs
+            //   transient flags or messages. See e.g:
+            // - https://wordpress.stackexchange.com/questions/261167/getting-admin-notices-to-appear-after-page-refresh
+            // - https://github.com/wpscholar/wp-transient-admin-notices
+            switch ($_REQUEST['acumulus_action']) {
+                case 'acumulus-document-invoice-mail':
+                case 'acumulus-document-packing-slip-mail':
+                    $result = $this->mailPdf($_REQUEST['acumulus_action'], $_REQUEST['order_id']);
+                    $content = !$result->hasError() ? '✓' : '❌';
+                    break;
+                default:
+                    $content = $this->renderNotice('Acumulus_action parameter of ajax request unknown to Acumulus.', 'error');
+            }
+            wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url( 'edit.php?post_type=shop_order' ) );
+            exit;
         } else {
-            $content = $this->renderNotice('No area parameter in ajax request for Acumulus.', 'error');
+            $content = $this->renderNotice('No recognised Acumulus ajax request.', 'error');
         }
         wp_send_json(['content' => $content]);
+    }
+
+    /**
+     * Mails an Acumulus invoice or packing slip pdf.
+     *
+     * @param string $acumulusAction
+     *   Either 'acumulus-invoice' or 'acumulus-packing-slip' (already checked
+     *   for).
+     * @param int $order_id
+     *   The order id. The parameter type conversion will throw an error if
+     *   someone played with the order_id parameter.
+     *
+     * @return \Siel\Acumulus\ApiClient\AcumulusResult
+     */
+    public function mailPdf(string $acumulusAction, int $order_id): AcumulusResult
+    {
+        $source = $this->getAcumulusContainer()->createSource(Source::Order, $order_id);
+        if ($acumulusAction === 'acumulus-document-invoice-mail') {
+            return $this->getAcumulusContainer()->getInvoiceManager()->emailInvoiceAsPdf($source);
+        } else {
+            return $this->getAcumulusContainer()->getInvoiceManager()->emailPackingSlipAsPdf($source);
+        }
     }
 
     /**
@@ -341,47 +386,78 @@ class Acumulus
         echo $this->processInvoiceStatusForm();
     }
 
+    /**
+     * Callback that renders tha Acumulus actions on the order list page.
+     *
+     * @param array $actions
+     * @param \WC_Order $order
+     *
+     * @return array
+     *   The $actions array with the (enabled) Acumulus actions added.
+     */
     public function adminOrderActions(array $actions, WC_Order $order): array
     {
-        $source = $this->getAcumulusContainer()->createSource(Source::Order, $order->get_id());
-        $acumulusEntry = $this->getAcumulusContainer()->getAcumulusEntryManager()->getByInvoiceSource($source);
-        if ($acumulusEntry !== null) {
-            $token = $acumulusEntry->getToken();
-            // If sent as concept, token will be null.
-            if ($token !== null) {
-                $translations = new InvoiceStatusFormTranslations();
-                $this->getAcumulusContainer()->getTranslator()->add($translations);
+        $documentsSettings = $this->getAcumulusContainer()->getConfig()->getDocumentsSettings();
+        if ($documentsSettings['showInvoiceList']
+            || $documentsSettings['mailInvoiceList']
+            || $documentsSettings['showPackingSlipList']
+            || $documentsSettings['mailPackingSlipList']
+        )
+        {
+            $source = $this->getAcumulusContainer()->createSource(Source::Order, $order);
+            $acumulusEntry = $this->getAcumulusContainer()->getAcumulusEntryManager()->getByInvoiceSource($source);
+            if ($acumulusEntry !== null) {
+                $token = $acumulusEntry->getToken();
+                // If sent as concept, token will be null.
+                if ($token !== null) {
+                    $subActions = [];
+                    $ajaxAction = 'acumulus_ajax_action';
+                    $document = ucfirst($this->t('document_invoice'));
+                    if ($documentsSettings['showInvoiceList']) {
+                        $action = 'acumulus-document-invoice-show';
+                        $uri = $this->getAcumulusContainer()->getAcumulusApiClient()->getInvoicePdfUri($token);
+                        $subActions[$action] = [
+                            'url' => $uri,
+                            'action' => $action,
+                            'name' => sprintf($this->t('document_show'), $document),
+                            'title' => sprintf($this->t('document_show_title'), $document),
+                        ];
+                    }
+                    if ($documentsSettings['mailInvoiceList']) {
+                        $action = 'acumulus-document-invoice-mail';
+                        $uri = sprintf("admin-ajax.php?action=%s&acumulus_action=%s&order_id=%d", $ajaxAction, $action, $order->get_id());
+                        $subActions[$action] = [
+                            'url' => wp_nonce_url(admin_url($uri), $ajaxAction, 'acumulus_nonce'),
+                            'action' => $action,
+                            'name' => sprintf($this->t('document_mail'), $document),
+                            'title' => sprintf($this->t('document_mail_title'), $document),
+                        ];
+                    }
 
-                $invoiceStatusSettings = $this->getAcumulusContainer()->getConfig()->getSourceListSettings();
+                    $document = ucfirst($this->t('document_packing_slip'));
+                    if ($documentsSettings['showPackingSlipList']) {
+                        $action = 'acumulus-document-packing-slip-show';
+                        $uri = $this->getAcumulusContainer()->getAcumulusApiClient()->getPackingSlipPdfUri($token);
+                        $subActions[$action] = [
+                            'url' => $uri,
+                            'action' => $action,
+                            'name' => sprintf($this->t('document_show'), $document),
+                            'title' => sprintf($this->t('document_show_title'), $document),
+                        ];
+                    }
+                    if ($documentsSettings['mailPackingSlipList']) {
+                        $action = 'acumulus-document-packing-slip-mail';
+                        $uri = sprintf("admin-ajax.php?action=%s&acumulus_action=%s&order_id=%d", $ajaxAction, $action, $order->get_id());
+                        $subActions[$action] = [
+                            'url' => wp_nonce_url(admin_url($uri), $ajaxAction, 'acumulus_nonce'),
+                            'action' => $action,
+                            'name' => sprintf($this->t('document_mail'), $document),
+                            'title' => sprintf($this->t('document_mail_title'), $document),
+                        ];
+                    }
 
-                $subActions = [];
-                if ($invoiceStatusSettings['showPdfInvoiceList']) {
-                    $uri = $this->getAcumulusContainer()->getAcumulusApiClient()->getInvoicePdfUri($token);
-                    $text = ucfirst($this->t('invoice'));
-                    $title = sprintf($this->t('open_as_pdf'), $text);
-                    $subActions['acumulus-invoice'] = [
-                        'url' => $uri,
-                        'action' => 'acumulus-invoice',
-                        'name' => $text,
-                        'title' => $title,
-                    ];
-                }
-
-                if ($invoiceStatusSettings['showPdfPackingSlipList']) {
-                    $uri = $this->getAcumulusContainer()->getAcumulusApiClient()->getPackingSlipPdfUri($token);
-                    $text = ucfirst($this->t('packing_slip'));
-                    $title = sprintf($this->t('open_as_pdf'), $text);
-                    $subActions['acumulus-packing-slip'] = [
-                        'url' => $uri,
-                        'action' => 'acumulus-packing-slip',
-                        'name' => $text,
-                        'title' => $title,
-                    ];
-                }
-
-                if (count($subActions) > 0) {
+                    // Add the actions and our own css.
                     $actions += $subActions;
-                    // Add our own css.
                     $pluginUrl = plugins_url('/acumulus');
                     wp_enqueue_style('acumulus_css_admin', $pluginUrl . '/acumulus.css');
                 }
@@ -621,12 +697,6 @@ class Acumulus
             case 'rate':
                 // Add some js.
                 wp_enqueue_script('acumulus-ajax.js', $pluginUrl . '/' . 'acumulus-ajax.js');
-                wp_localize_script('acumulus-ajax.js', 'acumulus_data',
-                    [
-                        'ajax_nonce' => wp_create_nonce('acumulus_ajax_action'),
-                        'wait' => $this->t('wait'),
-                    ]
-                );
 
                 // The invoice status overview is not rendered as other forms, therefore
                 // we change some properties of the form renderer.
