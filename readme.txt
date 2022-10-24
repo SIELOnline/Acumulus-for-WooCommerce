@@ -15,7 +15,7 @@ Over deze plugin.
 
 == WooCommerce boekhouden plugin voor Acumulus ==
 
-The Acumulus plugin connects your Woocommerce store to the Dutch SIEL Acumulus online financial administration application. It can add your invoices automatically or via a batch send form to your administration, saving you a lot of manual, error prone work.
+The Acumulus plugin connects your Woocommerce store to the Dutch SIEL Acumulus online financial administration application. It can add your invoices automatically or via a batch send form to your administration, saving you a lot of manual, error-prone work.
 
 The Acumulus plugin:
 
