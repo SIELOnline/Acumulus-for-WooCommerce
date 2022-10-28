@@ -310,10 +310,13 @@ input.success {
 
 #acumulus-invoice [class*="acumulus-document"] {
   position: relative;
-  height: 28px;
+  box-sizing: border-box;
+  height: 30px;
+  min-width: 85px;
   margin-top: 5px;
   margin-right: 10px;
   padding-left: 34px;
+  padding-right: 0;
   background-repeat: no-repeat;
   background-position: left center;
   background-position-x: 6px;
