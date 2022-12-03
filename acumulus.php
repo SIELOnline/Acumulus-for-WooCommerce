@@ -4,21 +4,27 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 7.4.3
+ * Version: 7.5.0
  * LICENCE: GPLv3
  * Requires at least: 5.9
- * Tested up to: 6.0
+ * Tested up to: 6.1
  * WC requires at least: 5.0
  * WC tested up to: 7.0
- * libAcumulus requires at least: 7.4.3
+ * libAcumulus requires at least: 7.5.0
+ * Requires PHP: 7.4
  */
+
 /**
  * @noinspection PhpMissingParamTypeInspection
  * @noinspection PhpMissingReturnTypeInspection
  * @noinspection PhpMissingFieldTypeInspection
  * @noinspection PhpMissingVisibilityInspection
+ * @noinspection AutoloadingIssuesInspection
+ * @noinspection PhpClassHasTooManyDeclaredMembersInspection
  * @noinspection PhpUnused
  */
+
+declare(strict_types=1);
 
 if (!defined('ABSPATH')) {
     exit;
@@ -39,45 +45,60 @@ use Siel\Acumulus\Shop\RegisterFormTranslations;
 
 /**
  * Class Acumulus is the base plugin class.
- *
- * @noinspection PhpIllegalPsrClassPathInspection
  */
 class Acumulus
 {
-    /** @var Acumulus */
-    private static $instance;
-
-    /** @var \Siel\Acumulus\Helpers\Container|null */
-    private $acumulusContainer = null;
+    // Singleton pattern.
+    private static Acumulus $instance;
 
     /**
      * Entry point for our plugin.
-     *
-     * @return Acumulus
      */
-    public static function create()
+    public static function create(): Acumulus
     {
-        if (self::$instance === null) {
+        if (!isset(self::$instance)) {
             self::$instance = new self();
         }
         return self::$instance;
     }
+    // End of singleton pattern.
+
+    private string $file;
+    private Container $acumulusContainer;
 
     /**
-     * Private constructor: use Acumulus::create()
+     * Private constructor, create via {@see create()}
      */
-    private function __construct() {}
-
-    /**
-     * Set up the environment for the plugin.
-     */
-    public function bootstrap()
+    private function __construct()
     {
-        // Install/uninstall actions.
-        $file = str_replace('\\', '/', __FILE__);
-        register_activation_hook($file, [$this, 'activate']);
-        register_deactivation_hook($file, [$this, 'deactivate']);
-        register_uninstall_hook($file, ['Acumulus', 'uninstall']);
+        $this->file = str_replace('\\', '/', __FILE__);
+    }
+
+    /**
+     * Helper method for the ConfigStore object to get the version number from the
+     * comment at the top of this file, as is the official location for WordPress
+     * plugins.
+     *
+     * @return string
+     *   The version number of this plugin.
+     */
+    public function getVersionNumber(): string
+    {
+        return get_plugins()['acumulus/acumulus.php']['Version'];
+    }
+
+    /**
+     * Set up the hooks for this plugin.
+     *
+     * This is to be called "internally" only when a request is being handled.
+     * When a third party wants to initialize the libAcumulus framework,
+     * {@see getAcumulusContainer()} should be called.
+     */
+    public function registerHooks(): void
+    {
+        // activate/deactivate actions.
+        register_activation_hook($this->file, [$this, 'activate']);
+        register_deactivation_hook($this->file, [$this, 'deactivate']);
 
         // Actions:
         // - Add our forms to the admin menu.
@@ -101,24 +122,11 @@ class Acumulus
     }
 
     /**
-     * Helper method for the ConfigStore object to get the version number from the
-     * comment at the top of this file, as is the official location for WordPress
-     * plugins.
-     *
-     * @return string
-     *   The version number of this plugin.
-     */
-    public function getVersionNumber()
-    {
-        return get_plugins()['acumulus/acumulus.php']['Version'];
-    }
-
-    /**
      * Returns whether the current page being rendered is the dashboard.
      *
      * @return bool
      */
-    private function isDashboard()
+    private function isDashboard(): bool
     {
         $screen = get_current_screen();
         return $screen && $screen->id === 'dashboard';
@@ -129,7 +137,7 @@ class Acumulus
      *
      * @return bool
      */
-    private function isOwnPage()
+    private function isOwnPage(): bool
     {
         $screenIds = ['settings_page_acumulus_config', 'settings_page_acumulus_advanced', 'woocommerce_page_acumulus_batch'];
         $screen = get_current_screen();
@@ -146,7 +154,7 @@ class Acumulus
      *   The translation for the given key or the key itself if no translation
      *   could be found.
      */
-    private function t($key)
+    private function t($key): string
     {
         return $this->getAcumulusContainer()->getTranslator()->get($key);
     }
@@ -154,9 +162,9 @@ class Acumulus
     /**
      * Loads our library and creates a configuration object.
      */
-    public function init()
+    private function init(): void
     {
-        if ($this->acumulusContainer === null) {
+        if (!isset($this->acumulusContainer)) {
             // Load autoloader
             require_once __DIR__ . '/lib/siel/acumulus/SielAcumulusAutoloader.php';
             SielAcumulusAutoloader::register();
@@ -180,8 +188,22 @@ class Acumulus
         }
     }
 
+    /**
+     * Returns an Acumulus container.
+     *
+     * Perhaps, more importantly - especially for 3rd parties that wants to use
+     * features from libAcumulus - the 1st time it is called, it ensures that
+     * libAcumulus autoloading is defined and that a Container with the correct
+     * settings is created.
+     *
+     * So, for 3rd parties, this is the correct way to access the libAcumulus:
+     * <code>Acumulus::create()->getAcumulusContainer()</code>
+     *
+     * @return \Siel\Acumulus\Helpers\Container
+     */
     public function getAcumulusContainer(): Container
     {
+        $this->init();
         return $this->acumulusContainer;
     }
 
@@ -191,9 +213,8 @@ class Acumulus
      * We load the translations for each form to be able to show the translated
      * form titles and headers.
      */
-    public function addMenuLinks()
+    public function addMenuLinks(): void
     {
-        $this->init();
         $this->getAcumulusContainer()->getTranslator()->add(new ConfigFormTranslations());
         add_submenu_page('options-general.php',
             $this->t('config_form_title'),
@@ -246,7 +267,7 @@ class Acumulus
      *
      * @throws \Throwable
      */
-    public function showAdminNotices()
+    public function showAdminNotices(): void
     {
         // These notices should only show on the main dashboard and our own screens.
         if ($this->isDashboard() || $this->isOwnPage()) {
@@ -270,7 +291,7 @@ class Acumulus
      *
      * @throws \Throwable
      */
-    public function handleAjaxRequest()
+    public function handleAjaxRequest(): void
     {
         check_ajax_referer('acumulus_ajax_action', 'acumulus_nonce');
 
@@ -302,7 +323,7 @@ class Acumulus
                 default:
                     $content = $this->renderNotice('Acumulus_action parameter of ajax request unknown to Acumulus.', 'error');
             }
-            wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url( 'edit.php?post_type=shop_order' ) );
+            wp_safe_redirect( wp_get_referer() ?: admin_url( 'edit.php?post_type=shop_order' ) );
             exit;
         } else {
             $content = $this->renderNotice('No recognised Acumulus ajax request.', 'error');
@@ -325,11 +346,9 @@ class Acumulus
     public function mailPdf(string $acumulusAction, int $order_id): AcumulusResult
     {
         $source = $this->getAcumulusContainer()->createSource(Source::Order, $order_id);
-        if ($acumulusAction === 'acumulus-document-invoice-mail') {
-            return $this->getAcumulusContainer()->getInvoiceManager()->emailInvoiceAsPdf($source);
-        } else {
-            return $this->getAcumulusContainer()->getInvoiceManager()->emailPackingSlipAsPdf($source);
-        }
+        return $acumulusAction === 'acumulus-document-invoice-mail'
+            ? $this->getAcumulusContainer()->getInvoiceManager()->emailInvoiceAsPdf($source)
+            : $this->getAcumulusContainer()->getInvoiceManager()->emailPackingSlipAsPdf($source);
     }
 
     /**
@@ -339,9 +358,8 @@ class Acumulus
      *
      * @throws \Throwable
      */
-    public function addShopOrderMetaBox(WP_Post $shopOrderPost)
+    public function addShopOrderMetaBox(WP_Post $shopOrderPost): void
     {
-        $this->init();
         $invoiceStatusSettings = $this->getAcumulusContainer()->getConfig()->getInvoiceStatusSettings();
         if ($invoiceStatusSettings['showInvoiceStatus']) {
             // Create form to load form translations and set its Source.
@@ -355,8 +373,7 @@ class Acumulus
                     $this->t('invoice_form_title'),
                     [$this, 'outputInvoiceStatusInfoBox'],
                     'shop_order',
-                    'side',
-                    'default');
+                    'side');
             } catch (Throwable $e) {
                 // We do not show the meta box, not even a message (though we
                 // could add an action for admin_notices), the mail should
@@ -381,7 +398,7 @@ class Acumulus
      *
      * @throws \Throwable
      */
-    public function outputInvoiceStatusInfoBox(/*WP_Post $shopOrderPost*/)
+    public function outputInvoiceStatusInfoBox(/*WP_Post $shopOrderPost*/): void
     {
         echo $this->processInvoiceStatusForm();
     }
@@ -425,7 +442,7 @@ class Acumulus
                     }
                     if ($documentsSettings['mailInvoiceList']) {
                         $action = 'acumulus-document-invoice-mail';
-                        $uri = sprintf("admin-ajax.php?action=%s&acumulus_action=%s&order_id=%d", $ajaxAction, $action, $order->get_id());
+                        $uri = sprintf('admin-ajax.php?action=%s&acumulus_action=%s&order_id=%d', $ajaxAction, $action, $order->get_id());
                         $subActions[$action] = [
                             'url' => wp_nonce_url(admin_url($uri), $ajaxAction, 'acumulus_nonce'),
                             'action' => $action,
@@ -447,7 +464,7 @@ class Acumulus
                     }
                     if ($documentsSettings['mailPackingSlipList']) {
                         $action = 'acumulus-document-packing-slip-mail';
-                        $uri = sprintf("admin-ajax.php?action=%s&acumulus_action=%s&order_id=%d", $ajaxAction, $action, $order->get_id());
+                        $uri = sprintf('admin-ajax.php?action=%s&acumulus_action=%s&order_id=%d', $ajaxAction, $action, $order->get_id());
                         $subActions[$action] = [
                             'url' => wp_nonce_url(admin_url($uri), $ajaxAction, 'acumulus_nonce'),
                             'action' => $action,
@@ -473,9 +490,8 @@ class Acumulus
      *
      * @return \Siel\Acumulus\Helpers\Form
      */
-    private function getForm($type)
+    private function getForm($type): Form
     {
-        $this->init();
         return $this->getAcumulusContainer()->getForm($type);
     }
 
@@ -486,7 +502,7 @@ class Acumulus
      *
      * @throws \Throwable
      */
-    public function processRegisterForm()
+    public function processRegisterForm(): void
     {
         $this->checkCapability('manage_options');
         $this->checkCapability('manage_woocommerce');
@@ -500,7 +516,7 @@ class Acumulus
      *
      * @throws \Throwable
      */
-    public function processConfigForm()
+    public function processConfigForm(): void
     {
         $this->checkCapability('manage_options');
         $this->checkCapability('manage_woocommerce');
@@ -514,7 +530,7 @@ class Acumulus
      *
      * @throws \Throwable
      */
-    public function processAdvancedForm()
+    public function processAdvancedForm(): void
     {
         $this->checkCapability('manage_options');
         $this->checkCapability('manage_woocommerce');
@@ -528,7 +544,7 @@ class Acumulus
      *
      * @throws \Throwable
      */
-    public function processActivateForm()
+    public function processActivateForm(): void
     {
         $this->checkCapability('manage_options');
         $this->checkCapability('manage_woocommerce');
@@ -542,7 +558,7 @@ class Acumulus
      *
      * @throws \Throwable
      */
-    public function processBatchForm()
+    public function processBatchForm(): void
     {
         $this->checkCapability('manage_woocommerce');
         echo $this->processForm('batch');
@@ -560,7 +576,7 @@ class Acumulus
      *
      * @throws \Throwable
      */
-    public function processInvoiceStatusForm()
+    public function processInvoiceStatusForm(): string
     {
         return $this->processForm('invoice');
     }
@@ -577,7 +593,7 @@ class Acumulus
      *
      * @throws \Throwable
      */
-    public function processRatePluginForm()
+    public function processRatePluginForm(): string
     {
         return $this->processForm('rate');
     }
@@ -593,7 +609,7 @@ class Acumulus
      *
      * @throws \Throwable
      */
-    public function processForm($type)
+    public function processForm($type): string
     {
         $form = $this->getForm($type);
         try {
@@ -629,7 +645,7 @@ class Acumulus
      * @param \Siel\Acumulus\Helpers\Form $form
      *   The form that is going to be processed.
      */
-    private function preProcessForm(Form $form)
+    private function preProcessForm(Form $form): void
     {
         $type = $form->getType();
 
@@ -653,7 +669,7 @@ class Acumulus
      * @param \Siel\Acumulus\Helpers\Form $form
      *   The form that has been processed.
      */
-    private function postProcessForm(Form $form)
+    private function postProcessForm(Form $form): void
     {
         $type = $form->getType();
 
@@ -669,7 +685,7 @@ class Acumulus
      * @param \Siel\Acumulus\Helpers\Form $form
      *   The form that is going to be rendered.
      */
-    private function preRenderForm(Form $form)
+    private function preRenderForm(Form $form): void
     {
         // Get a new FormRenderer as the rate plugin message may be shown inside our
         // pages and that one has different settings.
@@ -724,7 +740,7 @@ class Acumulus
      * @return string
      *   The rendered form with any wrapping around it.
      */
-    private function postRenderForm(Form $form, $formOutput)
+    private function postRenderForm(Form $form, $formOutput): string
     {
         $output = '';
         $type = $form->getType();
@@ -778,7 +794,7 @@ class Acumulus
      *
      * @return string
      */
-    public function showNotices($form)
+    public function showNotices($form): string
     {
         $output = '';
         if (isset($form)) {
@@ -802,7 +818,7 @@ class Acumulus
      * @return string
      *
      */
-    private function SeverityToNoticeClass($severity)
+    private function SeverityToNoticeClass($severity): string
     {
         switch ($severity) {
             case Severity::Success:
@@ -847,17 +863,18 @@ class Acumulus
      * @return string
      *   The rendered notice.
      */
-    private function renderNotice($message, $type, $id = '', $extraAttributes = [], $isHtml = false)
+    private function renderNotice(string $message, string $type, string $id = '', array $extraAttributes = [], bool $isHtml = false):
+    string
     {
         $for = '';
-        if ($id !== '' && func_num_args() === 3) {
+        if (!empty($id) && func_num_args() === 3) {
             // Form field message (because: 3 arguments (I know: this sucks)):
             //   make it a clickable label.
             $for = $id;
             $id = '';
         }
 
-        if ($id !== '') {
+        if (!empty($id)) {
             $id = ' id="' . $id . '"';
         }
 
@@ -897,7 +914,7 @@ class Acumulus
      * @param string $capability
      *   The access right to check for.
      */
-    private function checkCapability($capability)
+    private function checkCapability($capability): void
     {
         if (!empty($capability) && !current_user_can($capability)) {
             /** @noinspection ForgottenDebugOutputInspection */
@@ -922,7 +939,7 @@ class Acumulus
      *
      * @throws \Throwable
      */
-    public function woocommerceOrderChanged($orderId)
+    public function woocommerceOrderChanged($orderId): void
     {
         $this->init();
         /** @var WC_Order|null $order */
@@ -948,7 +965,7 @@ class Acumulus
      *
      * @throws \Throwable
      */
-    public function woocommerceOrderRefunded(/** @noinspection PhpUnusedParameterInspection */ $orderId, $refundId)
+    public function woocommerceOrderRefunded(/** @noinspection PhpUnusedParameterInspection */ $orderId, $refundId): void
     {
         $this->init();
         $this->sourceStatusChange(Source::CreditNote, $refundId);
@@ -1000,7 +1017,7 @@ class Acumulus
      *
      * @return array
      */
-    public function woocommerceOrderIsPaidStatuses(array $statuses/*, WC_Order $order*/)
+    public function woocommerceOrderIsPaidStatuses(array $statuses/*, WC_Order $order*/): array
     {
         return array_merge($statuses, ['refunded']);
     }
@@ -1022,7 +1039,7 @@ class Acumulus
      *
      * @return array
      */
-    public function woocommerceValidOrderStatusesForPayment(array $statuses/*, WC_Order $order*/)
+    public function woocommerceValidOrderStatusesForPayment(array $statuses/*, WC_Order $order*/): array
     {
         return array_merge($statuses, ['on-hold', 'cancelled', 'failed']);
     }
@@ -1044,10 +1061,9 @@ class Acumulus
      *   The changed invoice or null if you do not want the invoice to be sent
      *   to Acumulus.
      */
-    public function acumulusInvoiceCreated($invoice, Source $invoiceSource, InvoiceAddResult $localResult)
+    public function acumulusInvoiceCreated($invoice, Source $invoiceSource, InvoiceAddResult $localResult): ?array
     {
         if ($invoice !== null) {
-            $this->init();
             /** @var \Siel\Acumulus\WooCommerce\Invoice\CreatorPluginSupport $pluginSupport */
             $pluginSupport = $this->getAcumulusContainer()->getInstance('CreatorPluginSupport', 'Invoice');
             $invoice = $pluginSupport->acumulusInvoiceCreated($invoice, $invoiceSource, $localResult);
@@ -1059,10 +1075,10 @@ class Acumulus
     /**
      * Forwards the call to an instance of the setup class.
      */
-    public function activate()
+    public function activate(): void
     {
-        $this->init();
-        require_once 'AcumulusSetup.php';
+        register_uninstall_hook($this->file, ['Acumulus', 'uninstall']);
+        require_once __DIR__ . '/AcumulusSetup.php';
         $setup = new AcumulusSetup($this->getAcumulusContainer());
         $setup->activate();
     }
@@ -1078,7 +1094,7 @@ class Acumulus
      * @return bool
      *   Success.
      */
-    public function upgrade()
+    public function upgrade(): bool
     {
         $result = true;
 
@@ -1096,13 +1112,10 @@ class Acumulus
      *
      * @return bool
      */
-    public function deactivate()
+    public function deactivate(): bool
     {
-        $this->init();
-        require_once 'AcumulusSetup.php';
-        $setup = new AcumulusSetup($this->getAcumulusContainer());
-
-        return $setup->deactivate();
+        require_once __DIR__ . '/AcumulusSetup.php';
+        return (new AcumulusSetup($this->getAcumulusContainer()))->deactivate();
     }
 
     /**
@@ -1110,16 +1123,13 @@ class Acumulus
      *
      * @return bool
      */
-    public static function uninstall()
+    public static function uninstall(): bool
     {
         $acumulus = static::create();
-        $acumulus->init();
-        require_once 'AcumulusSetup.php';
-        $setup = new AcumulusSetup($acumulus->getAcumulusContainer());
-
-        return $setup->uninstall();
+        require_once __DIR__ . '/AcumulusSetup.php';
+        return (new AcumulusSetup($acumulus->getAcumulusContainer()))->uninstall();
     }
 }
 
 // Entry point for WP: create and bootstrap our module.
-Acumulus::create()->bootstrap();
+Acumulus::create()->registerHooks();
