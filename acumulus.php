@@ -20,7 +20,6 @@
  * @noinspection PhpMissingFieldTypeInspection
  * @noinspection PhpMissingVisibilityInspection
  * @noinspection AutoloadingIssuesInspection
- * @noinspection PhpClassHasTooManyDeclaredMembersInspection
  * @noinspection PhpUnused
  */
 
