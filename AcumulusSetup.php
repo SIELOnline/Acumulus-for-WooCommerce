@@ -1,23 +1,23 @@
 <?php
-/**
- * @noinspection PhpMissingParamTypeInspection
- * @noinspection PhpMissingReturnTypeInspection
- * @noinspection PhpMissingFieldTypeInspection
- * @noinspection PhpMissingVisibilityInspection
- */
+
+declare(strict_types=1);
 
 use Siel\Acumulus\Config\Config;
 use Siel\Acumulus\Helpers\Container;
 
-use const Siel\Acumulus\Version as Version;
+use const Siel\Acumulus\Version;
 
+/**
+ * AcumulusSetup contains code to b executed on install, activate, deactivate,
+ * and uninstall
+ */
 class AcumulusSetup
 {
     /** @var array */
-    private $messages = [];
+    private array $messages = [];
 
     /** @var \Siel\Acumulus\Helpers\Container */
-    private $container;
+    private Container $container;
 
     /**
      * AcumulusSetup constructor.
@@ -38,7 +38,7 @@ class AcumulusSetup
      * @return bool
      *   Success.
      */
-    public function activate()
+    public function activate(): bool
     {
         $result = false;
         // Check user access.
@@ -55,8 +55,8 @@ class AcumulusSetup
 
             $values = [];
             // Set initial config version.
-            if (empty($this->container->getConfig()->get(Config::configVersion))) {
-                $values[Config::configVersion] = Version;
+            if (empty($this->container->getConfig()->get(Config::VersionKey))) {
+                $values[Config::VersionKey] = Version;
             }
             // In 1 week time we will ask the user to rate this plugin.
             $values['showRatePluginMessage'] = time() + 7 * 24 * 60 * 60;
@@ -72,7 +72,7 @@ class AcumulusSetup
      * @return bool
      *   Success.
      */
-    public function deactivate()
+    public function deactivate(): bool
     {
         if (!current_user_can('activate_plugins')) {
             return false;
@@ -91,7 +91,7 @@ class AcumulusSetup
      * @return bool
      *   Success.
      */
-    public function uninstall()
+    public function uninstall(): bool
     {
         if (!current_user_can('delete_plugins')) {
             return false;
@@ -100,25 +100,22 @@ class AcumulusSetup
         // Uninstall.
         delete_option('acumulus');
 
-        $model = $this->container->getAcumulusEntryManager();
-
-        return $model->uninstall();
+        return $this->container->getAcumulusEntryManager()->uninstall();
     }
 
     /**
-     * Checks the requirements for this module (CURL, DOMXML, ...).
+     * Checks the requirements for this module (cUrl, ...).
      *
      * @return bool
      *   Success.
      */
-    public function checkRequirements()
+    public function checkRequirements(): bool
     {
-        $requirements = $this->container->getRequirements();
-        $this->messages = $requirements->check();
+        $this->messages = $this->container->getRequirements()->check();
 
         // Check that WooCommerce is active.
         if (!is_plugin_active('woocommerce/woocommerce.php')) {
-            $this->messages[] = "The Acumulus component requires WooCommerce to be installed and enabled.";
+            $this->messages['message_error_no_woocommerce'] = 'The Acumulus component requires WooCommerce to be installed and enabled.';
         }
 
         if (count($this->messages) > 0) {
@@ -132,11 +129,12 @@ class AcumulusSetup
     /**
      * Action hook that adds administrator notices to the admin screen.
      */
-    public function adminNotice()
+    public function adminNotice(): void
     {
         $output = '';
-        foreach ($this->messages as $message) {
-            $output .= $this->renderNotice($message, 'error');
+        foreach ($this->messages as $key => $message) {
+            $type = stripos($key, 'error') !== false ? 'error' : 'warning';
+            $output .= $this->renderNotice($message, $type);
         }
         echo $output;
     }
@@ -150,7 +148,7 @@ class AcumulusSetup
      * @return string
      *   The rendered notice.
      */
-    protected function renderNotice($message, $type)
+    protected function renderNotice(string $message, string $type): string
     {
         return sprintf('<div class="notice notice-%s is-dismissible"><p>%s</p></div>', $type, $message);
     }

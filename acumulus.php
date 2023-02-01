@@ -4,13 +4,13 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 7.5.0
+ * Version: 7.6.2
  * LICENCE: GPLv3
  * Requires at least: 5.9
  * Tested up to: 6.1
  * WC requires at least: 5.0
- * WC tested up to: 7.1
- * libAcumulus requires at least: 7.5.0
+ * WC tested up to: 7.3
+ * libAcumulus requires at least: 7.6.2
  * Requires PHP: 7.4
  */
 
@@ -44,6 +44,8 @@ use Siel\Acumulus\Shop\RegisterFormTranslations;
 
 /**
  * Class Acumulus is the base plugin class.
+ *
+ * @noinspection EfferentObjectCouplingInspection
  */
 class Acumulus
 {
@@ -1086,7 +1088,7 @@ class Acumulus
      * Checks if we may have to upgrade.
      *
      * This will convert the separate 'acumulus_version' option, if still
-     * existing, to the 7.0+ 'configVersion' config value.
+     * existing, to the 7.0+ 'VersionKey' config value.
      *
      * WP specific updates (to metadata definitions) should also be placed here.
      *
@@ -1098,8 +1100,8 @@ class Acumulus
         $result = true;
 
         $dbVersion = get_option('acumulus_version');
-        if (!empty($dbVersion) && empty($this->getAcumulusContainer()->getConfig()->get(Config::configVersion))) {
-            $result = $this->getAcumulusContainer()->getConfig()->save([Config::configVersion => $dbVersion]);
+        if (!empty($dbVersion) && empty($this->getAcumulusContainer()->getConfig()->get(Config::VersionKey))) {
+            $result = $this->getAcumulusContainer()->getConfig()->save([Config::VersionKey => $dbVersion]);
             delete_option('acumulus_version');
         }
 
