@@ -1,21 +1,24 @@
-# patches, diffs, merges
-*.patch
-interdiff.txt
-*.orig
-*.bak
-*.old
+# Ignore dependencies that are managed with Composer.
+# We only want to commit our own stuff, that is unique to this project. So we do not
+# commit the vendor directory, not even autoload.php and vendor/siel/acumulus. If you want
+# to use this project from GitHub isntead of via WordPress.org, you will have to run
+# "composer update --no-dev" yourself.
+composer.lock
+/vendor/*
 
-# PHPStorm, svn
+# We use test classes and utilities that are not our own, but from the WordPress and
+# WooCommerce projects, but are not defined as composer packages. These are also stored
+# under the tests dir via custom actions, but not committed.
+/tests/*/
+# Our own tests are committed.
+!/tests/WooCommerce
+# Local config, create your own using wp-tests-config-sample.php.
+/tests/wp-tests-config.php
+
+# PHPStorm
 .idea/*
-svn/*
 
-# Resulting installer files
-/*.zip
-
-# Shared library
-lib/siel/*
-
-# Resources shared with other modules
+# Resources shared with other modules, committed in libAcumulus.
 acumulus-invoice.png
 acumulus-packing-slip.png
 icon-pdf.svg

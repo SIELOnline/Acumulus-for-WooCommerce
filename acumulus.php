@@ -4,7 +4,7 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 7.6.6
+ * Version: 8.0.0-alpha
  * LICENCE: GPLv3
  * Requires at least: 5.9
  * Tested up to: 6.1
@@ -166,11 +166,10 @@ class Acumulus
     private function init(): void
     {
         if (!isset($this->acumulusContainer)) {
-            // Load autoloader
-            require_once __DIR__ . '/lib/siel/acumulus/SielAcumulusAutoloader.php';
-            SielAcumulusAutoloader::register();
+            // Load autoloader.
+            require_once __DIR__ . '/vendor/autoload.php';
 
-            // Get language
+            // Get language.
             $languageCode = get_bloginfo('language');
             if (empty($languageCode)) {
                 $languageCode = 'nl';

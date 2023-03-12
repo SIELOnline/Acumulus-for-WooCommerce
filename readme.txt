@@ -44,6 +44,21 @@ If not, this plugin is useless and will not do anything.
 8. You can use the 'Woocommerce - Acumulus' page (`wp-admin/admin.php?page=acumulus_batch`) to send a batch of (older) orders to Acumulus.
 9. To cater for specific use cases, the plugin does define some filters and actions, so you can intercept and influence the actions it performs. See the separate [filters.txt](http://plugins.svn.wordpress.org/acumulus/trunk/filters.txt) for more information.
 
+== Installation using composer and GitHub ==
+
+Note: this is only recommended for developers, not if you only want to use this plugin in your webshop.
+
+1. Open a cmd prompt and go to the plugins folder: cd wp-content/plugins
+3. Download the zip from https://github.com/SIELOnline/Acumulus-for-WooCommerce, either:
+   - The latest version: https://github.com/SIELOnline/Acumulus-for-WooCommerce/archive/refs/heads/master.zip
+   - A specific version, e.g: https://github.com/SIELOnline/Acumulus-for-WooCommerce/archive/refs/tags/7.6.5.zip
+4. Extract the zip and rename the folder Acumulus-for-WooCommerce-[master|7.6.5] to acumulus
+5. cd acumulus
+6. composer update --no-dev
+
+Note this won't install the test classes from WooCommerce and WordPress that are required by our own tests.
+Installing the test environment for this plugin is yet to be described here.
+
 == Screenshots ==
 
 1. Settings form
