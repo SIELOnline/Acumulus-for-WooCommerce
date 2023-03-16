@@ -40,62 +40,32 @@ declare(strict_types=1);
  *     (includes/bootstrap.php expects this as a constant).
  *   - WP_TESTS_DIR={path to the data and includes folders from above}
  *   - WP_TESTS_SKIP_INSTALL=1; {1 = skip install, 0 = reinstall tables}
+ *   - WP_TESTS_PHPUNIT_POLYFILLS_PATH={path to yoast/phpunit-polyfills project}
  */
 
-// Get some paths, being aware that our plugin may be symlinked.
-$testsRoot = __DIR__;
-$pluginRoot = dirname(__DIR__, 2);
-$wpRoot = substr($pluginRoot, 0, strpos($pluginRoot, 'wp-content') - 1);
-// if out plugin is symlinked, we ty to find $wpRoot by looking at the
-// --bootstrap option as passed to phpunit.
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
+
+require_once __DIR__ . '/../vendor/autoload.php';
+//$class1 = class_exists(LegacyProxy::class);
+//$class2 = class_exists(MockableLegacyProxy::class);
+require_once __DIR__ . '/environment.php';
+
+// if our plugin is symlinked, we need to redefine WP_TESTS_INSTALLATION. Try to
+// find it by looking at the --bootstrap option as passed to phpunit.
 global $argv;
-if (is_array($argv) && count($argv) >= 3) {
+if (is_array($argv)) {
     $i = array_search('--bootstrap', $argv, true);
     // if we found --bootstrap, the value is in the next entry.
     if ($i < count($argv) - 1) {
         $bootstrapFile = $argv[$i + 1];
         $wpRoot = substr($bootstrapFile, 0, strpos($bootstrapFile, 'wp-content') - 1);
+        putenv("WP_TESTS_INSTALLATION=$wpRoot");
     }
 }
 
-putenv("WP_TESTS_INSTALLATION=$wpRoot");
-define('WP_TESTS_CONFIG_FILE_PATH', "$testsRoot/wp-tests-config.php");
-putenv("WP_TESTS_PHPUNIT_POLYFILLS_PATH=$pluginRoot/vendor/yoast/phpunit-polyfills");
-putenv("WP_TESTS_DIR=$testsRoot/wordpress/wordpress/tests/phpunit");
+define('WP_TESTS_CONFIG_FILE_PATH', getenv('WP_TESTS_CONFIG_FILE_PATH'));
 putenv('WP_TESTS_SKIP_INSTALL=1');
 
-$tests_dir = getenv('WP_TESTS_DIR');
-if (!$tests_dir) {
-    $tests_dir = rtrim(sys_get_temp_dir(), '/\\') . '/wordpress-tests-lib';
-}
-
-// Forward custom PHPUnit Polyfills configuration to PHPUnit bootstrap file.
-$_phpunit_polyfills_path = getenv('WP_TESTS_PHPUNIT_POLYFILLS_PATH');
-if ($_phpunit_polyfills_path !== false) {
-    define('WP_TESTS_PHPUNIT_POLYFILLS_PATH', $_phpunit_polyfills_path);
-}
-
-if (!file_exists("$tests_dir/includes/functions.php")) {
-    echo "Could not find $tests_dir/includes/functions.php, have you run bin/install-wp-tests.sh ?" . PHP_EOL;
-    exit(1);
-}
-
-// Give access to tests_add_filter() function.
-require_once "$tests_dir/includes/functions.php";
-
-/**
- * Manually load the plugin being tested.
- */
-function _manually_load_plugin(): void
-{
-    require getenv('WP_TESTS_INSTALLATION') . '/wp-content/plugins/acumulus/acumulus.php';
-    require getenv('WP_TESTS_INSTALLATION') . '/wp-content/plugins/woocommerce/woocommerce.php';
-}
-
-tests_add_filter('muplugins_loaded', '_manually_load_plugin');
-
-if (getenv('WP_TESTS_SKIP_INSTALL') === '1') {
-    echo 'Not reinstalling, running on current install.' . PHP_EOL;
-}
-// Start up the WP testing environment.
-require "$tests_dir/includes/bootstrap.php";
+// Start up the WP, WC, and Acumulus testing environment.
+require __DIR__ . '/bootstrap-acumulus.php';

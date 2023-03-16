@@ -15,7 +15,14 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Siel\\Acumulus\\Tests\\WooCommerce\\": "tests/WooCommerce/"
-        }
+            "Siel\\Acumulus\\Tests\\WooCommerce\\": "tests/WooCommerce/",
+            "Automattic\\WooCommerce\\Testing\\Tools\\": "tests/frameworks/woocommerce/tests/Tools/"
+        },
+        "classmap": ["tests/frameworks"]
+    },
+    "scripts": {
+        "pre-autoload-dump": [
+            "Siel\\Acumulus\\Tests\\WooCommerce\\ComposerScripts::preAutoloadDump"
+        ]
     }
 }

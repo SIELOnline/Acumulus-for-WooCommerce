@@ -9,7 +9,7 @@ namespace Siel\Acumulus\Tests\WooCommerce\Integration;
 
 use Acumulus;
 use Siel\Acumulus\Invoice\Source;
-use WP_UnitTestCase;
+use WC_Unit_Test_Case;
 
 /**
  * Tests collecting data in WooCommerce
@@ -17,13 +17,26 @@ use WP_UnitTestCase;
  * Things that should get tested:
  * - Defaults from {@see \Siel\Acumulus\WooCommerce\Config\ShopCapabilities::getDefaultShopMappings()}
  */
-class CollectorTest extends WP_UnitTestCase
+class CollectorTest extends WC_Unit_Test_Case
 {
+    /**
+     * @return false|\WP_User
+     */
+    private function createCustomer()
+    {
+        $id = wc_create_new_customer('erwin@example.com', 'erwin', 'password', [
+            'first_name' => 'Erwin',
+            'last_name' => 'Derksen',
+        ]);
+        return get_user_by('id', $id);
+    }
+
     public function customerProvider(): array
     {
         return [
             [
-                Source::Order, 462,
+                Source::Order,
+                1,
                 [
                     'contactId' => null,
                     'type' => null,
@@ -35,7 +48,7 @@ class CollectorTest extends WP_UnitTestCase
                     'telephone' => '0303132334',
                     'telephone2' => null,
                     'fax' => null,
-                    'email' => 'erwin@reve-provencal.eu',
+                    'email' => 'erwin@example.com',
                     'overwriteIfExists' => null,
                     'bankAccountNumber' => null,
                     'mark' => null,
@@ -52,9 +65,9 @@ class CollectorTest extends WP_UnitTestCase
     {
         $container = Acumulus::create()->getAcumulusContainer();
         $collector = $container->getCollectorManager();
+        $customer = $this->createCustomer();
         $source = $container->createSource(Source::Order, 462);
-        $collector->addPropertySource('source', $source);
-        $customer = $collector->collectCustomer();
+        $customer = $collector->collectCustomer($source);
         foreach ($values as $key => $value) {
             /** @noinspection PhpVariableVariableInspection */
             $this->assertSame($value, $customer->$key, $key);
