@@ -1,5 +1,6 @@
 <?php
 /**
+ * @noinspection GrazieInspection
  * @noinspection PhpStaticAsDynamicMethodCallInspection
  * @noinspection PhpUnhandledExceptionInspection
  * @noinspection DuplicatedCode
@@ -26,61 +27,50 @@ class AcumulusTestsBootstrap
 
     protected static AcumulusTestsBootstrap $instance;
 
-    /** @var string directory where wordpress-tests-lib is installed */
     public $wp_tests_dir;
-
-    /** @var string testing directory */
     public string $wc_legacy_dir;
-
-    /** @var string plugin directory */
     public string $wc_plugin_dir;
 
     /**
      * Setup the unit testing environment.
-     *
-     * @since 2.2
      */
     public function __construct()
     {
-        $this->wc_tests_dir = __DIR__ . '/frameworks/woocommerce/tests';
-        $this->wc_legacy_dir = $this->wc_tests_dir . '/legacy';
-        $this->wc_tools_dir = $this->wc_tests_dir . '/Tools';
-        // The plugin as installed.
+        // WordPress framework path.
+        $this->wp_tests_dir = getenv('WP_TESTS_DIR');
+        // WordPress installation path.
         $wp_tests_installation = getenv('WP_TESTS_INSTALLATION');
+        // WooCommerce installation path.
         $this->wc_plugin_dir = $wp_tests_installation . '/wp-content/plugins/woocommerce';
+        $this->wc_legacy_dir = $this->wc_plugin_dir . '/tests/legacy';
+        $this->wc_tools_dir = $this->wc_plugin_dir . '/tests/Tools';
 
         $this->register_autoloader_for_testing_tools();
 
         $this->initialize_code_hacker();
 
         ini_set('display_errors', 'on');
-        error_reporting(
-            E_ALL
-        );
+        error_reporting(E_ALL);
 
         // Ensure theme install tests use direct filesystem method.
         define('FS_METHOD', 'direct');
 
         // Ensure server variable is set for WP email functions.
-        // phpcs:disable WordPress.VIP.SuperGlobalInputUsage.AccessDetected
         if (!isset($_SERVER['SERVER_NAME'])) {
             $_SERVER['SERVER_NAME'] = 'localhost';
         }
-        // phpcs:enable WordPress.VIP.SuperGlobalInputUsage.AccessDetected
 
-        $this->wp_tests_dir = getenv('WP_TESTS_DIR');
-
-        // load test function so tests_add_filter() is available.
+        // Load test function so tests_add_filter() is available.
         require_once $this->wp_tests_dir . '/includes/functions.php';
 
         // Always load PayPal Standard for unit tests.
         tests_add_filter('woocommerce_should_load_paypal_standard', '__return_true');
 
-        // load WC.
+        // Load WooCommerce and Acumulus.
         tests_add_filter('muplugins_loaded', [$this, 'load_wc']);
         tests_add_filter('muplugins_loaded', [$this, 'load_acumulus']);
 
-        // install WC.
+        // Install WooCommerce.
         tests_add_filter('setup_theme', [$this, 'install_wc']);
 
         // Set up WC-Admin config.
@@ -90,7 +80,7 @@ class AcumulusTestsBootstrap
          * Load PHPUnit Polyfills for the WP testing suite.
          * @see https://github.com/WordPress/wordpress-develop/pull/1563/
          */
-        define('WP_TESTS_PHPUNIT_POLYFILLS_PATH', __DIR__ . '/../../vendor/yoast/phpunit-polyfills/phpunitpolyfills-autoload.php');
+        define('WP_TESTS_PHPUNIT_POLYFILLS_PATH', getenv('WP_TESTS_PHPUNIT_POLYFILLS_PATH'));
 
         // load the WP testing environment.
         if (getenv('WP_TESTS_SKIP_INSTALL') === '1') {
@@ -99,10 +89,10 @@ class AcumulusTestsBootstrap
         }
         require_once $this->wp_tests_dir . '/includes/bootstrap.php';
 
-        // load WC testing framework.
+        // load WooCommerce testing framework.
         $this->includes();
 
-        // re-initialize dependency injection, this needs to be the last operation after everything else is in place.
+        // Re-initialize dependency injection, this needs to be the last operation after everything else is in place.
         $this->initialize_dependency_injection();
     }
 
@@ -154,7 +144,6 @@ class AcumulusTestsBootstrap
         }
 
         CodeHacker::add_hack(new BypassFinalsHack());
-
         CodeHacker::enable();
     }
 

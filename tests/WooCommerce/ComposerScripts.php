@@ -16,6 +16,10 @@ use function dirname;
  *
  * We should install the parts of the test frameworks from WordPress and
  * WooCommerce that these tests depend upon.
+ *
+ * GitHub projects:
+ * - woocommerce/woocommerce
+ * - wordpress/wordpress-develop
  */
 class ComposerScripts
 {
@@ -23,12 +27,18 @@ class ComposerScripts
     {
         if ($event->isDevMode()) {
             require_once dirname(__FILE__, 2) . '/environment.php';
-            // @todo: If not yet existing, mMake links to WordPress and
-            //   WooCommerce frameworks,  .../plugins/acumulus/tests/frameworks:
-            //   - .../wordpress/test/phpunit/data
-            //   - .../wordpress/test/phpunit/includes
-            //   - .../woocommerce/test/legacy/framework
-            //   - .../woocommerce/test/legacy/includes
+            // @todo: If not yet existing, make links to (part) of the test
+            //   utilities of:
+            //   - WooCommerce:
+            //     -  link wp-content/plugins/woocommerce to the plugins/woocommerce
+            //        sub folder of the woocommerce/woocommerce repo.
+            //     -  Copy our feature-config.php to the includes/react-admin folder
+            //        of the woocommerce plugin (which indeed is a link in itself).
+            //   - WordPress:
+            //     - link tests/phpunit/data of the wordpress/wordpress-develop repo
+            //       to wp-content/plugins/acumulus/tests/wordpress-develop.
+            //     - link tests/phpunit/includes of the wordpress/wordpress-develop repo
+            //       to wp-content/plugins/acumulus/tests/wordpress-develop.
         }
     }
 }

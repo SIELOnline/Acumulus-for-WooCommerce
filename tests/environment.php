@@ -16,15 +16,15 @@ declare(strict_types=1);
  * - WP_TESTS_SKIP_INSTALL=1; {1 = skip install, 0 = reinstall tables}
  */
 
-// Get some paths, being aware that our plugin, and this file, may be symlinked.
+// Get some paths, unaware that our plugin may be symlinked.
 $testsRoot = __DIR__;
 $pluginRoot = dirname(__DIR__, 2);
 $wpRoot = substr($pluginRoot, 0, strpos($pluginRoot, 'wp-content') - 1);
 putenv("WP_TESTS_INSTALLATION=$wpRoot");
 putenv("WP_TESTS_CONFIG_FILE_PATH=$testsRoot/wp-tests-config.php");
 putenv("WP_TESTS_PHPUNIT_POLYFILLS_PATH=$pluginRoot/vendor/yoast/phpunit-polyfills");
-putenv("WP_TESTS_DIR=$testsRoot/frameworks/wordpress/tests/phpunit");
-putenv("WC_TESTS_DIR=$testsRoot/frameworks/woocommerce/tests/legacy");
+putenv("WP_TESTS_DIR=$testsRoot/wordpress-develop/tests/phpunit");
+putenv("WC_TESTS_DIR=$pluginRoot/woocommerce/tests/legacy");
 unset($testsRoot, $pluginRoot, $wpRoot);
 
 putenv("WORDPRESS_WORDPRESS_DEVELOP_REPO=C:/Projecten/WordPress/develop");
