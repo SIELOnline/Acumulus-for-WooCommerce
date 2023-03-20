@@ -10,67 +10,123 @@ namespace Siel\Acumulus\Tests\WooCommerce\Integration;
 use Acumulus;
 use Siel\Acumulus\Invoice\Source;
 use WC_Unit_Test_Case;
+use wpdb;
+
+use function is_array;
 
 /**
  * Tests collecting data in WooCommerce
  *
  * Things that should get tested:
  * - Defaults from {@see \Siel\Acumulus\WooCommerce\Config\ShopCapabilities::getDefaultShopMappings()}
+ *   - Customer
+ *   - Invoice address
+ *   - Shipping address
+ *   - @todo email invoice as pdf
+ *   - @todo email packing slip as pdf
+ *   - @todo invoice + lines
  */
 class CollectorTest extends WC_Unit_Test_Case
 {
     /**
-     * @return false|\WP_User
+     * @before  We want to test on a given set of customers, products and
+     *   orders. As the WP utils will clear all posts, all posts (products and
+     *   orders) will be gone. However, WP allows to change the prefix during
+     *   the execution of a request, and we use that to switch to tables
+     *   containing this known set of testdata.
      */
-    private function createCustomer()
+    public function beforeChangePrefix(): void
     {
-        $id = wc_create_new_customer('erwin@example.com', 'erwin', 'password', [
-            'first_name' => 'Erwin',
-            'last_name' => 'Derksen',
-        ]);
-        return get_user_by('id', $id);
+        /** @var wpdb $wpdb */
+        global $wpdb;
+        $wpdb->set_prefix('wp_');
     }
 
-    public function customerProvider(): array
+    /**
+     * @after  {@see beforeChangePrefix}
+     */
+    public function afterResetPrefix(): void
+    {
+        /** @var wpdb $wpdb */
+        global $wpdb;
+        $wpdb->set_prefix('wptests_');
+    }
+
+    public function collectCustomerProvider(): array
     {
         return [
             [
                 Source::Order,
-                1,
+                61,
                 [
                     'contactId' => null,
                     'type' => null,
                     'vatTypeId' => null,
-                    'contactYourId' => 9,
+                    'contactYourId' => '2',
                     'contactStatus' => null,
                     'website' => null,
                     'vatNumber' => null,
-                    'telephone' => '0303132334',
+                    'telephone' => '0123456789',
                     'telephone2' => null,
                     'fax' => null,
-                    'email' => 'erwin@example.com',
+                    'email' => 'nederland@example.com',
                     'overwriteIfExists' => null,
                     'bankAccountNumber' => null,
                     'mark' => null,
                     'disableDuplicates' => null,
+                    'invoiceAddress' => [
+                        'companyName1' => null,
+                        'companyName2' => null,
+                        'fullName' => 'Account Holland',
+                        'salutation' => null,
+                        'address1' => 'straat 1',
+                        'address2' => null,
+                        'postalCode' => '7777 AB',
+                        'city' => 'Nijmegen',
+                        'country' => null,
+                        'countryCode' => 'NL',
+                        'countryAutoName' => null,
+                        'countryAutoNameLang' => null,
+                    ],
+                    'shippingAddress' => [
+                        'companyName1' => null,
+                        'companyName2' => null,
+                        'fullName' => 'Account2 Holland2',
+                        'salutation' => null,
+                        'address1' => 'straat 2',
+                        'address2' => null,
+                        'postalCode' => '8888 AB',
+                        'city' => 'Arnhem',
+                        'country' => null,
+                        'countryCode' => 'NL',
+                        'countryAutoName' => null,
+                        'countryAutoNameLang' => null,
+                    ],
                 ],
             ],
         ];
     }
 
     /**
-     * @dataProvider customerProvider
+     * @dataProvider collectCustomerProvider
      */
     public function testCollectCustomer(string $type, int $id, array $values): void
     {
         $container = Acumulus::create()->getAcumulusContainer();
         $collector = $container->getCollectorManager();
-        $customer = $this->createCustomer();
-        $source = $container->createSource(Source::Order, 462);
+        $source = $container->createSource(Source::Order, 61);
         $customer = $collector->collectCustomer($source);
         foreach ($values as $key => $value) {
-            /** @noinspection PhpVariableVariableInspection */
-            $this->assertSame($value, $customer->$key, $key);
+            if (is_array($value)) {
+                $address = $key === 'invoiceAddress' ? $customer->getInvoiceAddress() : $customer->getShippingAddress();
+                foreach ($value as $key2 => $value2) {
+                    /** @noinspection PhpVariableVariableInspection */
+                    $this->assertSame($value2, $address->$key2, $key2);
+                }
+            } else {
+                /** @noinspection PhpVariableVariableInspection */
+                $this->assertSame($value, $customer->$key, $key);
+            }
         }
     }
 }

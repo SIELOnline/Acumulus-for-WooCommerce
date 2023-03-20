@@ -34,6 +34,7 @@ class ComposerScripts
             //        sub folder of the woocommerce/woocommerce repo.
             //     -  Copy our feature-config.php to the includes/react-admin folder
             //        of the woocommerce plugin (which indeed is a link in itself).
+            //     - Build the assets (or copy from a downloaded install).
             //   - WordPress:
             //     - link tests/phpunit/data of the wordpress/wordpress-develop repo
             //       to wp-content/plugins/acumulus/tests/wordpress-develop.

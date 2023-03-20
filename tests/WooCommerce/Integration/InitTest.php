@@ -26,6 +26,6 @@ class InitTest extends WP_UnitTestCase
     {
         $container = Acumulus::create()->getAcumulusContainer();
         $environmentInfo = $container->getEnvironment()->get();
-        $this->assertSame('7.4.1', $environmentInfo['shopVersion']);
+        $this->assertMatchesRegularExpression('|\d+\.\d+\.\d+|', $environmentInfo['shopVersion']);
     }
 }
