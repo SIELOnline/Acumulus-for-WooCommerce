@@ -6,6 +6,8 @@
 declare(strict_types=1);
 
 /**
+ * @noinspection GrazieInspection
+ *
  * Bootstrap file for our PHPUnit tests.
  * - define some locations needed by the WP test framework.
  * - include includes/functions.php
@@ -43,12 +45,7 @@ declare(strict_types=1);
  *   - WP_TESTS_PHPUNIT_POLYFILLS_PATH={path to yoast/phpunit-polyfills project}
  */
 
-use Automattic\WooCommerce\Proxies\LegacyProxy;
-use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
-
 require_once __DIR__ . '/../vendor/autoload.php';
-//$class1 = class_exists(LegacyProxy::class);
-//$class2 = class_exists(MockableLegacyProxy::class);
 require_once __DIR__ . '/environment.php';
 
 // if our plugin is symlinked, we need to redefine WP_TESTS_INSTALLATION. Try to

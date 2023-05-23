@@ -7,10 +7,8 @@ declare(strict_types=1);
 
 namespace Siel\Acumulus\Tests\WooCommerce\Integration;
 
-use Acumulus;
 use Siel\Acumulus\Invoice\Source;
-use WC_Unit_Test_Case;
-use wpdb;
+use Siel\Acumulus\Tests\WooCommerce\Acumulus_WooCommerce_TestCase;
 
 use function is_array;
 
@@ -18,7 +16,7 @@ use function is_array;
  * Tests collecting data in WooCommerce
  *
  * Things that should get tested:
- * - Defaults from {@see \Siel\Acumulus\WooCommerce\Config\ShopCapabilities::getDefaultShopMappings()}
+ * - Defaults from {@see \Siel\Acumulus\WooCommerce\Config\ShopCapabilities::getDefaultPropertyMappings()}
  *   - Customer
  *   - Invoice address
  *   - Shipping address
@@ -26,32 +24,8 @@ use function is_array;
  *   - @todo email packing slip as pdf
  *   - @todo invoice + lines
  */
-class CollectorTest extends WC_Unit_Test_Case
+class CollectorTest extends Acumulus_WooCommerce_TestCase
 {
-    /**
-     * @before  We want to test on a given set of customers, products and
-     *   orders. As the WP utils will clear all posts, all posts (products and
-     *   orders) will be gone. However, WP allows to change the prefix during
-     *   the execution of a request, and we use that to switch to tables
-     *   containing this known set of testdata.
-     */
-    public function beforeChangePrefix(): void
-    {
-        /** @var wpdb $wpdb */
-        global $wpdb;
-        $wpdb->set_prefix('wp_');
-    }
-
-    /**
-     * @after  {@see beforeChangePrefix}
-     */
-    public function afterResetPrefix(): void
-    {
-        /** @var wpdb $wpdb */
-        global $wpdb;
-        $wpdb->set_prefix('wptests_');
-    }
-
     public function collectCustomerProvider(): array
     {
         return [
@@ -112,7 +86,7 @@ class CollectorTest extends WC_Unit_Test_Case
      */
     public function testCollectCustomer(string $type, int $id, array $values): void
     {
-        $container = Acumulus::create()->getAcumulusContainer();
+        $container = $this->getAcumulusContainer();
         $collector = $container->getCollectorManager();
         $source = $container->createSource(Source::Order, 61);
         $customer = $collector->collectCustomer($source);

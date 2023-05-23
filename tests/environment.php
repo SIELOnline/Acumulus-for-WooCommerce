@@ -24,8 +24,6 @@ putenv("WP_TESTS_INSTALLATION=$wpRoot");
 putenv("WP_TESTS_CONFIG_FILE_PATH=$testsRoot/wp-tests-config.php");
 putenv("WP_TESTS_PHPUNIT_POLYFILLS_PATH=$pluginRoot/vendor/yoast/phpunit-polyfills");
 putenv("WP_TESTS_DIR=$testsRoot/wordpress-develop/tests/phpunit");
-putenv("WC_TESTS_DIR=$pluginRoot/woocommerce/tests/legacy");
 unset($testsRoot, $pluginRoot, $wpRoot);
 
-putenv("WORDPRESS_WORDPRESS_DEVELOP_REPO=C:/Projecten/WordPress/develop");
-putenv("WOOCOMMERCE_WOOCOMMERCE_REPO=C:/Projecten/WordPress/woocommerce");
+putenv('WORDPRESS_WORDPRESS_DEVELOP_REPO=C:/Projecten/WordPress/develop');
