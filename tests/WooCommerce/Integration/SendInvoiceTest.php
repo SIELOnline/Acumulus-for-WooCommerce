@@ -10,10 +10,12 @@ namespace Siel\Acumulus\Tests\WooCommerce\Integration;
 use Siel\Acumulus\Completors\InvoiceCompletor;
 use Siel\Acumulus\Data\DataType;
 use Siel\Acumulus\Fld;
+use Siel\Acumulus\Helpers\Log;
 use Siel\Acumulus\Invoice\Source;
-use Siel\Acumulus\Shop\SendInvoice;
 use Siel\Acumulus\Tests\WooCommerce\Acumulus_WooCommerce_TestCase;
 use Siel\Acumulus\Tests\WooCommerce\Data\TestData;
+
+use function in_array;
 
 /**
  * SendInvoiceTest tests the process of creation and sending process.
@@ -49,6 +51,8 @@ class SendInvoiceTest extends Acumulus_WooCommerce_TestCase
         $testData = new TestData();
         $expected = $testData->get("$type$id");
         $result = $invoice->toArray();
+        $filename = __DIR__ . "/../Data/$type$id.json";
+        file_put_contents($filename, json_encode($result, Log::JsonFlags));
         $this->assertCount(1, $result);
         $this->assertArrayHasKey(Fld::Customer, $result);
         $this->compareCustomerPart($expected[Fld::Customer], $result[Fld::Customer], $excludeCustomerFields);

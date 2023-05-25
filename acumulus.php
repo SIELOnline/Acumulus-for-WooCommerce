@@ -1064,7 +1064,12 @@ class Acumulus
     public function acumulusInvoiceCreated($invoice, Source $invoiceSource, InvoiceAddResult $localResult): ?array
     {
         if ($invoice !== null) {
-            /** @var \Siel\Acumulus\WooCommerce\Invoice\CreatorPluginSupport $pluginSupport */
+            /**
+             * @var \Siel\Acumulus\WooCommerce\Invoice\CreatorPluginSupport $pluginSupport
+             *
+             * @todo: when making the switch to AcumulusObjects,, switch to the legacy
+             *   CreatorPluginSupport here.
+             */
             $pluginSupport = $this->getAcumulusContainer()->getInstance('CreatorPluginSupport', 'Invoice');
             $invoice = $pluginSupport->acumulusInvoiceCreated($invoice, $invoiceSource, $localResult);
         }

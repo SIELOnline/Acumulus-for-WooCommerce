@@ -15,27 +15,19 @@ use wpdb;
 class Acumulus_WooCommerce_TestCase extends WP_UnitTestCase
 {
     /**
-     * @before  We want to test on a given set of customers, products and
-     *   orders. As the WP utils will clear all posts, all posts (products and
-     *   orders) will be gone. However, WP allows to change the prefix during
-     *   the execution of a request, and we use that to switch to tables
-     *   containing this known set of testdata.
+     * @before  See {@see \Siel\Acumulus\Tests\WooCommerce\Util::changePrefix()}.
      */
     public function beforeChangePrefix(): void
     {
-        /** @var wpdb $wpdb */
-        global $wpdb;
-        $wpdb->set_prefix('wp_');
+        Util::changePrefix();
     }
 
     /**
-     * @after  {@see beforeChangePrefix}
+     * @after  See {@see \Siel\Acumulus\Tests\WooCommerce\Util::resetPrefix()}
      */
     public function afterResetPrefix(): void
     {
-        /** @var wpdb $wpdb */
-        global $wpdb;
-        $wpdb->set_prefix('wptests_');
+        Util::resetPrefix();
     }
 
     /**

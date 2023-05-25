@@ -5,6 +5,8 @@
 
 declare(strict_types=1);
 
+use Siel\Acumulus\Tests\WooCommerce\Util;
+
 /**
  * Class AcumulusTestsBootstrap Bootstraps the Acumulus tests.
  *
@@ -72,7 +74,9 @@ class AcumulusTestsBootstrap
      */
     public function load_acumulus(): void
     {
+        Util::changePrefix();
         require_once $this->plugins_dir . '/acumulus/acumulus.php';
+        Util::resetPrefix();
     }
 
     /**
@@ -80,6 +84,7 @@ class AcumulusTestsBootstrap
      */
     public function load_wc(): void
     {
+        Util::changePrefix();
         define('WC_TAX_ROUNDING_MODE', 'auto');
         define('WC_USE_TRANSACTIONS', false);
         update_option('woocommerce_enable_coupons', 'yes');
@@ -87,6 +92,7 @@ class AcumulusTestsBootstrap
         update_option('woocommerce_onboarding_opt_in', 'yes');
 
         require_once $this->plugins_dir . '/woocommerce/woocommerce.php';
+        Util::resetPrefix();
     }
 
     /**
