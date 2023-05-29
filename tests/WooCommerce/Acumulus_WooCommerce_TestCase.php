@@ -7,7 +7,6 @@ namespace Siel\Acumulus\Tests\WooCommerce;
 use Acumulus;
 use Siel\Acumulus\Helpers\Container;
 use WP_UnitTestCase;
-use wpdb;
 
 /**
  * Acumulus_WooCommerce_TestCase does foo.
@@ -23,7 +22,7 @@ class Acumulus_WooCommerce_TestCase extends WP_UnitTestCase
     }
 
     /**
-     * @after  See {@see \Siel\Acumulus\Tests\WooCommerce\Util::resetPrefix()}
+     * @after  See {@see \Siel\Acumulus\Tests\WooCommerce\Util::resetPrefix()}.
      */
     public function afterResetPrefix(): void
     {
@@ -33,7 +32,7 @@ class Acumulus_WooCommerce_TestCase extends WP_UnitTestCase
     /**
      * Returns an Acumulus Container instance.
      */
-    public function getAcumulusContainer(): Container
+    public static function getAcumulusContainer(): Container
     {
         return Acumulus::create()->getAcumulusContainer();
     }

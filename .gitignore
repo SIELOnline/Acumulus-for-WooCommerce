@@ -10,8 +10,11 @@ composer.lock
 # WooCommerce projects, but are not defined as composer packages. These are also stored
 # under the tests dir via custom actions, but not committed.
 /tests/*/
-# Our own tests are committed.
+# Our own tests are committed,
 !/tests/WooCommerce
+# but not the *.latest.json files
+/tests/WooCommerce/Data/*.latest.json
+
 # Local config, create your own using wp-tests-config-sample.php.
 /tests/wp-tests-config.php
 
