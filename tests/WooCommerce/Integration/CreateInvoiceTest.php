@@ -7,7 +7,6 @@ declare(strict_types=1);
 
 namespace Siel\Acumulus\Tests\WooCommerce\Integration;
 
-use RuntimeException;
 use Siel\Acumulus\Completors\InvoiceCompletor;
 use Siel\Acumulus\Data\DataType;
 use Siel\Acumulus\Fld;
@@ -21,7 +20,7 @@ use function in_array;
 /**
  * SendInvoiceTest tests the process of creation and sending process.
  */
-class SendInvoiceTest extends Acumulus_WooCommerce_TestCase
+class CreateInvoiceTest extends Acumulus_WooCommerce_TestCase
 {
     /**
      * @beforeClass
@@ -35,10 +34,11 @@ class SendInvoiceTest extends Acumulus_WooCommerce_TestCase
     public function InvoiceDataProvider(): array
     {
         return [
-            'NL consument' => [Source::Order, 61, [],],
-            'NL bedrijf' => [Source::Order, 62,],
-            '1 kortingsbon' => [Source::Order, 67,],
-            '2 kortingsbonnen' => [Source::Order, 68,],
+            'NL consument' => [Source::Order, 61,],
+            'NL company' => [Source::Order, 62,],
+            '1 coupon' => [Source::Order, 67,],
+            '2 coupons' => [Source::Order, 68,],
+            'reversed vat, different shipping country, variants' => [Source::Order, 69,],
         ];
     }
 
@@ -60,15 +60,17 @@ class SendInvoiceTest extends Acumulus_WooCommerce_TestCase
         $invoiceCompletor->setSource($invoiceSource)->complete($invoice, $result);
         $result = $invoice->toArray();
         $testData = new TestData();
-
-        try {
-            $expected = $testData->get($type, $id);
+        // Get order from Order{id}.json.
+        $expected = $testData->get($type, $id);
+        if ($expected !== null) {
+            // Save order to Order{id}.latest.json, so we can compare differences ourselves.
+            $testData->save($type, $id, false, $result);
             $this->assertCount(1, $result);
             $this->assertArrayHasKey(Fld::Customer, $result);
             $this->compareAcumulusObject($expected[Fld::Customer], $result[Fld::Customer], $excludeFields);
-            $testData->save($type, $id, false, $result);
-        } catch (RuntimeException $e) {
-            // First time for a new test order: save to the data folder.
+        } else {
+            // File does not yet exist: first time for a new test order: save order to Order{id}.json.
+            // Will raise a warning that no asserts have been executed.
             $testData->save($type, $id, true, $result);
         }
     }

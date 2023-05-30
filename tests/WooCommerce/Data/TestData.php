@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Siel\Acumulus\Tests\WooCommerce\Data;
 
-use RuntimeException;
 use Siel\Acumulus\Helpers\Log;
 
 /**
@@ -15,17 +14,16 @@ class TestData
     /**
      * Returns test data, typically a created and completed invoice converted to an array.
      *
-     * @return mixed
-     *   The json decoded testdata.
+     * @return mixed|null
+     *   The json decoded testdata, or null if the file does not yet exist.
      *
-     * @throws \RuntimeException
      * @throws \JsonException
      */
     public function get(string $type, int $id)
     {
         $filename = __DIR__ . "/$type$id.json";
         if (!is_readable($filename)) {
-            throw new RuntimeException("Could not read test data for $type $id");
+            return null;
         }
         $json = file_get_contents($filename);
         return json_decode($json, true, 512, JSON_THROW_ON_ERROR);
