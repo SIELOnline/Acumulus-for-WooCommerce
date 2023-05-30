@@ -14,7 +14,7 @@
         "city": "Molenhoek",
         "countryCode": "NL",
         "meta-address-type": "invoiceAddress",
-        "meta-shop-country-name": "Netherlands",
+        "meta-shop-country-name": "Nederland",
         "altCompanyName1": "BV Mijn Bedrijf",
         "altFullName": "Bedrijf Nederland",
         "altAddress1": "straat 3",
@@ -22,7 +22,7 @@
         "altCity": "Mook",
         "altCountryCode": "NL",
         "altMeta-address-type": "shippingAddress",
-        "altMeta-shop-country-name": "Netherlands",
+        "altMeta-shop-country-name": "Nederland",
         "meta-vat-based-on-shop": "billing",
         "meta-main-address": "invoiceAddress",
         "invoice": {

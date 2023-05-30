@@ -36,9 +36,11 @@ class CreateInvoiceTest extends Acumulus_WooCommerce_TestCase
         return [
             'NL consument' => [Source::Order, 61,],
             'NL company' => [Source::Order, 62,],
-            '1 coupon' => [Source::Order, 67,],
-            '2 coupons' => [Source::Order, 68,],
+            '1 fixed amount coupon' => [Source::Order, 67,],
+            '2 (fixed amount and percentage) coupons' => [Source::Order, 68,],
             'reversed vat, different shipping country, variants' => [Source::Order, 69,],
+            'EU VAT, variants, percentage coupon' => [Source::Order, 70,],
+            'EU VAT Belgium (same vat rate as NL), shipping to NL' => [Source::Order, 71,],
         ];
     }
 

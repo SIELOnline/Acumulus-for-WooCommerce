@@ -15,7 +15,7 @@
         "city": "Mirabel aux Baronnies",
         "countryCode": "FR",
         "meta-address-type": "invoiceAddress",
-        "meta-shop-country-name": "France",
+        "meta-shop-country-name": "Frankrijk",
         "altCompanyName1": "Le Rêve Provencal",
         "altFullName": "Jan Jansen",
         "altAddress1": "straat 3",
@@ -23,7 +23,7 @@
         "altCity": "Tilburg",
         "altCountryCode": "NL",
         "altMeta-address-type": "shippingAddress",
-        "altMeta-shop-country-name": "Netherlands",
+        "altMeta-shop-country-name": "Nederland",
         "meta-vat-based-on-shop": "billing",
         "meta-main-address": "invoiceAddress",
         "invoice": {
