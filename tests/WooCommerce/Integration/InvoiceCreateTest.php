@@ -7,8 +7,6 @@ declare(strict_types=1);
 
 namespace Siel\Acumulus\Tests\WooCommerce\Integration;
 
-use Siel\Acumulus\Completors\InvoiceCompletor;
-use Siel\Acumulus\Data\DataType;
 use Siel\Acumulus\Fld;
 use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Invoice\Translations;
@@ -18,9 +16,9 @@ use Siel\Acumulus\Tests\WooCommerce\Data\TestData;
 use function in_array;
 
 /**
- * SendInvoiceTest tests the process of creation and sending process.
+ * InvoiceCreateTest tests the process of creating an {@see Invoice}.
  */
-class CreateInvoiceTest extends Acumulus_WooCommerce_TestCase
+class InvoiceCreateTest extends Acumulus_WooCommerce_TestCase
 {
     /**
      * @beforeClass
@@ -51,15 +49,11 @@ class CreateInvoiceTest extends Acumulus_WooCommerce_TestCase
      * @dataProvider InvoiceDataProvider
      * @throws \JsonException
      */
-    public function testCreateAndCompleteInvoice(string $type, int $id, array $excludeFields = []): void
+    public function testCreate(string $type, int $id, array $excludeFields = []): void
     {
-        $manager = $this->getAcumulusContainer()->getCollectorManager();
         $invoiceSource = $this->getAcumulusContainer()->createSource($type, $id);
-        $invoice = $manager->collectInvoice($invoiceSource);
-        /** @var InvoiceCompletor $invoiceCompletor */
-        $invoiceCompletor = $this->getAcumulusContainer()->getCompletor(DataType::Invoice);
-        $result = $this->getAcumulusContainer()->createInvoiceAddResult('SendInvoiceTest::testCreateAndCompleteInvoice()');
-        $invoiceCompletor->setSource($invoiceSource)->complete($invoice, $result);
+        $invoiceAddResult = $this->getAcumulusContainer()->createInvoiceAddResult('SendInvoiceTest::testCreateAndCompleteInvoice()');
+        $invoice = $this->getAcumulusContainer()->getInvoiceCreate()->create($invoiceSource, $invoiceAddResult);
         $result = $invoice->toArray();
         $testData = new TestData();
         // Get order from Order{id}.json.
