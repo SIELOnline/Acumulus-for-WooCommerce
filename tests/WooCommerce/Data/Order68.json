@@ -143,7 +143,7 @@
             "meta-currency": "{'currency':'EUR','rate':1.0,'doConvert':false}",
             "meta-totals": "{'amountEx':52.69,'amountInc':63.75,'amountVat':11.06,'vatBreakdown':null,'calculated':'amountEx'}",
             "meta-prices-include-vat": true,
-            "meta-add-email-as-pdf-section": "",
+            "meta-add-email-as-pdf-section": false,
             "meta-lines-amount": 52.68595041322314,
             "meta-lines-amountinc": 63.75,
             "meta-lines-vatamount": 11.064050000000002,

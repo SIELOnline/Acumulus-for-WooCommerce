@@ -39,6 +39,7 @@ class InvoiceCreateTest extends Acumulus_WooCommerce_TestCase
             'reversed vat, different shipping country, variants' => [Source::Order, 69,],
             'EU VAT, variants, percentage coupon' => [Source::Order, 70,],
             'EU VAT Belgium (same vat rate as NL), shipping to NL' => [Source::Order, 71,],
+            'NL Refund' => [Source::CreditNote, 74,],
         ];
     }
 
