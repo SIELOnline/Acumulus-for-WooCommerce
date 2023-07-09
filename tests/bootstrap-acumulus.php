@@ -19,6 +19,7 @@ class AcumulusTestsBootstrap
 
     public $wp_tests_dir;
     public string $plugins_dir;
+    public string $languages_dir;
 
     /**
      * Setup the unit testing environment.
@@ -33,6 +34,7 @@ class AcumulusTestsBootstrap
         $wp_tests_installation = getenv('WP_TESTS_INSTALLATION');
         // Plugins installation path.
         $this->plugins_dir = $wp_tests_installation . '/wp-content/plugins';
+        $this->languages_dir = $wp_tests_installation . '/wp-content/languages';
 
         ini_set('display_errors', 'on');
         error_reporting(E_ALL);
@@ -47,6 +49,9 @@ class AcumulusTestsBootstrap
 
         // Load test function so tests_add_filter() is available.
         require_once $this->wp_tests_dir . '/includes/functions.php';
+
+        // Ensure that translations from our own installation are loaded.
+        tests_add_filter('load_textdomain_mofile', [$this, 'load_text_domain_mo_file'], 10, 2);
 
         // Always load PayPal Standard for unit tests.
         tests_add_filter('woocommerce_should_load_paypal_standard', '__return_true');
@@ -104,6 +109,14 @@ class AcumulusTestsBootstrap
             self::$instance = new self();
         }
         return self::$instance;
+    }
+
+    public function load_text_domain_mo_file(string $moFile, string $domain): string
+    {
+        if (strpos($moFile, WP_LANG_DIR) === 0 && !is_readable($moFile)) {
+            $moFile = $this->languages_dir . '/plugins/' . basename($moFile);
+        }
+        return $moFile;
     }
 }
 
