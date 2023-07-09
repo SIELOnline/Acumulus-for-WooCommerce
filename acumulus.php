@@ -215,21 +215,44 @@ class Acumulus
      */
     public function addMenuLinks(): void
     {
+        // Initialise translations.
         $this->getAcumulusContainer()->getTranslator()->add(new ConfigFormTranslations());
-        add_submenu_page('options-general.php',
-            $this->t('config_form_title'),
-            $this->t('config_form_header'),
-            'manage_options',
-            'acumulus_config',
-            [$this, 'processConfigForm']
-        );
-        add_submenu_page('options-general.php',
-            $this->t('advanced_form_title'),
-            $this->t('advanced_form_header'),
-            'manage_options',
-            'acumulus_advanced',
-            [$this, 'processAdvancedForm']
-        );
+
+        if ($this->getAcumulusContainer()->getShopCapabilities()->usesNewCode()) {
+            add_submenu_page(
+                'options-general.php',
+                $this->t('settings_form_title'),
+                $this->t('settings_form_header'),
+                'manage_options',
+                'acumulus_settings',
+                [$this, 'processSettingsForm']
+            );
+            add_submenu_page(
+                'options-general.php',
+                $this->t('mappings_form_title'),
+                $this->t('mappings_form_header'),
+                'manage_options',
+                'acumulus_mappings',
+                [$this, 'processMappingsForm']
+            );
+        } else {
+            add_submenu_page(
+                'options-general.php',
+                $this->t('config_form_title'),
+                $this->t('config_form_header'),
+                'manage_options',
+                'acumulus_config',
+                [$this, 'processConfigForm']
+            );
+            add_submenu_page(
+                'options-general.php',
+                $this->t('advanced_form_title'),
+                $this->t('advanced_form_header'),
+                'manage_options',
+                'acumulus_advanced',
+                [$this, 'processAdvancedForm']
+            );
+        }
         $this->getAcumulusContainer()->getTranslator()->add(new ActivateSupportFormTranslations());
         add_submenu_page('options-general.php',
             $this->t('activate_form_title'),
@@ -241,7 +264,7 @@ class Acumulus
         $this->getAcumulusContainer()->getTranslator()->add(new RegisterFormTranslations());
         // Do not show the registration form in the menu by making it a child of
         // our config form.
-        add_submenu_page('acumulus_config',
+        add_submenu_page('acumulus_activate',
             $this->t('register_form_title'),
             $this->t('register_form_header'),
             'manage_options',
@@ -538,6 +561,34 @@ class Acumulus
     }
 
     /**
+     * Implements the admin_post_acumulus_settings action.
+     *
+     * Processes and renders the settings form.
+     *
+     * @throws \Throwable
+     */
+    public function processSettingsForm(): void
+    {
+        $this->checkCapability('manage_options');
+        $this->checkCapability('manage_woocommerce');
+        echo $this->processForm('settings');
+    }
+
+    /**
+     * Implements the admin_post_acumulus_mappings action.
+     *
+     * Processes and renders the mappings form.
+     *
+     * @throws \Throwable
+     */
+    public function processMappingsForm(): void
+    {
+        $this->checkCapability('manage_options');
+        $this->checkCapability('manage_woocommerce');
+        echo $this->processForm('mappings');
+    }
+
+    /**
      * Implements the admin_post_acumulus_activate action.
      *
      * Processes and renders the "activate pro-support" form.
@@ -753,6 +804,8 @@ class Acumulus
             case 'register':
             case 'config':
             case 'advanced':
+            case 'settings':
+            case 'mappings':
             case 'activate':
             case 'batch':
             case 'invoice':
@@ -1047,7 +1100,7 @@ class Acumulus
     /**
      * Processes the filter triggered before an invoice will be sent to Acumulus.
      *
-     * @param array|null $invoice
+     * @param \Siel\Acumulus\Data\Invoice|array|null $invoice
      *   The invoice in Acumulus format as will be sent to Acumulus or null if
      *   another filter already decided that the invoice should not be sent to
      *   Acumulus.
@@ -1064,13 +1117,17 @@ class Acumulus
     public function acumulusInvoiceCreated($invoice, Source $invoiceSource, InvoiceAddResult $localResult): ?array
     {
         if ($invoice !== null) {
-            /**
-             * @var \Siel\Acumulus\WooCommerce\Invoice\CreatorPluginSupport $pluginSupport
-             *
-             * @todo: when making the switch to AcumulusObjects,, switch to the legacy
-             *   CreatorPluginSupport here.
-             */
-            $pluginSupport = $this->getAcumulusContainer()->getInstance('CreatorPluginSupport', 'Invoice');
+            if ($this->getAcumulusContainer()->getShopCapabilities()->usesNewCode()) {
+                /**
+                 * @var \Siel\Acumulus\WooCommerce\Invoice\CreatorPluginSupport $pluginSupport
+                 */
+                $pluginSupport = $this->getAcumulusContainer()->getInstance('CreatorPluginSupport', 'Invoice');
+            } else {
+                /**
+                 * @var \Siel\Acumulus\WooCommerce\Completors\Legacy\CreatorPluginSupport $pluginSupport
+                 */
+                $pluginSupport = $this->getAcumulusContainer()->getInstance('CreatorPluginSupport', 'Completors\Legacy');
+            }
             $invoice = $pluginSupport->acumulusInvoiceCreated($invoice, $invoiceSource, $localResult);
         }
 
