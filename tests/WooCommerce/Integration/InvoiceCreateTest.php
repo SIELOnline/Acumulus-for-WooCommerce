@@ -64,7 +64,7 @@ class InvoiceCreateTest extends Acumulus_WooCommerce_TestCase
             $testData->save($type, $id, false, $result);
             $this->assertCount(1, $result);
             $this->assertArrayHasKey(Fld::Customer, $result);
-            $this->compareAcumulusObject($expected[Fld::Customer], $result[Fld::Customer], $excludeFields);
+            $this->compareAcumulusObject($expected[Fld::Customer], $result[Fld::Customer], Fld::Customer, $excludeFields);
         } else {
             // File does not yet exist: first time for a new test order: save order to Order{id}.json.
             // Will raise a warning that no asserts have been executed.
@@ -72,7 +72,7 @@ class InvoiceCreateTest extends Acumulus_WooCommerce_TestCase
         }
     }
 
-    private function compareAcumulusObject(array $expected, array $object, array $excludeFields): void
+    private function compareAcumulusObject(array $expected, array $object, string $objectName, array $excludeFields): void
     {
         foreach ($expected as $field => $value) {
             if (!in_array($field, $excludeFields, true)) {
@@ -80,15 +80,15 @@ class InvoiceCreateTest extends Acumulus_WooCommerce_TestCase
                 switch ($field) {
                     case 'invoice':
                     case 'emailAsPdf':
-                        $this->compareAcumulusObject($value, $object[$field], $excludeFields);
+                        $this->compareAcumulusObject($value, $object[$field], $field, $excludeFields);
                         break;
                     case 'lines':
                         foreach ($value as $index => $line) {
-                            $this->compareAcumulusObject($line, $object[$field][$index], $excludeFields);
+                            $this->compareAcumulusObject($line, $object[$field][$index], $field, $excludeFields);
                         }
                         break;
                     default:
-                        $this->assertEquals($value, $object[$field]);
+                        $this->assertEquals($value, $object[$field], "$objectName::$field");
                         break;
                 }
             }

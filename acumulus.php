@@ -4,13 +4,13 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 8.0.0-alpha
+ * Version: 8.0.0
  * LICENCE: GPLv3
  * Requires at least: 5.9
- * Tested up to: 6.1
+ * Tested up to: 6.2
  * WC requires at least: 5.0
- * WC tested up to: 7.4
- * libAcumulus requires at least: 7.6.6
+ * WC tested up to: 7.8
+ * libAcumulus requires at least: 8.0.0
  * Requires PHP: 7.4
  */
 
@@ -140,7 +140,13 @@ class Acumulus
      */
     private function isOwnPage(): bool
     {
-        $screenIds = ['settings_page_acumulus_config', 'settings_page_acumulus_advanced', 'woocommerce_page_acumulus_batch'];
+        $screenIds = [
+            'settings_page_acumulus_settings',
+            'settings_page_acumulus_mappings',
+            'settings_page_acumulus_config',
+            'settings_page_acumulus_advanced',
+            'woocommerce_page_acumulus_batch',
+        ];
         $screen = get_current_screen();
         return $screen && in_array($screen->id, $screenIds);
     }
@@ -294,6 +300,10 @@ class Acumulus
     {
         // These notices should only show on the main dashboard and our own screens.
         if ($this->isDashboard() || $this->isOwnPage()) {
+            // Notice about the new version.
+            if (time() >= $this->getAcumulusContainer()->getConfig()->getPluginV8Message()) {
+                echo $this->processMessageForm();
+            }
             // Notice about rating our plugin.
             if (time() >= $this->getAcumulusContainer()->getConfig()->getShowRatePluginMessage()) {
                 echo $this->processRatePluginForm();
@@ -305,8 +315,9 @@ class Acumulus
      * Handles ajax requests for this plugin.
      *
      * Uses of ajax:
-     * - Invoice status overview
-     * - Rate plugin message
+     * - Invoice status overview.
+     * - Rate plugin message.
+     * - plugin new version message.
      * - Mail invoice/packing slip from order list. This use is not a real ajax
      *   request but uses admin-ajax.php as entry point like WooCommerce does:
      *   no need to define a proper admin page and finish with a redirect back to
@@ -327,6 +338,9 @@ class Acumulus
                     break;
                 case 'acumulus-rate':
                     $content = $this->processRatePluginForm();
+                    break;
+                case 'acumulus-message':
+                    $content = $this->processMessageForm();
                     break;
                 default:
                     $content = $this->renderNotice('Area parameter of ajax request unknown to Acumulus.', 'error');
@@ -650,6 +664,22 @@ class Acumulus
     }
 
     /**
+     * Processes and renders the Acumulus message form.
+     *
+     * Called via:
+     * - Render admin notice.
+     *
+     * @return string
+     *   The rendered form (embedded in any necessary html).
+     *
+     * @throws \Throwable
+     */
+    public function processMessageForm(): string
+    {
+        return $this->processForm('message');
+    }
+
+    /**
      * Processes and renders the form of the given type.
      *
      * @param string $type
@@ -762,10 +792,11 @@ class Acumulus
                     ->setProperty('markupWrapperTag', '');
                 break;
             case 'rate':
+            case 'message':
                 // Add some js.
                 wp_enqueue_script('acumulus-ajax.js', $pluginUrl . '/' . 'acumulus-ajax.js');
 
-                // The invoice status overview is not rendered as other forms, therefore
+                // The rte plugin message is not rendered as other forms, therefore
                 // we change some properties of the form renderer.
                 $this->getAcumulusContainer()->getFormRenderer()
                     ->setProperty('fieldsetContentWrapperTag', 'div')
@@ -825,15 +856,17 @@ class Acumulus
                 }
                 break;
             case 'rate':
+            case 'message':
                 $extraAttributes = [
-                    'class' => 'acumulus-area',
+                    'class' => 'acumulus acumulus-area',
                     'data-acumulus-wait' => $wait,
                     'data-acumulus-nonce' => $nonce,
                 ];
                 if ($this->isOwnPage()) {
                     $extraAttributes['class'] .= ' inline';
                 }
-                $output .= $this->renderNotice($formOutput, 'success', $id, $extraAttributes, true);
+                $noticeType = $type === 'rate' ? 'success' : 'info';
+                $output .= $this->renderNotice($formOutput, $noticeType, $id, $extraAttributes, true);
                 break;
         }
 

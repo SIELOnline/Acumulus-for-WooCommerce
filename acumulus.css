@@ -76,6 +76,11 @@ textarea {
   margin-bottom: 0;
 }
 
+.property-list dd .info {
+  display: block;
+  margin-bottom: 0.2em;
+}
+
 label {
   color: #777;
 }
@@ -119,7 +124,7 @@ input.success {
 }
 
 #acumulus-register summary {
-  font-size: inherit
+  font-size: inherit;
 }
 
 /* Acumulus About block */
@@ -353,17 +358,17 @@ input.success {
 }
 
 /*
- * Ensures that the rate plugin message gets aligned with the field sets.
+ * Ensures that the rate plugin or message gets aligned with the field sets.
  */
-#acumulus-rate {
+.acumulus {
   margin-left: 0;
 }
 
-#acumulus-rate > div > img {
+.acumulus > div > img {
   float: left;
   margin-right: 12px;
 }
 
-#acumulus-rate input {
+.acumulus .button {
   margin: 0 2em 0.5em 0;
 }
