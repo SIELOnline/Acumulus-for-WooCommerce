@@ -67,7 +67,7 @@ Installing the test environment for this plugin is yet to be described here.
 4. Acumulus invoice status overview
 
 == Changelog ==
-The Acumulus plugin exists for multiple eCommerce solutions and are all built on a common library. Most changes take place in that common library, therefore there's only 1 changelog that is part of the library, see [changelog.txt](https://plugins.svn.wordpress.org/acumulus/trunk/lib/siel/acumulus/changelog.txt).
+The Acumulus plugin exists for multiple eCommerce solutions and are all built on a common library. Most changes take place in that common library, therefore there's only 1 changelog that is part of the library, see [changelog.txt](https://plugins.svn.wordpress.org/acumulus/trunk/vendor/siel/acumulus/changelog.txt).
 
 == Support ==
 See the [Acumulus forum](https://forum.acumulus.nl/index.php?board=17.0).
