@@ -6,6 +6,7 @@ namespace Siel\Acumulus\Tests\WooCommerce;
 
 use Acumulus;
 use Siel\Acumulus\Helpers\Container;
+use Siel\Acumulus\Tests\AcumulusTestUtils;
 use WP_UnitTestCase;
 
 /**
@@ -13,6 +14,13 @@ use WP_UnitTestCase;
  */
 class Acumulus_WooCommerce_TestCase extends WP_UnitTestCase
 {
+    use AcumulusTestUtils;
+
+    protected function getAcumulusContainer(): Container
+    {
+        return Acumulus::create()->getAcumulusContainer();
+    }
+
     /**
      * @before  See {@see \Siel\Acumulus\Tests\WooCommerce\Util::changePrefix()}.
      */
@@ -27,13 +35,5 @@ class Acumulus_WooCommerce_TestCase extends WP_UnitTestCase
     public function afterResetPrefix(): void
     {
         Util::resetPrefix();
-    }
-
-    /**
-     * Returns an Acumulus Container instance.
-     */
-    public static function getAcumulusContainer(): Container
-    {
-        return Acumulus::create()->getAcumulusContainer();
     }
 }
