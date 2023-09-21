@@ -22,10 +22,11 @@ composer.lock
 .idea/*
 
 # Resources shared with other modules, committed in libAcumulus.
-acumulus-invoice.png
-acumulus-packing-slip.png
-icon-pdf.svg
-siel-logo.svg
-leesmij-indien-hulp-nodig.txt
-license.txt
-licentie-nl.pdf
+# We need these in svn, ths in wp-org
+#acumulus-invoice.png
+#acumulus-packing-slip.png
+#icon-pdf.svg
+#siel-logo.svg
+#leesmij-indien-hulp-nodig.txt
+#license.txt
+#licentie-nl.pdf
