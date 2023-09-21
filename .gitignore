@@ -9,12 +9,12 @@ composer.lock
 # We use test classes and utilities that are not our own, but from the WordPress and
 # WooCommerce projects, but are not defined as composer packages. These are also stored
 # under the tests dir via custom actions, but not committed.
+/tests/.phpunit.result.cache
 /tests/*/
 # Our own tests are committed,
 !/tests/WooCommerce
 # but not the *.latest.json files
 /tests/WooCommerce/Data/*.latest.json
-
 # Local config, create your own using wp-tests-config-sample.php.
 /tests/wp-tests-config.php
 
