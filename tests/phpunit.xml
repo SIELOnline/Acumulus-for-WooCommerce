@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <testsuites>
-  <testsuite name="all">
-    <directory>WooCommerce</directory>
-  </testsuite>
-  <testsuite name="unit">
-    <directory>WooCommerce/Unit</directory>
-  </testsuite>
-  <testsuite name="integration">
-    <directory>WooCommerce/Integration</directory>
-  </testsuite>
+    <testsuite name="all">
+        <directory>WooCommerce</directory>
+    </testsuite>
+    <testsuite name="unit">
+        <directory>WooCommerce/Unit</directory>
+    </testsuite>
+    <testsuite name="integration">
+        <directory>WooCommerce/Integration</directory>
+    </testsuite>
 </testsuites>

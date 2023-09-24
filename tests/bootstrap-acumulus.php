@@ -8,7 +8,7 @@ declare(strict_types=1);
 use Siel\Acumulus\Tests\WooCommerce\Util;
 
 /**
- * Class AcumulusTestsBootstrap Bootstraps the Acumulus tests.
+ * Class AcumulusTestsBootstrap bootstraps the Acumulus tests.
  *
  * This class works on top of ./wordpress-develop/tests/phpunit/includes/bootstrap.php,
  * which it includes as last action.

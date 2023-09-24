@@ -172,7 +172,7 @@ class Acumulus
     private function init(): void
     {
         if (!isset($this->acumulusContainer)) {
-            // Load autoloader.
+            // Get access to our library.
             require_once __DIR__ . '/vendor/autoload.php';
 
             // Get language.
