@@ -110,6 +110,8 @@ class Acumulus
         add_action('wp_ajax_acumulus_ajax_action', [$this, 'handleAjaxRequest']);
         add_filter( 'woocommerce_admin_order_actions', [$this, 'adminOrderActions'], 100, 2 );
         // - To process our own forms.
+        add_action('admin_post_acumulus_settings', [$this, 'processSettingsForm']);
+        add_action('admin_post_acumulus_mappings', [$this, 'processMappingsForm']);
         add_action('admin_post_acumulus_config', [$this, 'processConfigForm']);
         add_action('admin_post_acumulus_advanced', [$this, 'processAdvancedForm']);
         add_action('admin_post_acumulus_batch', [$this, 'processBatchForm']);
