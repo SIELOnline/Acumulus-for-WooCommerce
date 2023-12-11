@@ -29,6 +29,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Siel\Acumulus\ApiClient\AcumulusResult;
 use Siel\Acumulus\Config\Config;
 use Siel\Acumulus\Helpers\Container;
@@ -106,6 +107,7 @@ class Acumulus
         add_action('admin_menu', [$this, 'addMenuLinks'], 900);
         // - Admin notices , meta boxes, and ajax requests from them.
         add_action('admin_notices', [$this, 'showAdminNotices']);
+        // @todo: WooCommerce HPOS compatibility.
         add_action('add_meta_boxes_shop_order', [$this, 'addShopOrderMetaBox']);
         add_action('wp_ajax_acumulus_ajax_action', [$this, 'handleAjaxRequest']);
         add_filter( 'woocommerce_admin_order_actions', [$this, 'adminOrderActions'], 100, 2 );
@@ -122,6 +124,15 @@ class Acumulus
         add_action('woocommerce_order_refunded', [$this, 'woocommerceOrderRefunded'], 10, 2);
         // - Our own invoice related events.
         add_filter('acumulus_invoice_created', [$this, 'acumulusInvoiceCreated'], 10, 3);
+
+        // @todo: WooCommerce HPOS compatibility.
+        //   Declare incompatibility, change to true once we are compatible.
+        add_action('before_woocommerce_init', static function () {
+            if (class_exists(FeaturesUtil::class)) {
+                FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, false);
+            }
+        });
+
     }
 
     /**
@@ -362,6 +373,7 @@ class Acumulus
                 default:
                     $content = $this->renderNotice('Acumulus_action parameter of ajax request unknown to Acumulus.', 'error');
             }
+            // @todo: WooCommerce HPOS compatibility.
             wp_safe_redirect( wp_get_referer() ?: admin_url( 'edit.php?post_type=shop_order' ) );
             exit;
         } else {
@@ -408,6 +420,7 @@ class Acumulus
                 $orderId = $shopOrderPost->ID;
                 $source = $this->getAcumulusContainer()->createSource(Source::Order, $orderId);
                 $form->setSource($source);
+                // @todo: WooCommerce HPOS compatibility.
                 add_meta_box('acumulus-invoice-status-overview',
                     $this->t('invoice_form_title'),
                     [$this, 'outputInvoiceStatusInfoBox'],
@@ -1019,11 +1032,11 @@ class Acumulus
      *
      * @param int $orderId
      * - For 'woocommerce_new_order'
-     *   param 2: WC_Order $Order
+     *   param 2: WC[_Abstract]_Order $order
      * - For 'woocommerce_order_status_changed'
      *   param 2: int $fromStatus
      *   param 3: int $toStatus
-     *   param 4: WC_Order $Order
+     *   param 4: WC[_Abstract]_Order $order
      *
      * @throws \Throwable
      */
