@@ -4,31 +4,26 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 8.0.2
+ * Version: 8.1.0
  * LICENCE: GPLv3
  * Requires at least: 5.9
- * Tested up to: 6.3
+ * Tested up to: 6.4
  * WC requires at least: 5.0
- * WC tested up to: 8.1
- * libAcumulus requires at least: 8.0.2
+ * WC tested up to: 8.3
+ * libAcumulus requires at least: 8.1.0
  * Requires PHP: 7.4
  */
 
 /**
- * @noinspection PhpMissingParamTypeInspection
- * @noinspection PhpMissingReturnTypeInspection
- * @noinspection PhpMissingFieldTypeInspection
- * @noinspection PhpMissingVisibilityInspection
+ * @noinspection PhpMissingStrictTypesDeclarationInspection  accept strings as int
  * @noinspection AutoloadingIssuesInspection
- * @noinspection PhpUnused
  */
-
-declare(strict_types=1);
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Siel\Acumulus\ApiClient\AcumulusResult;
 use Siel\Acumulus\Config\Config;
@@ -45,6 +40,12 @@ use Siel\Acumulus\Shop\RegisterFormTranslations;
 
 /**
  * Class Acumulus is the base plugin class.
+ *
+ * WooCommerce HPOS compatibility notes:
+ * - new order list page: wp-admin/admin.php?page=wc-orders
+ * - new order detail page: wp-admin/admin.php?page=wc-orders&action=edit&id={post_id}
+ * - legacy order as a post order list page: wp-admin/edit.php?post_type=shop_order
+ * - legacy order as a post order detail page: wp-admin/post.php?post={post_id}&action=edit
  *
  * @noinspection EfferentObjectCouplingInspection
  */
@@ -91,10 +92,6 @@ class Acumulus
 
     /**
      * Set up the hooks for this plugin.
-     *
-     * This is to be called "internally" only when a request is being handled.
-     * When a third party wants to initialize the libAcumulus framework,
-     * {@see getAcumulusContainer()} should be called.
      */
     public function registerHooks(): void
     {
@@ -107,8 +104,7 @@ class Acumulus
         add_action('admin_menu', [$this, 'addMenuLinks'], 900);
         // - Admin notices , meta boxes, and ajax requests from them.
         add_action('admin_notices', [$this, 'showAdminNotices']);
-        // @todo: WooCommerce HPOS compatibility.
-        add_action('add_meta_boxes_shop_order', [$this, 'addShopOrderMetaBox']);
+        add_action('add_meta_boxes', [$this, 'addShopOrderMetaBox'], 10, 2);
         add_action('wp_ajax_acumulus_ajax_action', [$this, 'handleAjaxRequest']);
         add_filter( 'woocommerce_admin_order_actions', [$this, 'adminOrderActions'], 100, 2 );
         // - To process our own forms.
@@ -126,10 +122,10 @@ class Acumulus
         add_filter('acumulus_invoice_created', [$this, 'acumulusInvoiceCreated'], 10, 3);
 
         // @todo: WooCommerce HPOS compatibility.
-        //   Declare incompatibility, change to true once we are compatible.
+        //   Declare incompatibility, change to true to test or once we are compatible.
         add_action('before_woocommerce_init', static function () {
             if (class_exists(FeaturesUtil::class)) {
-                FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, false);
+                FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
             }
         });
 
@@ -165,6 +161,23 @@ class Acumulus
     }
 
     /**
+     * Returns whether HPOS is used or the legacy order as post storage.
+     */
+    public function useHpos(): bool
+    {
+        return class_exists(CustomOrdersTableController::class)
+            && wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled();
+    }
+
+    /**
+     * Returns the page that shows the list of orders.
+     */
+    public function getOrderListPage(): string
+    {
+        return $this->useHpos() ? 'admin.php?page=wc-orders' : 'edit.php?post_type=shop_order';
+    }
+
+    /**
      * Helper method to translate strings.
      *
      * @param string $key
@@ -174,7 +187,7 @@ class Acumulus
      *   The translation for the given key or the key itself if no translation
      *   could be found.
      */
-    private function t($key): string
+    private function t(string $key): string
     {
         return $this->getAcumulusContainer()->getTranslator()->get($key);
     }
@@ -374,7 +387,7 @@ class Acumulus
                     $content = $this->renderNotice('Acumulus_action parameter of ajax request unknown to Acumulus.', 'error');
             }
             // @todo: WooCommerce HPOS compatibility.
-            wp_safe_redirect( wp_get_referer() ?: admin_url( 'edit.php?post_type=shop_order' ) );
+            wp_safe_redirect(wp_get_referer() ?: admin_url($this->getOrderListPage()));
             exit;
         } else {
             $content = $this->renderNotice('No recognised Acumulus ajax request.', 'error');
@@ -405,38 +418,49 @@ class Acumulus
     /**
      * Action handler for the add_meta_boxes_shop_order action.
      *
-     * @param WP_Post $shopOrderPost
+     * @param string $screen_id
+     *   The id of the screen to add meta boxes to: we want to add our meta box to:
+     *   - 'shop_order': the legacy edit order as a post screen.
+     *   - 'woocommerce_page_wc-orders': the HPOS edit order screen.
+     * @noinspection PhpDocSignatureInspection  object is base type of these possibilities.
+     * @param \WP_Post|\WC_Order $shopOrderOrPost
+     *   This will be a:
+     *   - WP_POST: on the legacy screen.
+     *   - WC_Order: on the HPOS screen.
      *
      * @throws \Throwable
      */
-    public function addShopOrderMetaBox(WP_Post $shopOrderPost): void
+    public function addShopOrderMetaBox(string $screen_id, object $shopOrderOrPost): void
     {
-        $invoiceStatusSettings = $this->getAcumulusContainer()->getConfig()->getInvoiceStatusSettings();
-        if ($invoiceStatusSettings['showInvoiceStatus']) {
-            // Create form to load form translations and set its Source.
-            /** @var \Siel\Acumulus\Shop\InvoiceStatusForm $form */
-            try {
-                $form = $this->getForm('invoice');
-                $orderId = $shopOrderPost->ID;
-                $source = $this->getAcumulusContainer()->createSource(Source::Order, $orderId);
-                $form->setSource($source);
-                // @todo: WooCommerce HPOS compatibility.
-                add_meta_box('acumulus-invoice-status-overview',
-                    $this->t('invoice_form_title'),
-                    [$this, 'outputInvoiceStatusInfoBox'],
-                    'shop_order',
-                    'side');
-            } catch (Throwable $e) {
-                // We do not show the meta box, not even a message (though we
-                // could add an action for admin_notices), the mail should
-                // suffice to inform the user.
+        if (in_array($screen_id, ['woocommerce_page_wc-orders', 'shop_order'])) {
+            $orderId = ($shopOrderOrPost instanceof WP_Post) ? $shopOrderOrPost->ID : $shopOrderOrPost->get_id();
+            $invoiceStatusSettings = $this->getAcumulusContainer()->getConfig()->getInvoiceStatusSettings();
+            if ($invoiceStatusSettings['showInvoiceStatus']) {
+                // Create form to load form translations and set its Source.
+                /** @var \Siel\Acumulus\Shop\InvoiceStatusForm $form */
                 try {
-                    $crashReporter = $this->getAcumulusContainer()->getCrashReporter();
-                    $crashReporter->logAndMail($e);
-                } catch (Throwable $inner) {
-                    // We do not know if we have informed the user per mail or
-                    // screen, so assume not, and rethrow the original exception.
-                    throw $e;
+                    $form = $this->getForm('invoice');
+                    $source = $this->getAcumulusContainer()->createSource(Source::Order, $orderId);
+                    $form->setSource($source);
+                    add_meta_box(
+                        'acumulus-invoice-status-overview',
+                        $this->t('invoice_form_title'),
+                        [$this, 'outputInvoiceStatusInfoBox'],
+                        $screen_id,
+                        'side'
+                    );
+                } catch (Throwable $e) {
+                    // We do not show the meta box, not even a message (though we
+                    // could add an action for admin_notices), the mail should
+                    // suffice to inform the user.
+                    try {
+                        $crashReporter = $this->getAcumulusContainer()->getCrashReporter();
+                        $crashReporter->logAndMail($e);
+                    } catch (Throwable $inner) {
+                        // We do not know if we have informed the user per mail or
+                        // screen, so assume not, and rethrow the original exception.
+                        throw $e;
+                    }
                 }
             }
         }
@@ -542,7 +566,7 @@ class Acumulus
      *
      * @return \Siel\Acumulus\Helpers\Form
      */
-    private function getForm($type): Form
+    private function getForm(string $type): Form
     {
         return $this->getAcumulusContainer()->getForm($type);
     }
@@ -705,7 +729,7 @@ class Acumulus
      *
      * @throws \Throwable
      */
-    public function processForm($type): string
+    public function processForm(string $type): string
     {
         $form = $this->getForm($type);
         try {
@@ -837,7 +861,7 @@ class Acumulus
      * @return string
      *   The rendered form with any wrapping around it.
      */
-    private function postRenderForm(Form $form, $formOutput): string
+    private function postRenderForm(Form $form, string $formOutput): string
     {
         $output = '';
         $type = $form->getType();
@@ -891,11 +915,11 @@ class Acumulus
     /**
      * Action method that renders any notices coming from the form(s).
      *
-     * @param \Siel\Acumulus\Helpers\Form $form
+     * @param \Siel\Acumulus\Helpers\Form|null $form
      *
      * @return string
      */
-    public function showNotices($form): string
+    private function showNotices(?Form $form): string
     {
         $output = '';
         if (isset($form)) {
@@ -919,7 +943,7 @@ class Acumulus
      * @return string
      *
      */
-    private function SeverityToNoticeClass($severity): string
+    private function SeverityToNoticeClass(int $severity): string
     {
         switch ($severity) {
             case Severity::Success:
@@ -1015,7 +1039,7 @@ class Acumulus
      * @param string $capability
      *   The access right to check for.
      */
-    private function checkCapability($capability): void
+    private function checkCapability(string $capability): void
     {
         if (!empty($capability) && !current_user_can($capability)) {
             /** @noinspection ForgottenDebugOutputInspection */
@@ -1040,7 +1064,7 @@ class Acumulus
      *
      * @throws \Throwable
      */
-    public function woocommerceOrderChanged($orderId): void
+    public function woocommerceOrderChanged(int $orderId): void
     {
         $this->init();
         /** @var WC_Order|null $order */
@@ -1066,7 +1090,7 @@ class Acumulus
      *
      * @throws \Throwable
      */
-    public function woocommerceOrderRefunded(/** @noinspection PhpUnusedParameterInspection */ $orderId, $refundId): void
+    public function woocommerceOrderRefunded(/** @noinspection PhpUnusedParameterInspection */ int $orderId, int $refundId): void
     {
         $this->init();
         $this->sourceStatusChange(Source::CreditNote, $refundId);
@@ -1121,28 +1145,6 @@ class Acumulus
     public function woocommerceOrderIsPaidStatuses(array $statuses/*, WC_Order $order*/): array
     {
         return array_merge($statuses, ['refunded']);
-    }
-
-    /**
-     * Hook to correct the behaviour of WC_Order::needs_payment().
-     *
-     * Note: this is only used when running with WC 2.x.
-     *
-     * WooCommerce thinks that orders in the on-hold status are to be seen as
-     * paid, whereas for Acumulus they are seen as due. (On-hold means waiting for
-     * bank transfer to be booked on our account.)
-     *
-     * We also add the cancelled and failed statuses, although for a cancelled
-     * no invoice should be created. But if 1 gets created, mark it as due.
-     *
-     * @param array $statuses
-     * param WC_Order $order
-     *
-     * @return array
-     */
-    public function woocommerceValidOrderStatusesForPayment(array $statuses/*, WC_Order $order*/): array
-    {
-        return array_merge($statuses, ['on-hold', 'cancelled', 'failed']);
     }
 
     /**
