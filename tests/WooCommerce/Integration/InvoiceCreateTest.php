@@ -7,7 +7,6 @@ declare(strict_types=1);
 
 namespace Siel\Acumulus\Tests\WooCommerce\Integration;
 
-use Siel\Acumulus\Fld;
 use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Tests\WooCommerce\Acumulus_WooCommerce_TestCase;
 

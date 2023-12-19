@@ -14,6 +14,7 @@
         "postalCode": "26110",
         "city": "Mirabel aux Baronnies",
         "countryCode": "FR",
+        "countryAutoName": 2,
         "meta-address-type": "invoice",
         "meta-shop-country-name": "Frankrijk",
         "altCompanyName1": "Le Rêve Provencal",
@@ -22,9 +23,10 @@
         "altPostalCode": "5011 AB",
         "altCity": "Tilburg",
         "altCountryCode": "NL",
+        "altCountryAutoName": 2,
         "altMeta-address-type": "shipping",
         "altMeta-shop-country-name": "Nederland",
-        "meta-vat-based-on-shop": "billing",
+        "meta-shop-vat-based-on": "billing",
         "meta-main-address": "invoice",
         "invoice": {
             "concept": 0,
@@ -113,7 +115,7 @@
             "meta-lines-amount": 87.64,
             "meta-lines-amountinc": 87.64,
             "meta-lines-vatamount": 0.0,
-            "meta-vattype-source": "Completor::completeVatType: Only one choice fits all",
+            "meta-vattype-source": "Completor::completeVatType: Only 1 choice fits all",
             "meta-vattypes-possible-invoice": "[6,3]",
             "meta-vattypes-possible-lines-intersection": "[3]",
             "meta-vattypes-possible-lines-union": "[3]"

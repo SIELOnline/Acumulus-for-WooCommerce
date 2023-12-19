@@ -12,6 +12,7 @@
         "postalCode": "1100",
         "city": "Antwerpen",
         "countryCode": "BE",
+        "countryAutoName": 2,
         "meta-address-type": "invoice",
         "meta-shop-country-name": "België",
         "altFullName": "Jan Jansen",
@@ -19,9 +20,10 @@
         "altPostalCode": "1234 AB",
         "altCity": "Eindhoven",
         "altCountryCode": "NL",
+        "altCountryAutoName": 2,
         "altMeta-address-type": "shipping",
         "altMeta-shop-country-name": "Nederland",
-        "meta-vat-based-on-shop": "billing",
+        "meta-shop-vat-based-on": "billing",
         "meta-main-address": "invoice",
         "invoice": {
             "concept": 0,
@@ -40,7 +42,7 @@
                     "vatRate": 21.0,
                     "quantity": 3.0,
                     "meta-id": 29,
-                    "meta-info": "Price inc is realistic: not all taxes are rounded => taxes are realistic ({'3':23.429752})",
+                    "meta-info": "Price inc is realistic: not all taxes are rounded => taxes are realistic ({'3':'23.429752'})",
                     "unitpriceinc": 45.0,
                     "meta-unitpriceinc-precision": 0.001,
                     "meta-recalculate-price": "unitprice",
@@ -54,7 +56,7 @@
                     "meta-vatrate-lookup": "[21.0]",
                     "meta-vatrate-lookup-label": "['btw (21%)']",
                     "meta-line-type": "order-item",
-                    "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':6}]",
+                    "meta-vatrate-range-matches": "[{'vatrate':'21.0000','vattype':6}]",
                     "meta-recalculate-old-price": 37.19008266666667,
                     "meta-did-recalculate": true
                 },
@@ -71,7 +73,7 @@
                     "meta-vatrate-lookup-label": "['btw (21%)']",
                     "meta-vatrate-lookup-source": "get_option('woocommerce_shipping_tax_class')",
                     "meta-line-type": "shipping",
-                    "meta-vatrate-lookup-matches": "[{'vatrate':21.0,'vattype':6}]",
+                    "meta-vatrate-lookup-matches": "[{'vatrate':'21.0000','vattype':6}]",
                     "unitpriceinc": 0,
                     "meta-fields-calculated": "['unitpriceinc']"
                 }

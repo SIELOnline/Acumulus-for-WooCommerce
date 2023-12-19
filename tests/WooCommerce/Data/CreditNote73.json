@@ -13,6 +13,7 @@
         "postalCode": "9999 CD",
         "city": "Molenhoek",
         "countryCode": "NL",
+        "countryAutoName": 2,
         "meta-address-type": "invoice",
         "meta-shop-country-name": "Nederland",
         "altCompanyName1": "BV Mijn Bedrijf",
@@ -21,9 +22,10 @@
         "altPostalCode": "9999 AB",
         "altCity": "Mook",
         "altCountryCode": "NL",
+        "altCountryAutoName": 2,
         "altMeta-address-type": "shipping",
         "altMeta-shop-country-name": "Nederland",
-        "meta-vat-based-on-shop": "billing",
+        "meta-shop-vat-based-on": "billing",
         "meta-main-address": "invoice",
         "invoice": {
             "concept": 0,
@@ -56,7 +58,7 @@
                     "meta-vatrate-lookup": "[21.0]",
                     "meta-vatrate-lookup-label": "['btw (21%)']",
                     "meta-line-type": "order-item",
-                    "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':1}]",
+                    "meta-vatrate-range-matches": "[{'vatrate':'21.0000','vattype':1}]",
                     "meta-recalculate-old-price": 45.000083000000004,
                     "meta-did-recalculate": true
                 },
@@ -80,7 +82,7 @@
                     "meta-vatrate-lookup": "[21.0]",
                     "meta-vatrate-lookup-label": "['btw (21%)']",
                     "meta-line-type": "order-item",
-                    "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':1}]",
+                    "meta-vatrate-range-matches": "[{'vatrate':'21.0000','vattype':1}]",
                     "meta-recalculate-old-price": 45.000083000000004,
                     "meta-did-recalculate": true
                 },
@@ -104,7 +106,7 @@
                     "meta-vatrate-lookup": "[21.0]",
                     "meta-vatrate-lookup-label": "['btw (21%)']",
                     "meta-line-type": "order-item",
-                    "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':1}]",
+                    "meta-vatrate-range-matches": "[{'vatrate':'21.0000','vattype':1}]",
                     "meta-recalculate-old-price": 17.996033,
                     "meta-did-recalculate": true
                 }
