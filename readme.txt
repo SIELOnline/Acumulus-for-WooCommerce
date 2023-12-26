@@ -2,7 +2,7 @@
 Contributors: SIEL Acumulus.
 Tags: Acumulus, administratie, boekhouding, boekhoudpakket, boekhoudsoftware
 Requires at least: 5.9
-Tested up to: 6.3
+Tested up to: 6.4
 Requires PHP: 7.4
 Stable tag: trunk
 License: GPLv3 or later

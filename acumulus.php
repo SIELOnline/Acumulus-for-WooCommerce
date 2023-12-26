@@ -9,7 +9,7 @@
  * Requires at least: 5.9
  * Tested up to: 6.4
  * WC requires at least: 5.0
- * WC tested up to: 8.3
+ * WC tested up to: 8.4
  * libAcumulus requires at least: 8.1.0
  * Requires PHP: 7.4
  */
