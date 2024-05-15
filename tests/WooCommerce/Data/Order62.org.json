@@ -16,7 +16,7 @@
         "overwriteifexists": 1,
         "invoice": {
             "concept": 0,
-            "meta-id": 62,
+            "meta-source-id": 62,
             "issuedate": "2023-03-19",
             "costcenter": "56074",
             "accountnumber": "147659",
@@ -30,7 +30,7 @@
                 {
                     "itemnumber": "woo-hoodie-with-zipper",
                     "product": "Hoodie with Zipper",
-                    "meta-id": 5,
+                    "meta-source-id": 5,
                     "quantity": 1.0,
                     "meta-warning": "Price inc is realistic: not all taxes are rounded => taxes are realistic ({'22':7.809917})",
                     "unitprice": 37.1900826446281,
@@ -55,7 +55,7 @@
                 {
                     "itemnumber": "woo-hoodie-with-logo",
                     "product": "Hoodie with Logo",
-                    "meta-id": 6,
+                    "meta-source-id": 6,
                     "quantity": 1.0,
                     "meta-warning": "Price inc is realistic: not all taxes are rounded => taxes are realistic ({'22':7.809917})",
                     "unitprice": 37.1900826446281,
@@ -80,7 +80,7 @@
                 {
                     "itemnumber": "woo-tshirt",
                     "product": "T-Shirt",
-                    "meta-id": 7,
+                    "meta-source-id": 7,
                     "quantity": 1.0,
                     "meta-warning": "Price inc is realistic: not all taxes are rounded => taxes are realistic ({'22':3.123967})",
                     "unitprice": 14.87603305785124,
@@ -106,7 +106,7 @@
                     "product": "Gratis verzending",
                     "unitprice": 0.0,
                     "quantity": 1,
-                    "meta-id": 8,
+                    "meta-source-id": 8,
                     "vatrate": "21.0000",
                     "vatamount": 0.0,
                     "meta-vatrate-source": "completor-lookup",

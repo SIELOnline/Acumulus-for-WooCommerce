@@ -86,9 +86,10 @@ class CollectorTest extends Acumulus_WooCommerce_TestCase
     public function testCollectCustomer(string $type, int $id, array $values): void
     {
         $container = $this->getAcumulusContainer();
-        $collector = $container->getCollectorManager();
-        $source = $container->createSource(Source::Order, 61);
-        $customer = $collector->collectCustomer($source);
+        $source = $container->createSource($type, $id);
+        $customer = $container->getCollectorManager()
+            ->setPropertySourcesForSource($source)
+            ->collectCustomer();
         foreach ($values as $key => $value) {
             if (is_array($value)) {
                 $address = $key === 'invoiceAddress' ? $customer->getInvoiceAddress() : $customer->getShippingAddress();

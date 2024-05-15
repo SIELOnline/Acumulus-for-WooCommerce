@@ -17,7 +17,7 @@
         "overwriteifexists": 1,
         "invoice": {
             "concept": 0,
-            "meta-id": 69,
+            "meta-source-id": 69,
             "issuedate": "2023-05-30",
             "costcenter": "56074",
             "accountnumber": "147659",
@@ -31,7 +31,7 @@
                 {
                     "itemnumber": "woo-belt",
                     "product": "Belt",
-                    "meta-id": 20,
+                    "meta-source-id": 20,
                     "quantity": 1.0,
                     "meta-warning": "Price inc is realistic: price inc is rounded: 45.45",
                     "unitprice": 45.45,
@@ -52,7 +52,7 @@
                 {
                     "itemnumber": "woo-hoodie-blue-logo",
                     "product": "Hoodie - Blue, Yes (Color: Blue, Logo: Yes)",
-                    "meta-id": 21,
+                    "meta-source-id": 21,
                     "quantity": 1.0,
                     "meta-warning": "Price inc is realistic: price inc is rounded: 37.19",
                     "unitprice": 37.19,
@@ -75,7 +75,7 @@
                     "product": "Vast tarief",
                     "unitprice": 5.0,
                     "quantity": 1,
-                    "meta-id": 22,
+                    "meta-source-id": 22,
                     "vatrate": 0,
                     "vatamount": 0.0,
                     "meta-vatrate-source": "exact-0",

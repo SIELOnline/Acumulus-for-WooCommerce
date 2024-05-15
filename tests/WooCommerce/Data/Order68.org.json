@@ -15,7 +15,7 @@
         "overwriteifexists": 1,
         "invoice": {
             "concept": 0,
-            "meta-id": 68,
+            "meta-source-id": 68,
             "issuedate": "2023-05-28",
             "costcenter": "56074",
             "accountnumber": "147659",
@@ -29,7 +29,7 @@
                 {
                     "itemnumber": "woo-beanie",
                     "product": "Beanie",
-                    "meta-id": 14,
+                    "meta-source-id": 14,
                     "quantity": 2.0,
                     "meta-warning": "Price inc is realistic: not all taxes are rounded => taxes are realistic ({'22':5.501653})",
                     "unitprice": 13.099173553719007,
@@ -54,7 +54,7 @@
                 {
                     "itemnumber": "woo-album",
                     "product": "Album",
-                    "meta-id": 15,
+                    "meta-source-id": 15,
                     "quantity": 2.0,
                     "meta-warning": "Price inc is realistic: not all taxes are rounded => taxes are realistic ({'22':4.512397})",
                     "unitprice": 10.743801652892563,
@@ -80,7 +80,7 @@
                     "product": "Vast tarief",
                     "unitprice": 5.0,
                     "quantity": 1,
-                    "meta-id": 16,
+                    "meta-source-id": 16,
                     "vatrate": "21.0000",
                     "meta-vatrate-min": 20.88566080598973,
                     "meta-vatrate-max": 21.114364808858593,
@@ -106,7 +106,7 @@
                     "vatrate": 21.0,
                     "vatamount": 0.0,
                     "meta-vatrate-source": "completor-max-appearing",
-                    "meta-id": 66,
+                    "meta-source-id": 66,
                     "meta-line-type": "discount",
                     "meta-fields-calculated": "['vatrate']"
                 },
@@ -119,7 +119,7 @@
                     "vatrate": 21.0,
                     "vatamount": 0.0,
                     "meta-vatrate-source": "completor-max-appearing",
-                    "meta-id": 65,
+                    "meta-source-id": 65,
                     "meta-line-type": "discount",
                     "meta-fields-calculated": "['vatrate']"
                 }

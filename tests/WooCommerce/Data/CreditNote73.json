@@ -26,7 +26,7 @@
         "altMeta-address-type": "shipping",
         "altMeta-shop-country-name": "Nederland",
         "meta-shop-vat-based-on": "billing",
-        "meta-main-address": "invoice",
+        "meta-main-address-type": "invoice",
         "invoice": {
             "concept": 0,
             "vatType": 1,
@@ -111,11 +111,11 @@
                     "meta-did-recalculate": true
                 }
             ],
-            "meta-shop-source-type": "CreditNote",
-            "meta-id": 73,
-            "meta-reference": 73,
-            "meta-shop-source-date": "2023-08-17",
-            "meta-status": "completed",
+            "meta-source-type": "CreditNote",
+            "meta-source-id": 73,
+            "meta-source-reference": 73,
+            "meta-source-date": "2023-08-17",
+            "meta-source-status": "completed",
             "meta-payment-method": "bacs",
             "meta-shop-invoice-id": 73,
             "meta-shop-invoice-reference": 73,

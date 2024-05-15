@@ -15,7 +15,7 @@
         "overwriteifexists": 1,
         "invoice": {
             "concept": 0,
-            "meta-id": 67,
+            "meta-source-id": 67,
             "issuedate": "2023-05-28",
             "costcenter": "56074",
             "accountnumber": "147659",
@@ -29,7 +29,7 @@
                 {
                     "itemnumber": "woo-belt",
                     "product": "Belt",
-                    "meta-id": 10,
+                    "meta-source-id": 10,
                     "quantity": 1.0,
                     "meta-warning": "Price inc is realistic: not all taxes are rounded => taxes are realistic ({'22':8.677686})",
                     "unitprice": 41.32231404958678,
@@ -55,7 +55,7 @@
                     "product": "Vast tarief",
                     "unitprice": 5.0,
                     "quantity": 1,
-                    "meta-id": 11,
+                    "meta-source-id": 11,
                     "vatrate": "21.0000",
                     "meta-vatrate-min": 20.88566080598973,
                     "meta-vatrate-max": 21.114364808858593,
@@ -81,7 +81,7 @@
                     "vatrate": 21.0,
                     "vatamount": 0.0,
                     "meta-vatrate-source": "completor-max-appearing",
-                    "meta-id": 65,
+                    "meta-source-id": 65,
                     "meta-line-type": "discount",
                     "meta-fields-calculated": "['vatrate']"
                 }

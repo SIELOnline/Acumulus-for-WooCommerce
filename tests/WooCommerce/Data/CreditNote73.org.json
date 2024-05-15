@@ -16,7 +16,7 @@
         "overwriteifexists": 1,
         "invoice": {
             "concept": 0,
-            "meta-id": 73,
+            "meta-source-id": 73,
             "issuedate": "2023-08-17",
             "costcenter": 56074,
             "accountnumber": 147659,
@@ -31,7 +31,7 @@
                 {
                     "itemnumber": "woo-hoodie-with-zipper",
                     "product": "Hoodie with Zipper",
-                    "meta-id": 35,
+                    "meta-source-id": 35,
                     "quantity": -1.0,
                     "unitprice": 37.190083,
                     "unitpriceinc": 45.00000043,
@@ -55,7 +55,7 @@
                 {
                     "itemnumber": "woo-hoodie-with-logo",
                     "product": "Hoodie with Logo",
-                    "meta-id": 36,
+                    "meta-source-id": 36,
                     "quantity": -1.0,
                     "unitprice": 37.190083,
                     "unitpriceinc": 45.00000043,
@@ -79,7 +79,7 @@
                 {
                     "itemnumber": "woo-tshirt",
                     "product": "T-Shirt",
-                    "meta-id": 37,
+                    "meta-source-id": 37,
                     "quantity": -1.0,
                     "unitprice": 14.876033,
                     "unitpriceinc": 17.999999929999998,

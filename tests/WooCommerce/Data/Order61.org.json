@@ -15,7 +15,7 @@
         "overwriteifexists": 1,
         "invoice": {
             "concept": 0,
-            "meta-id": 61,
+            "meta-source-id": 61,
             "issuedate": "2023-03-19",
             "costcenter": "56074",
             "accountnumber": "147659",
@@ -34,7 +34,7 @@
                 {
                     "itemnumber": "woo-album",
                     "product": "Album",
-                    "meta-id": 1,
+                    "meta-source-id": 1,
                     "quantity": 1,
                     "meta-warning": "Price inc is realistic: not all taxes are rounded => taxes are realistic ({'22':2.603306})",
                     "unitprice": 12.396694214876034,
@@ -59,7 +59,7 @@
                 {
                     "itemnumber": "woo-beanie",
                     "product": "Beanie",
-                    "meta-id": 2,
+                    "meta-source-id": 2,
                     "quantity": 1,
                     "meta-warning": "Price inc is realistic: not all taxes are rounded => taxes are realistic ({'22':3.123967})",
                     "unitprice": 14.87603305785124,
@@ -85,7 +85,7 @@
                     "product": "Vast tarief",
                     "unitprice": 5,
                     "quantity": 1,
-                    "meta-id": 3,
+                    "meta-source-id": 3,
                     "vatrate": "21.0000",
                     "meta-vatrate-min": 20.88566080598973,
                     "meta-vatrate-max": 21.114364808858593,
