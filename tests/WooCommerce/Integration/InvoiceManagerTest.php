@@ -33,7 +33,7 @@ class InvoiceManagerTest extends Acumulus_WooCommerce_TestCase
           [Source::Order, 0, 10, []],
           [Source::Order, 61, 61, [61]],
           [Source::Order, 60, 70, [61, 62, 67, 68, 69, 70]],
-          [Source::Order, 72, 80, []],
+          [Source::Order, 92, 99, []],
           [Source::CreditNote, 0, 10, []],
           [Source::CreditNote, 72, 72, [72]],
           [Source::CreditNote, 70, 80, [72, 73]],

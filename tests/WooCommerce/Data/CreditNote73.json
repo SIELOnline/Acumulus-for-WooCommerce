@@ -111,6 +111,11 @@
                     "meta-did-recalculate": true
                 }
             ],
+            "emailAsPdf": {
+                "emailTo": "bedrijf.nederland@example.com",
+                "subject": "Factuur voor creditnota 73 - bestelling 62",
+                "ubl": 1
+            },
             "meta-source-type": "CreditNote",
             "meta-source-id": 73,
             "meta-source-reference": 73,
@@ -123,7 +128,7 @@
             "meta-currency": "{'currency':'EUR','rate':1.0,'doConvert':false}",
             "meta-totals": "{'amountEx':-89.26,'amountInc':-108.0,'amountVat':-18.74,'vatBreakdown':null,'calculated':'amountEx'}",
             "meta-prices-include-vat": true,
-            "meta-add-email-as-pdf-section": false,
+            "meta-add-email-as-pdf-section": true,
             "meta-lines-amount": -89.25619900000001,
             "meta-lines-amountinc": -108.00000079,
             "meta-lines-vatamount": -18.74,

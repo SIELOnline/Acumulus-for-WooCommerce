@@ -15,7 +15,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Siel\\Acumulus\\Tests\\WooCommerce\\": "tests/WooCommerce/"
+            "Siel\\Acumulus\\Tests\\WooCommerce\\": "tests/WooCommerce/",
+            "Siel\\Acumulus\\Tests\\": "vendor/siel/acumulus/tests/"
         }
     }
 }

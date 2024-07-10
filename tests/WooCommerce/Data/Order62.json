@@ -130,6 +130,11 @@
                     "meta-fields-calculated": "['unitpriceinc']"
                 }
             ],
+            "emailAsPdf": {
+                "emailTo": "bedrijf.nederland@example.com",
+                "subject": "Factuur voor bestelling 62",
+                "ubl": 1
+            },
             "meta-source-type": "Order",
             "meta-source-id": 62,
             "meta-source-reference": "62",
@@ -142,7 +147,7 @@
             "meta-currency": "{'currency':'EUR','rate':1.0,'doConvert':false}",
             "meta-totals": "{'amountEx':89.26,'amountInc':108.0,'amountVat':18.74,'vatBreakdown':null,'calculated':'amountEx'}",
             "meta-prices-include-vat": true,
-            "meta-add-email-as-pdf-section": false,
+            "meta-add-email-as-pdf-section": true,
             "meta-lines-amount": 89.25619834710744,
             "meta-lines-amountinc": 108.0,
             "meta-lines-vatamount": 18.743801,
