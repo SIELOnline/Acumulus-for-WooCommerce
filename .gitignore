@@ -10,11 +10,9 @@ composer.lock
 # WooCommerce projects, but are not defined as composer packages. These are also stored
 # under the tests dir via custom actions, but not committed.
 /tests/.phpunit.result.cache
-/tests/*/
-# Our own tests are committed,
-!/tests/WooCommerce
-# but not the *.latest.json files
-/tests/WooCommerce/Data/*.latest.json
+/tests/wordpress-develop/
+# Our own tests are committed, but not the *.latest.json files
+/tests/Integration/WooCommerce/Data/*.latest.json
 # Local config, create your own using wp-tests-config-sample.php.
 /tests/wp-tests-config.php
 
@@ -22,7 +20,7 @@ composer.lock
 .idea/*
 
 # Resources shared with other modules, committed in libAcumulus.
-# We need these in svn, ths in wp-org
+# We need these in svn, thus in wp-org
 #acumulus-invoice.png
 #acumulus-packing-slip.png
 #icon-pdf.svg

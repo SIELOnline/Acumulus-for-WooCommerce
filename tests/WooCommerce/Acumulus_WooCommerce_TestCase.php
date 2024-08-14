@@ -10,7 +10,7 @@ use Siel\Acumulus\Tests\AcumulusTestUtils;
 use WP_UnitTestCase;
 
 /**
- * Acumulus_WooCommerce_TestCase does foo.
+ * Acumulus_WooCommerce_TestCase is the base class for Acumulus WooCommerce tests.
  */
 class Acumulus_WooCommerce_TestCase extends WP_UnitTestCase
 {

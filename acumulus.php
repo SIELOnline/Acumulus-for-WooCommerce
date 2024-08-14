@@ -110,8 +110,6 @@ class Acumulus
         // - To process our own forms.
         add_action('admin_post_acumulus_settings', [$this, 'processSettingsForm']);
         add_action('admin_post_acumulus_mappings', [$this, 'processMappingsForm']);
-        add_action('admin_post_acumulus_config', [$this, 'processConfigForm']);
-        add_action('admin_post_acumulus_advanced', [$this, 'processAdvancedForm']);
         add_action('admin_post_acumulus_batch', [$this, 'processBatchForm']);
         add_action('admin_post_acumulus_register', [$this, 'processRegisterForm']);
         // - WooCommerce order/refund events.
@@ -216,6 +214,7 @@ class Acumulus
             $this->getAcumulusContainer()->getLog()->setLogLevel(Severity::Log);
 
             // Check for any updates to perform.
+            /** @noinspection PhpUnhandledExceptionInspection */
             $this->upgrade();
         }
     }
@@ -250,41 +249,22 @@ class Acumulus
         // Initialise translations.
         $this->getAcumulusContainer()->getTranslator()->add(new ConfigFormTranslations());
 
-        if ($this->getAcumulusContainer()->getShopCapabilities()->usesNewCode()) {
-            add_submenu_page(
-                'options-general.php',
-                $this->t('settings_form_title'),
-                $this->t('settings_form_header'),
-                'manage_options',
-                'acumulus_settings',
-                [$this, 'processSettingsForm']
-            );
-            add_submenu_page(
-                'options-general.php',
-                $this->t('mappings_form_title'),
-                $this->t('mappings_form_header'),
-                'manage_options',
-                'acumulus_mappings',
-                [$this, 'processMappingsForm']
-            );
-        } else {
-            add_submenu_page(
-                'options-general.php',
-                $this->t('config_form_title'),
-                $this->t('config_form_header'),
-                'manage_options',
-                'acumulus_config',
-                [$this, 'processConfigForm']
-            );
-            add_submenu_page(
-                'options-general.php',
-                $this->t('advanced_form_title'),
-                $this->t('advanced_form_header'),
-                'manage_options',
-                'acumulus_advanced',
-                [$this, 'processAdvancedForm']
-            );
-        }
+        add_submenu_page(
+            'options-general.php',
+            $this->t('settings_form_title'),
+            $this->t('settings_form_header'),
+            'manage_options',
+            'acumulus_settings',
+            [$this, 'processSettingsForm']
+        );
+        add_submenu_page(
+            'options-general.php',
+            $this->t('mappings_form_title'),
+            $this->t('mappings_form_header'),
+            'manage_options',
+            'acumulus_mappings',
+            [$this, 'processMappingsForm']
+        );
         $this->getAcumulusContainer()->getTranslator()->add(new ActivateSupportFormTranslations());
         add_submenu_page('options-general.php',
             $this->t('activate_form_title'),
@@ -293,10 +273,13 @@ class Acumulus
             'acumulus_activate',
             [$this, 'processActivateForm']
         );
+        // Do not show the registration form if we have valid account settings. In WP you
+        // do so by using another page as the parent.
+        $message = $this->getAcumulusContainer()->getCheckAccount()->doCheck();
+        $parent = empty($message) ? 'acumulus_activate' : 'options-general.php';
         $this->getAcumulusContainer()->getTranslator()->add(new RegisterFormTranslations());
-        // Do not show the registration form in the menu by making it a child of
-        // our config form.
-        add_submenu_page('acumulus_activate',
+        add_submenu_page(
+            $parent,
             $this->t('register_form_title'),
             $this->t('register_form_header'),
             'manage_options',
@@ -586,34 +569,6 @@ class Acumulus
     }
 
     /**
-     * Implements the admin_post_acumulus_config action.
-     *
-     * Processes and renders the basic config form.
-     *
-     * @throws \Throwable
-     */
-    public function processConfigForm(): void
-    {
-        $this->checkCapability('manage_options');
-        $this->checkCapability('manage_woocommerce');
-        echo $this->processForm('config');
-    }
-
-    /**
-     * Implements the admin_post_acumulus_advanced action.
-     *
-     * Processes and renders the advanced config form.
-     *
-     * @throws \Throwable
-     */
-    public function processAdvancedForm(): void
-    {
-        $this->checkCapability('manage_options');
-        $this->checkCapability('manage_woocommerce');
-        echo $this->processForm('advanced');
-    }
-
-    /**
      * Implements the admin_post_acumulus_settings action.
      *
      * Processes and renders the settings form.
@@ -872,8 +827,6 @@ class Acumulus
         $output .= $this->showNotices($form);
         switch ($type) {
             case 'register':
-            case 'config':
-            case 'advanced':
             case 'settings':
             case 'mappings':
             case 'activate':
@@ -888,7 +841,7 @@ class Acumulus
                 }
                 $output .= $formOutput;
                 if ($wrap) {
-                    $output .= get_submit_button(!in_array($type, ['config', 'advanced']) ? $this->t("button_submit_$type") : '');
+                    $output .= get_submit_button($this->t("button_submit_$type"));
                     $output .= '</form></div>';
                 } else {
                     $output .= '</div>';
@@ -1167,20 +1120,12 @@ class Acumulus
     public function acumulusInvoiceCreated($invoice, Source $invoiceSource, InvoiceAddResult $localResult): ?array
     {
         if ($invoice !== null) {
-            if ($this->getAcumulusContainer()->getShopCapabilities()->usesNewCode()) {
-                /**
-                 * @var \Siel\Acumulus\WooCommerce\Invoice\CreatorPluginSupport $pluginSupport
-                 */
-                $pluginSupport = $this->getAcumulusContainer()->getInstance('CreatorPluginSupport', 'Invoice');
-            } else {
-                /**
-                 * @var \Siel\Acumulus\WooCommerce\Completors\Legacy\CreatorPluginSupport $pluginSupport
-                 */
-                $pluginSupport = $this->getAcumulusContainer()->getInstance('CreatorPluginSupport', 'Completors\Legacy');
-            }
+            /**
+             * @var \Siel\Acumulus\WooCommerce\Invoice\CreatorPluginSupport $pluginSupport
+             */
+            $pluginSupport = $this->getAcumulusContainer()->getInstance('CreatorPluginSupport', 'Invoice');
             $invoice = $pluginSupport->acumulusInvoiceCreated($invoice, $invoiceSource, $localResult);
         }
-
         return $invoice;
     }
 
@@ -1205,6 +1150,8 @@ class Acumulus
      *
      * @return bool
      *   Success.
+     *
+     * @throws \JsonException
      */
     public function upgrade(): bool
     {

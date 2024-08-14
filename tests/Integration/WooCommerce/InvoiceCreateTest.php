@@ -5,26 +5,31 @@
 
 declare(strict_types=1);
 
-namespace Siel\Acumulus\Tests\WooCommerce\Integration;
+namespace Siel\Acumulus\Tests\Integration\WooCommerce;
 
 use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Tests\WooCommerce\Acumulus_WooCommerce_TestCase;
-
-use function dirname;
 
 /**
  * InvoiceCreateTest tests the process of creating an {@see Invoice}.
  */
 class InvoiceCreateTest extends Acumulus_WooCommerce_TestCase
 {
+    protected string $dataPath;
+
+    public function __construct(?string $name = null, array $data = [], $dataName = '')
+    {
+        parent::__construct($name, $data, $dataName);
+        $this->dataPath = __DIR__ . '/Data';
+    }
+
     public function InvoiceDataProviderWithoutEmailAsPdf(): array
     {
-        $dataPath = dirname(__FILE__, 2) . '/Data';
         return [
-            '2 (fixed amount and percentage) coupons' => [$dataPath, Source::Order, 68,],
-            'reversed vat, different shipping country, variants' => [$dataPath, Source::Order, 69,],
-            'EU VAT, variants, percentage coupon' => [$dataPath, Source::Order, 70,],
-            'EU VAT Belgium (same vat rate as NL), shipping to NL' => [$dataPath, Source::Order, 71,],
+            '2 (fixed amount and percentage) coupons' => [$this->dataPath, Source::Order, 68,],
+            'reversed vat, different shipping country, variants' => [$this->dataPath, Source::Order, 69,],
+            'EU VAT, variants, percentage coupon' => [$this->dataPath, Source::Order, 70,],
+            'EU VAT Belgium (same vat rate as NL), shipping to NL' => [$this->dataPath, Source::Order, 71,],
         ];
     }
 
@@ -45,12 +50,11 @@ class InvoiceCreateTest extends Acumulus_WooCommerce_TestCase
 
     public function InvoiceDataProviderWithEmailAsPdf(): array
     {
-        $dataPath = dirname(__FILE__, 2) . '/Data';
         return [
-            'NL consument' => [$dataPath, Source::Order, 61,],
-            'NL company' => [$dataPath, Source::Order, 62,],
-            '1 fixed amount coupon' => [$dataPath, Source::Order, 67,],
-            'NL Refund' => [$dataPath, Source::CreditNote, 73,],
+            'NL consument' => [$this->dataPath, Source::Order, 61,],
+            'NL company' => [$this->dataPath, Source::Order, 62,],
+            '1 fixed amount coupon' => [$this->dataPath, Source::Order, 67,],
+            'NL Refund' => [$this->dataPath, Source::CreditNote, 73,],
         ];
     }
 
@@ -71,9 +75,8 @@ class InvoiceCreateTest extends Acumulus_WooCommerce_TestCase
 
     public function InvoiceDataProviderVatBasedOnShippingAddress(): array
     {
-        $dataPath = dirname(__FILE__, 2) . '/Data';
         return [
-            'invoice to FR, shipping to NL, vat based on shipping' => [$dataPath, Source::Order, 77,],
+            'invoice to FR, shipping to NL, vat based on shipping' => [$this->dataPath, Source::Order, 77,],
         ];
     }
 

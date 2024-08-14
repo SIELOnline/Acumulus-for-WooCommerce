@@ -5,7 +5,7 @@
 
 declare(strict_types=1);
 
-namespace Siel\Acumulus\Tests\WooCommerce\Integration;
+namespace Siel\Acumulus\Tests\Integration\WooCommerce;
 
 use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Tests\WooCommerce\Acumulus_WooCommerce_TestCase;

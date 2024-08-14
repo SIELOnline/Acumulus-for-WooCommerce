@@ -17,7 +17,7 @@ class AcumulusTestsBootstrap
 {
     protected static AcumulusTestsBootstrap $instance;
 
-    public $wp_tests_dir;
+    public string $wp_tests_dir;
     public string $plugins_dir;
     public string $languages_dir;
 

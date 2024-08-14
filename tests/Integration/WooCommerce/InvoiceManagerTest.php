@@ -5,13 +5,13 @@
 
 declare(strict_types=1);
 
-namespace Siel\Acumulus\Tests\WooCommerce\Integration;
+namespace Siel\Acumulus\Tests\Integration\WooCommerce;
 
 use DateTime;
 use Siel\Acumulus\Api;
 use Siel\Acumulus\Invoice\Source;
-use Siel\Acumulus\Tests\WooCommerce\Acumulus_WooCommerce_TestCase;
 use Siel\Acumulus\Shop\InvoiceManager;
+use Siel\Acumulus\Tests\WooCommerce\Acumulus_WooCommerce_TestCase;
 
 /**
  * InvoiceManagerTest tests the {@see \Siel\Acumulus\Shop\InvoiceManager} class.
