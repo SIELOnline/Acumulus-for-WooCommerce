@@ -14,7 +14,7 @@ use Siel\Acumulus\Shop\AcumulusEntryManager;
 use Siel\Acumulus\Tests\WooCommerce\Acumulus_WooCommerce_TestCase;
 
 /**
- * AcumulusEntryTest tests the CRUD actions on the acumulus entries storage in Joomla.
+ * AcumulusEntryTest tests the CRUD actions on the acumulus entries storage in WordPress.
  */
 class AcumulusEntryManagerTest extends Acumulus_WooCommerce_TestCase
 {
