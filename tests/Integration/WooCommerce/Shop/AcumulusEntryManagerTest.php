@@ -39,7 +39,7 @@ class AcumulusEntryManagerTest extends Acumulus_WooCommerce_TestCase
         $source = static::getAcumulusContainer()->createSource(static::testSourceType, static::testSourceId);
         $entry = $acumulusEntryManager->getByInvoiceSource($source);
         self::assertTrue($entry === null || $acumulusEntryManager->delete($entry));
-        $this->commit_transaction();
+        static::commit_transaction();
         return $source;
     }
 
@@ -53,7 +53,7 @@ class AcumulusEntryManagerTest extends Acumulus_WooCommerce_TestCase
         $acumulusEntryManager = $this->getAcumulusEntryManager();
         $now = current_datetime();
         self::assertTrue($acumulusEntryManager->save($source, static::testConceptId, null));
-        $this->commit_transaction();
+        static::commit_transaction();
 
         $entry = $acumulusEntryManager->getByInvoiceSource($source);
         self::assertInstanceOf(AcumulusEntry::class, $entry);
@@ -84,7 +84,7 @@ class AcumulusEntryManagerTest extends Acumulus_WooCommerce_TestCase
         $now = new DateTime();
         sleep(1);
         self::assertTrue($acumulusEntryManager->save($source, static::testEntryId, static::testToken));
-        $this->commit_transaction();
+        static::commit_transaction();
 
         $entry = $acumulusEntryManager->getByEntryId(static::testEntryId);
         self::assertInstanceOf(AcumulusEntry::class, $entry);
@@ -114,7 +114,7 @@ class AcumulusEntryManagerTest extends Acumulus_WooCommerce_TestCase
         $acumulusEntryManager = $this->getAcumulusEntryManager();
         $entry = $acumulusEntryManager->getByEntryId(static::testEntryId);
         self::assertTrue($acumulusEntryManager->delete($entry));
-        $this->commit_transaction();
+        static::commit_transaction();
         self::assertNull($acumulusEntryManager->getByEntryId(static::testEntryId));
     }
 }
