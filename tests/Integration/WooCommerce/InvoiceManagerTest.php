@@ -35,7 +35,7 @@ class InvoiceManagerTest extends Acumulus_WooCommerce_TestCase
           [Source::Order, 60, 70, [61, 62, 67, 68, 69, 70]],
           [Source::Order, 92, 99, []],
           [Source::CreditNote, 0, 10, []],
-          [Source::CreditNote, 72, 72, [72]],
+          [Source::CreditNote, 73, 73, [73]],
           [Source::CreditNote, 70, 80, [72, 73]],
           [Source::CreditNote, 60, 70, []],
         ];
@@ -66,8 +66,7 @@ class InvoiceManagerTest extends Acumulus_WooCommerce_TestCase
             [Source::Order, '2023-03-01', '2023-05-29', [61, 67, 68]],
             [Source::Order, '2023-06-01', '2023-06-12', []],
             [Source::CreditNote, '2021-01-01', '2021-12-31', []],
-            [Source::CreditNote, '2023-06-13', '2023-06-13', [72]],
-            [Source::CreditNote, '2023-06-13', '2023-09-01', [72, 73]],
+            [Source::CreditNote, '2023-06-13', '2023-09-01', [73]],
             [Source::CreditNote, '2023-05-01', '2023-06-12', []],
         ];
     }
