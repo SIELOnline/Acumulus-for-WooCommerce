@@ -46,7 +46,7 @@
                     "meta-vatclass-id": "standard",
                     "meta-vatrate-lookup": "[21.0]",
                     "meta-vatrate-lookup-label": "['btw (21%)']",
-                    "meta-line-type": "order-item",
+                     "meta-sub-type": "ItemLine",
                     "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':1}]",
                     "meta-recalculate-old-price": 13.0991735,
                     "meta-did-recalculate": true
@@ -71,7 +71,7 @@
                     "meta-vatclass-id": "standard",
                     "meta-vatrate-lookup": "[21.0]",
                     "meta-vatrate-lookup-label": "['btw (21%)']",
-                    "meta-line-type": "order-item",
+                     "meta-sub-type": "ItemLine",
                     "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':1}]",
                     "meta-recalculate-old-price": 10.7438015,
                     "meta-did-recalculate": true
@@ -92,7 +92,7 @@
                     "meta-vatrate-lookup": "[21]",
                     "meta-vatrate-lookup-label": "['btw (21%)']",
                     "meta-vatrate-lookup-source": "shipping line taxes",
-                    "meta-line-type": "shipping",
+                    "meta-sub-type": "ShippingLine",
                     "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':1}]",
                     "unitpriceinc": 6.05,
                     "meta-fields-calculated": "['unitpriceinc']"
@@ -107,7 +107,7 @@
                     "vatamount": 0.0,
                     "meta-vatrate-source": "completor-max-appearing",
                     "meta-source-id": 66,
-                    "meta-line-type": "discount",
+                    "meta-sub-type": "discount",
                     "meta-fields-calculated": "['vatrate']"
                 },
                 {
@@ -120,7 +120,7 @@
                     "vatamount": 0.0,
                     "meta-vatrate-source": "completor-max-appearing",
                     "meta-source-id": 65,
-                    "meta-line-type": "discount",
+                    "meta-sub-type": "discount",
                     "meta-fields-calculated": "['vatrate']"
                 }
             ],

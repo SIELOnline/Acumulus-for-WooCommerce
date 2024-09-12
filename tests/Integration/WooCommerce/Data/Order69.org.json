@@ -44,7 +44,7 @@
                     "meta-vatclass-id": "standard",
                     "meta-vatrate-lookup": "[20.0]",
                     "meta-vatrate-lookup-label": "['btw (20%)']",
-                    "meta-line-type": "order-item",
+                     "meta-sub-type": "ItemLine",
                     "meta-recalculate-old-price": 45.45,
                     "meta-did-recalculate": true,
                     "meta-vattypes-possible": "[3]"
@@ -65,7 +65,7 @@
                     "meta-vatclass-id": "standard",
                     "meta-vatrate-lookup": "[20.0]",
                     "meta-vatrate-lookup-label": "['btw (20%)']",
-                    "meta-line-type": "order-item",
+                     "meta-sub-type": "ItemLine",
                     "meta-children-merged": 2,
                     "meta-recalculate-old-price": 37.19,
                     "meta-did-recalculate": true,
@@ -83,7 +83,7 @@
                     "meta-vatrate-lookup": "[20.0]",
                     "meta-vatrate-lookup-label": "['btw (20%)']",
                     "meta-vatrate-lookup-source": "get_option('woocommerce_shipping_tax_class')",
-                    "meta-line-type": "shipping",
+                    "meta-sub-type": "ShippingLine",
                     "unitpriceinc": 5.0,
                     "meta-fields-calculated": "['unitpriceinc']",
                     "meta-vattypes-possible": "[3]"

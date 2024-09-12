@@ -47,7 +47,7 @@
                     "meta-vatclass-id": "standard",
                     "meta-vatrate-lookup": "[21.0]",
                     "meta-vatrate-lookup-label": "['btw (21%)']",
-                    "meta-line-type": "order-item",
+                     "meta-sub-type": "ItemLine",
                     "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':1}]",
                     "meta-recalculate-old-price": 45.000083000000004,
                     "meta-did-recalculate": true
@@ -71,7 +71,7 @@
                     "meta-vatclass-id": "standard",
                     "meta-vatrate-lookup": "[21.0]",
                     "meta-vatrate-lookup-label": "['btw (21%)']",
-                    "meta-line-type": "order-item",
+                     "meta-sub-type": "ItemLine",
                     "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':1}]",
                     "meta-recalculate-old-price": 45.000083000000004,
                     "meta-did-recalculate": true
@@ -95,7 +95,7 @@
                     "meta-vatclass-id": "standard",
                     "meta-vatrate-lookup": "[21.0]",
                     "meta-vatrate-lookup-label": "['btw (21%)']",
-                    "meta-line-type": "order-item",
+                     "meta-sub-type": "ItemLine",
                     "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':1}]",
                     "meta-recalculate-old-price": 17.996033,
                     "meta-did-recalculate": true

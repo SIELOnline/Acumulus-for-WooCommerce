@@ -13,18 +13,18 @@
         "city": "Mirabel aux Baronnies",
         "countryCode": "FR",
         "countryAutoName": 2,
-        "meta-address-type": "invoice",
         "meta-shop-country-name": "Frankrijk",
+        "meta-sub-type": "InvoiceAddress",
         "altFullName": "Consument Frankrijk",
         "altAddress1": "1 Allée d'Ailleurs",
         "altPostalCode": "26110",
         "altCity": "Mirabel aux Baronnies",
         "altCountryCode": "FR",
         "altCountryAutoName": 2,
-        "altMeta-address-type": "shipping",
         "altMeta-shop-country-name": "Frankrijk",
+        "altMeta-sub-type": "ShippingAddress",
         "meta-shop-vat-based-on": "billing",
-        "meta-main-address-type": "invoice",
+        "meta-main-address-type": "InvoiceAddress",
         "invoice": {
             "concept": 0,
             "vatType": 6,
@@ -42,8 +42,9 @@
                     "vatRate": 20.0,
                     "quantity": 1.0,
                     "meta-id": 23,
-                    "meta-info": "Price inc is realistic: not all taxes are rounded => taxes are realistic ({'13':'6.595482'})",
+                    "meta-product-id": 32,
                     "unitpriceinc": 39.572891999999996,
+                    "meta-info": "Price inc is realistic: not all taxes are rounded => taxes are realistic ({'13':'6.595482'})",
                     "meta-unitpriceinc-precision": 0.001,
                     "meta-recalculate-price": "unitprice",
                     "meta-vatrate-min": 19.979625874048484,
@@ -53,13 +54,14 @@
                     "meta-vatamount-precision": 0.01,
                     "meta-vatrate-source": "completor-range",
                     "meta-vatclass-id": "standard",
-                    "meta-vatrate-lookup": "[20.0]",
-                    "meta-vatrate-lookup-label": "['btw (20%)']",
-                    "meta-line-type": "order-item",
+                    "meta-vatrate-lookup": 20.0,
+                    "meta-vatrate-lookup-label": "btw (20%)",
+                    "meta-sub-type": "ItemLine",
                     "meta-vatrate-range-matches": "[{'vatrate':'20.0000','vattype':6}]",
                     "meta-children-merged": 2,
                     "meta-recalculate-old-price": 32.97741,
-                    "meta-did-recalculate": true
+                    "meta-did-recalculate": true,
+                    "meta-vattypes-possible": "[6]"
                 },
                 {
                     "itemNumber": "woo-vneck-tee-red",
@@ -68,8 +70,9 @@
                     "vatRate": 20.0,
                     "quantity": 1.0,
                     "meta-id": 24,
-                    "meta-info": "Price inc is realistic: not all taxes are rounded => taxes are realistic ({'13':'3.140785'})",
+                    "meta-product-id": 29,
                     "unitpriceinc": 18.844711,
+                    "meta-info": "Price inc is realistic: not all taxes are rounded => taxes are realistic ({'13':'3.140785'})",
                     "meta-unitpriceinc-precision": 0.001,
                     "meta-recalculate-price": "unitprice",
                     "meta-vatrate-min": 19.95722213388234,
@@ -79,13 +82,14 @@
                     "meta-vatamount-precision": 0.01,
                     "meta-vatrate-source": "completor-range",
                     "meta-vatclass-id": "standard",
-                    "meta-vatrate-lookup": "[20.0]",
-                    "meta-vatrate-lookup-label": "['btw (20%)']",
-                    "meta-line-type": "order-item",
+                    "meta-vatrate-lookup": 20.0,
+                    "meta-vatrate-lookup-label": "btw (20%)",
+                    "meta-sub-type": "ItemLine",
                     "meta-vatrate-range-matches": "[{'vatrate':'20.0000','vattype':6}]",
                     "meta-children-merged": 2,
                     "meta-recalculate-old-price": 15.703926,
-                    "meta-did-recalculate": true
+                    "meta-did-recalculate": true,
+                    "meta-vattypes-possible": "[6]"
                 },
                 {
                     "itemNumber": "woo-hoodie-blue-logo",
@@ -94,8 +98,9 @@
                     "vatRate": 20.0,
                     "quantity": 1.0,
                     "meta-id": 25,
-                    "meta-info": "Price inc is realistic: not all taxes are rounded => taxes are realistic ({'13':'7.064683'})",
+                    "meta-product-id": 39,
                     "unitpriceinc": 42.388099000000004,
+                    "meta-info": "Price inc is realistic: not all taxes are rounded => taxes are realistic ({'13':'7.064683'})",
                     "meta-unitpriceinc-precision": 0.001,
                     "meta-recalculate-price": "unitprice",
                     "meta-vatrate-min": 19.98097824179422,
@@ -105,13 +110,14 @@
                     "meta-vatamount-precision": 0.01,
                     "meta-vatrate-source": "completor-range",
                     "meta-vatclass-id": "standard",
-                    "meta-vatrate-lookup": "[20.0]",
-                    "meta-vatrate-lookup-label": "['btw (20%)']",
-                    "meta-line-type": "order-item",
+                    "meta-vatrate-lookup": 20.0,
+                    "meta-vatrate-lookup-label": "btw (20%)",
+                    "meta-sub-type": "ItemLine",
                     "meta-vatrate-range-matches": "[{'vatrate':'20.0000','vattype':6}]",
                     "meta-children-merged": 2,
                     "meta-recalculate-old-price": 35.323416,
-                    "meta-did-recalculate": true
+                    "meta-did-recalculate": true,
+                    "meta-vattypes-possible": "[6]"
                 },
                 {
                     "product": "Vast tarief",
@@ -129,10 +135,11 @@
                     "meta-vatrate-lookup": "['20']",
                     "meta-vatrate-lookup-label": "['btw (20%)']",
                     "meta-vatrate-lookup-source": "shipping line taxes",
-                    "meta-line-type": "shipping",
+                    "meta-sub-type": "ShippingLine",
                     "meta-vatrate-range-matches": "[{'vatrate':'20.0000','vattype':6}]",
                     "unitpriceinc": 12.0,
-                    "meta-fields-calculated": "['unitpriceinc']"
+                    "meta-fields-calculated": "['unitpriceinc']",
+                    "meta-vattypes-possible": "[6]"
                 },
                 {
                     "itemNumber": "min5%",
@@ -144,13 +151,14 @@
                     "vatamount": 0.0,
                     "meta-vatrate-source": "completor-max-appearing",
                     "meta-id": 66,
-                    "meta-line-type": "discount",
-                    "meta-fields-calculated": "['vatrate']"
+                    "meta-sub-type": "DiscountLine",
+                    "meta-fields-calculated": "['vatrate']",
+                    "meta-vattypes-possible": "[6]"
                 }
             ],
             "meta-source-type": "Order",
             "meta-source-id": 70,
-            "meta-source-reference": "70",
+            "meta-source-reference": 70,
             "meta-source-date": "2023-05-30",
             "meta-source-status": "on-hold",
             "meta-payment-method": "bacs",
@@ -164,7 +172,10 @@
             "meta-lines-amount": 94.00475166666666,
             "meta-lines-amountinc": 112.805702,
             "meta-lines-vatamount": 18.80095,
-            "meta-vattype-source": "Completor::checkForKnownVatType: only 1 possible vat type"
+            "meta-vattype-source": "Completor::completeVatType: Only 1 choice fits all",
+            "meta-vattypes-possible-invoice": "[1,6]",
+            "meta-vattypes-possible-lines-intersection": "[6]",
+            "meta-vattypes-possible-lines-union": "[6]"
         }
     }
 }
