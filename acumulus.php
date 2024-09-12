@@ -26,17 +26,22 @@ if (!defined('ABSPATH')) {
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Siel\Acumulus\ApiClient\AcumulusResult;
+use Siel\Acumulus\Collectors\CollectorManager;
 use Siel\Acumulus\Config\Config;
+use Siel\Acumulus\Data\Invoice;
+use Siel\Acumulus\Data\Line;
 use Siel\Acumulus\Helpers\Container;
 use Siel\Acumulus\Helpers\Form;
 use Siel\Acumulus\Helpers\Message;
 use Siel\Acumulus\Helpers\Severity;
 use Siel\Acumulus\Invoice\InvoiceAddResult;
+use Siel\Acumulus\Invoice\Item;
 use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Shop\ActivateSupportFormTranslations;
 use Siel\Acumulus\Shop\BatchFormTranslations;
 use Siel\Acumulus\Shop\ConfigFormTranslations;
 use Siel\Acumulus\Shop\RegisterFormTranslations;
+use Siel\Acumulus\WooCommerce\Invoice\Collector3rdPartyPluginSupport;
 
 /**
  * Class Acumulus is the base plugin class.
@@ -117,7 +122,9 @@ class Acumulus
         add_action('woocommerce_order_status_changed', [$this, 'woocommerceOrderChanged'], 10, 4);
         add_action('woocommerce_order_refunded', [$this, 'woocommerceOrderRefunded'], 10, 2);
         // - Our own invoice related events.
-        add_filter('acumulus_invoice_created', [$this, 'acumulusInvoiceCreated'], 10, 3);
+        add_filter('acumulus_item_line_collect_before', [$this, 'acumulusItemLineCollectBefore'], 10, 2);
+        add_filter('acumulus_item_line_collect_after', [$this, 'acumulusItemLineCollectAfter'], 10, 3);
+        add_filter('acumulus_invoice_collect_After', [$this, 'acumulusInvoiceCollectAfter'], 10, 3);
 
         // @todo: WooCommerce HPOS compatibility.
         //   Declare incompatibility, change to true to test or once we are compatible.
@@ -1101,32 +1108,43 @@ class Acumulus
     }
 
     /**
-     * Processes the filter triggered before an invoice will be sent to Acumulus.
+     * Reacts to the {@see \Siel\Acumulus\Helpers\Event::triggerItemLineCollectBefore()}
+     * event from Acumulus.
      *
-     * @param \Siel\Acumulus\Data\Invoice|array|null $invoice
-     *   The invoice in Acumulus format as will be sent to Acumulus or null if
-     *   another filter already decided that the invoice should not be sent to
-     *   Acumulus.
-     * @param \Siel\Acumulus\Invoice\Source $invoiceSource
-     *   Wrapper around the original WooCommerce order or refund for which the
-     *   invoice has been created.
-     * @param \Siel\Acumulus\Invoice\InvoiceAddResult $localResult
-     *   Any local error or warning messages that were created locally.
-     *
-     * @return array|null
-     *   The changed invoice or null if you do not want the invoice to be sent
-     *   to Acumulus.
+     * See that event for more details.
      */
-    public function acumulusInvoiceCreated($invoice, Source $invoiceSource, InvoiceAddResult $localResult): ?array
+    public function acumulusItemLineCollectBefore(Item $item, CollectorManager $collectorManager): void
     {
-        if ($invoice !== null) {
-            /**
-             * @var \Siel\Acumulus\WooCommerce\Invoice\CreatorPluginSupport $pluginSupport
-             */
-            $pluginSupport = $this->getAcumulusContainer()->getInstance('CreatorPluginSupport', 'Invoice');
-            $invoice = $pluginSupport->acumulusInvoiceCreated($invoice, $invoiceSource, $localResult);
-        }
-        return $invoice;
+        /** @noinspection PhpParamsInspection  $item will be a WooCommerce\Invoice\Item */
+        $this->getCollector3rdPartyPluginSupport()->itemLineCollectBefore($item, $collectorManager);
+    }
+
+    /**
+     * Reacts to the {@see \Siel\Acumulus\Helpers\Event::triggerItemLineCollectAfter()}
+     * event from Acumulus.
+     *
+     * See that event for more details.
+     */
+    public function acumulusItemLineCollectAfter(Line $line, Item $item, CollectorManager $collectorManager): void
+    {
+        /** @noinspection PhpParamsInspection  $item will be a WooCommerce\Invoice\Item */
+        $this->getCollector3rdPartyPluginSupport()->itemLineCollectAfter($line, $item, $collectorManager);
+    }
+
+    /**
+     * Reacts to the {@see \Siel\Acumulus\Helpers\Event::triggerInvoiceCollectAfter()}
+     * event from Acumulus.
+     *
+     * See that event for more details.
+     */
+    public function acumulusInvoiceCollectAfter(Invoice $invoice, Source $invoiceSource, InvoiceAddResult $localResult): void
+    {
+        $this->getCollector3rdPartyPluginSupport()->acumulusInvoiceCollectAfter($invoice, $invoiceSource, $localResult);
+    }
+
+    private function getCollector3rdPartyPluginSupport(): Collector3rdPartyPluginSupport
+    {
+        return $this->getAcumulusContainer()->getInstance('Collector3rdPartyPluginSupport', 'Invoice');
     }
 
     /**
