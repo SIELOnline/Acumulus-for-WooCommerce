@@ -12,6 +12,8 @@ use Siel\Acumulus\Tests\WooCommerce\Util;
  *
  * This class works on top of ./wordpress-develop/tests/phpunit/includes/bootstrap.php,
  * which it includes as last action.
+ *
+ * @noinspection PhpIllegalPsrClassPathInspection  File is loaded directly not autoloaded.
  */
 class AcumulusTestsBootstrap
 {
@@ -51,6 +53,8 @@ class AcumulusTestsBootstrap
         require_once $this->wp_tests_dir . '/includes/functions.php';
 
         // Ensure that translations from our own installation are loaded.
+
+        // Ensure that translations from our own installation are loaded.
         tests_add_filter('load_textdomain_mofile', [$this, 'load_text_domain_mo_file'], 10, 2);
 
         // Always load PayPal Standard for unit tests.
@@ -71,7 +75,18 @@ class AcumulusTestsBootstrap
             // WP bootstrap does not mention this state.
             echo 'Not reinstalling, running on current install.' . PHP_EOL;
         }
+
+        /**
+         * The bootstrap.php we include here calls {@see _delete_al_posts()}. So we
+         * bootstrap with a different prefix ('wptests_', defined in wp-tests-config.php)
+         * and change that to the prefix with tables with ou test orders and products,
+         * etc. as soon as the bootstrap finishes
+         */
         require_once $this->wp_tests_dir . '/includes/bootstrap.php';
+
+        /** @var \wpdb $wpdb */
+        global $wpdb;
+        $wpdb->set_prefix('wp_');
     }
 
     /**
@@ -111,9 +126,12 @@ class AcumulusTestsBootstrap
         return self::$instance;
     }
 
+    /**
+     * @noinspection PhpUnusedParameterInspection
+     */
     public function load_text_domain_mo_file(string $moFile, string $domain): string
     {
-        if (strpos($moFile, WP_LANG_DIR) === 0 && !is_readable($moFile)) {
+        if (str_starts_with($moFile, WP_LANG_DIR) && !is_readable($moFile)) {
             $moFile = $this->languages_dir . '/plugins/' . basename($moFile);
         }
         return $moFile;

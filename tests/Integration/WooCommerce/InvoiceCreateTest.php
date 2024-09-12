@@ -15,12 +15,36 @@ use Siel\Acumulus\Tests\WooCommerce\Acumulus_WooCommerce_TestCase;
  */
 class InvoiceCreateTest extends Acumulus_WooCommerce_TestCase
 {
+    protected static bool $emailAsPdf;
+    protected static string $taxBasedOn;
     protected string $dataPath;
 
-    public function __construct(?string $name = null, array $data = [], $dataName = '')
+    public function __construct(?string $name = null, array $data = [], int|string $dataName = '')
     {
         parent::__construct($name, $data, $dataName);
         $this->dataPath = __DIR__ . '/Data';
+    }
+
+    /**
+     * @before
+     * @noinspection PhpUnhandledExceptionInspection
+     */
+    public function beforeGetConfig(): void
+    {
+        self::$emailAsPdf = self::getAcumulusContainer()->getConfig()->get('emailAsPdf');
+        self::$taxBasedOn = get_option('woocommerce_tax_based_on');
+        self::getAcumulusContainer()->getConfig()->set('emailAsPdf', true);
+        update_option('woocommerce_tax_based_on', 'billing');
+    }
+
+    /**
+     * @after
+     */
+    public function afterResetConfig(): void
+    {
+        /** @noinspection PhpUnhandledExceptionInspection */
+        self::getAcumulusContainer()->getConfig()->set('emailAsPdf', self::$emailAsPdf ?? true);
+        update_option('woocommerce_tax_based_on', self::$taxBasedOn ?? 'billing');
     }
 
     public function InvoiceDataProviderWithoutEmailAsPdf(): array
@@ -42,10 +66,8 @@ class InvoiceCreateTest extends Acumulus_WooCommerce_TestCase
      */
     public function testCreateWithoutEmailAsPdf(string $dataPath, string $type, int $id, array $excludeFields = []): void
     {
-        $emailAsPdf = self::getAcumulusContainer()->getConfig()->get('emailAsPdf');
         self::getAcumulusContainer()->getConfig()->set('emailAsPdf', false);
         $this->_testCreate($dataPath, $type, $id, $excludeFields);
-        self::getAcumulusContainer()->getConfig()->set('emailAsPdf', $emailAsPdf);
     }
 
     public function InvoiceDataProviderWithEmailAsPdf(): array
@@ -67,10 +89,8 @@ class InvoiceCreateTest extends Acumulus_WooCommerce_TestCase
      */
     public function testCreateWithEmailAsPdf(string $dataPath, string $type, int $id, array $excludeFields = []): void
     {
-        $emailAsPdf = self::getAcumulusContainer()->getConfig()->get('emailAsPdf');
         self::getAcumulusContainer()->getConfig()->set('emailAsPdf', true);
         $this->_testCreate($dataPath, $type, $id, $excludeFields);
-        self::getAcumulusContainer()->getConfig()->set('emailAsPdf', $emailAsPdf);
     }
 
     public function InvoiceDataProviderVatBasedOnShippingAddress(): array
@@ -89,9 +109,9 @@ class InvoiceCreateTest extends Acumulus_WooCommerce_TestCase
      */
     public function testCreateVatBasedOnShippingAddress(string $dataPath, string $type, int $id, array $excludeFields = []): void
     {
-        $taxBasedOn = get_option('woocommerce_tax_based_on');
+        self::getAcumulusContainer()->getConfig()->set('emailAsPdf', false);
         update_option('woocommerce_tax_based_on', 'shipping');
+        $v = get_option('woocommerce_tax_based_on');
         $this->_testCreate($dataPath, $type, $id, $excludeFields);
-        update_option('woocommerce_tax_based_on', $taxBasedOn);
     }
 }
