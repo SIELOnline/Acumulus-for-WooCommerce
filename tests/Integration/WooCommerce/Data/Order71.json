@@ -57,7 +57,7 @@
                     "meta-vatrate-lookup": 21.0,
                     "meta-vatrate-lookup-label": "btw (21%)",
                     "meta-sub-type": "ItemLine",
-                    "meta-vatrate-range-matches": "[{'vatrate':'21.0000','vattype':1},{'vatrate':'21.0000','vattype':6}]",
+                    "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':1},{'vatrate':21.0,'vattype':6}]",
                     "meta-recalculate-old-price": 37.19008266666667,
                     "meta-did-recalculate": true,
                     "meta-vattypes-possible": "[1,6]"
@@ -75,7 +75,7 @@
                     "meta-vatrate-lookup-label": "['btw (21%)']",
                     "meta-vatrate-lookup-source": "get_option('woocommerce_shipping_tax_class')",
                     "meta-sub-type": "ShippingLine",
-                    "meta-vatrate-lookup-matches": "[{'vatrate':'21.0000','vattype':1},{'vatrate':'21.0000','vattype':6}]",
+                    "meta-vatrate-lookup-matches": "[{'vatrate':21.0,'vattype':1},{'vatrate':21.0,'vattype':6}]",
                     "unitpriceinc": 0,
                     "meta-fields-calculated": "['unitpriceinc']",
                     "meta-vattypes-possible": "[1,6]"

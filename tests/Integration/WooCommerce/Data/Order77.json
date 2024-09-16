@@ -57,7 +57,7 @@
                     "meta-vatrate-lookup": 21.0,
                     "meta-vatrate-lookup-label": "btw (21%)",
                     "meta-sub-type": "ItemLine",
-                    "meta-vatrate-range-matches": "[{'vatrate':'21.0000','vattype':1}]",
+                    "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':1}]",
                     "meta-children-merged": 2,
                     "meta-recalculate-old-price": 32.975207,
                     "meta-did-recalculate": true
@@ -84,7 +84,7 @@
                     "meta-vatrate-lookup": 21.0,
                     "meta-vatrate-lookup-label": "btw (21%)",
                     "meta-sub-type": "ItemLine",
-                    "meta-vatrate-range-matches": "[{'vatrate':'21.0000','vattype':1}]",
+                    "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':1}]",
                     "meta-children-merged": 2,
                     "meta-recalculate-old-price": 15.702479,
                     "meta-did-recalculate": true
@@ -111,7 +111,7 @@
                     "meta-vatrate-lookup": 21.0,
                     "meta-vatrate-lookup-label": "btw (21%)",
                     "meta-sub-type": "ItemLine",
-                    "meta-vatrate-range-matches": "[{'vatrate':'21.0000','vattype':1}]",
+                    "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':1}]",
                     "meta-children-merged": 2,
                     "meta-recalculate-old-price": 35.330579,
                     "meta-did-recalculate": true
@@ -133,7 +133,7 @@
                     "meta-vatrate-lookup-label": "['btw (21%)']",
                     "meta-vatrate-lookup-source": "shipping line taxes",
                     "meta-sub-type": "ShippingLine",
-                    "meta-vatrate-range-matches": "[{'vatrate':'21.0000','vattype':1}]",
+                    "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':1}]",
                     "unitpriceinc": 6.05,
                     "meta-fields-calculated": "['unitpriceinc']"
                 },
