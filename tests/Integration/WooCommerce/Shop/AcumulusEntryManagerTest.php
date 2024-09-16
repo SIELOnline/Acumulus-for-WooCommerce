@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Siel\Acumulus\Tests\Integration\WooCommerce\Shop;
 
-use DateTime;
+use DateTimeImmutable;
 use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Shop\AcumulusEntry;
 use Siel\Acumulus\Shop\AcumulusEntryManager;
@@ -81,7 +81,7 @@ class AcumulusEntryManagerTest extends Acumulus_WooCommerce_TestCase
         $entry = $acumulusEntryManager->getByInvoiceSource($source);
         $created = $entry->getCreated();
         $updated = $entry->getUpdated();
-        $now = new DateTime();
+        $now = new DateTimeImmutable();
         sleep(1);
         self::assertTrue($acumulusEntryManager->save($source, static::testEntryId, static::testToken));
         static::commit_transaction();
