@@ -29,7 +29,6 @@ class InvoiceCreateTest extends Acumulus_WooCommerce_TestCase
 
     /**
      * @before
-     * @noinspection PhpUnhandledExceptionInspection
      */
     public function beforeGetConfig(): void
     {
@@ -44,7 +43,6 @@ class InvoiceCreateTest extends Acumulus_WooCommerce_TestCase
      */
     public function afterResetConfig(): void
     {
-        /** @noinspection PhpUnhandledExceptionInspection */
         self::getAcumulusContainer()->getConfig()->set('emailAsPdf', self::$emailAsPdf ?? true);
         update_option('woocommerce_tax_based_on', self::$taxBasedOn ?? 'billing');
     }
@@ -107,13 +105,11 @@ class InvoiceCreateTest extends Acumulus_WooCommerce_TestCase
      * completing an {@see \Siel\Acumulus\Data\Invoice}.
      *
      * @dataProvider InvoiceDataProviderVatBasedOnShippingAddress
-     * @throws \JsonException
      */
     public function testCreateVatBasedOnShippingAddress(string $dataPath, string $type, int $id, array $excludeFields = []): void
     {
         self::getAcumulusContainer()->getConfig()->set('emailAsPdf', false);
         update_option('woocommerce_tax_based_on', 'shipping');
-        $v = get_option('woocommerce_tax_based_on');
         $this->_testCreate($dataPath, $type, $id, $excludeFields);
     }
 }

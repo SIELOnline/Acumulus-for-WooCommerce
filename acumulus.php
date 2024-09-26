@@ -4,13 +4,13 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 8.2.0
+ * Version: 8.3.0
  * LICENCE: GPLv3
  * Requires at least: 5.9
- * Tested up to: 6.5
+ * Tested up to: 6.6
  * WC requires at least: 5.0
- * WC tested up to: 9.1
- * libAcumulus requires at least: 8.2.0
+ * WC tested up to: 9.3
+ * libAcumulus requires at least: 8.3.0
  * Requires PHP: 8.0
  */
 
@@ -26,7 +26,7 @@ if (!defined('ABSPATH')) {
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Siel\Acumulus\ApiClient\AcumulusResult;
-use Siel\Acumulus\Collectors\CollectorManager;
+use Siel\Acumulus\Collectors\PropertySources;
 use Siel\Acumulus\Config\Config;
 use Siel\Acumulus\Data\Invoice;
 use Siel\Acumulus\Data\Line;
@@ -35,7 +35,6 @@ use Siel\Acumulus\Helpers\Form;
 use Siel\Acumulus\Helpers\Message;
 use Siel\Acumulus\Helpers\Severity;
 use Siel\Acumulus\Invoice\InvoiceAddResult;
-use Siel\Acumulus\Invoice\Item;
 use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Shop\ActivateSupportFormTranslations;
 use Siel\Acumulus\Shop\BatchFormTranslations;
@@ -122,12 +121,11 @@ class Acumulus
         add_action('woocommerce_order_status_changed', [$this, 'woocommerceOrderChanged'], 10, 4);
         add_action('woocommerce_order_refunded', [$this, 'woocommerceOrderRefunded'], 10, 2);
         // - Our own invoice related events.
-        add_filter('acumulus_item_line_collect_before', [$this, 'acumulusItemLineCollectBefore'], 10, 2);
-        add_filter('acumulus_item_line_collect_after', [$this, 'acumulusItemLineCollectAfter'], 10, 3);
+        add_filter('acumulus_line_collect_before', [$this, 'acumulusLineCollectBefore'], 10, 2);
+        add_filter('acumulus_line_collect_after', [$this, 'acumulusLineCollectAfter'], 10, 2);
         add_filter('acumulus_invoice_collect_After', [$this, 'acumulusInvoiceCollectAfter'], 10, 3);
 
-        // @todo: WooCommerce HPOS compatibility.
-        //   Declare incompatibility, change to true to test or once we are compatible.
+        // WooCommerce HPOS compatibility. Declare compatibility.
         add_action('before_woocommerce_init', static function () {
             if (class_exists(FeaturesUtil::class)) {
                 FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
@@ -221,7 +219,6 @@ class Acumulus
             $this->getAcumulusContainer()->getLog()->setLogLevel(Severity::Log);
 
             // Check for any updates to perform.
-            /** @noinspection PhpUnhandledExceptionInspection */
             $this->upgrade();
         }
     }
@@ -348,19 +345,12 @@ class Acumulus
         $this->init();
         // Check where the ajax call came from.
         if (isset($_POST['area'])) {
-            switch ($_POST['area']) {
-                case 'acumulus-invoice':
-                    $content = $this->processInvoiceStatusForm();
-                    break;
-                case 'acumulus-rate':
-                    $content = $this->processRatePluginForm();
-                    break;
-                case 'acumulus-message':
-                    $content = $this->processMessageForm();
-                    break;
-                default:
-                    $content = $this->renderNotice('Area parameter of ajax request unknown to Acumulus.', 'error');
-            }
+            $content = match ($_POST['area']) {
+                'acumulus-invoice' => $this->processInvoiceStatusForm(),
+                'acumulus-rate' => $this->processRatePluginForm(),
+                'acumulus-message' => $this->processMessageForm(),
+                default => $this->renderNotice('Area parameter of ajax request unknown to Acumulus.', 'error'),
+            };
         } elseif (isset($_REQUEST['acumulus_action'])) {
             // @nth: should we have some visual feedback here, in case of both
             //   error and success. Given the redirect at the end, this needs
@@ -371,12 +361,13 @@ class Acumulus
                 case 'acumulus-document-invoice-mail':
                 case 'acumulus-document-packing-slip-mail':
                     $result = $this->mailPdf($_REQUEST['acumulus_action'], $_REQUEST['order_id']);
+                    /** @noinspection PhpUnusedLocalVariableInspection @todo: do something with this content. */
                     $content = !$result->hasError() ? '✓' : '❌';
                     break;
                 default:
+                    /** @noinspection PhpUnusedLocalVariableInspection */
                     $content = $this->renderNotice('Acumulus_action parameter of ajax request unknown to Acumulus.', 'error');
             }
-            // @todo: WooCommerce HPOS compatibility.
             wp_safe_redirect(wp_get_referer() ?: admin_url($this->getOrderListPage()));
             exit;
         } else {
@@ -446,7 +437,7 @@ class Acumulus
                     try {
                         $crashReporter = $this->getAcumulusContainer()->getCrashReporter();
                         $crashReporter->logAndMail($e);
-                    } catch (Throwable $inner) {
+                    } catch (Throwable) {
                         // We do not know if we have informed the user per mail or
                         // screen, so assume not, and rethrow the original exception.
                         throw $e;
@@ -710,7 +701,7 @@ class Acumulus
                 $crashReporter = $this->getAcumulusContainer()->getCrashReporter();
                 $message = $crashReporter->logAndMail($e);
                 $form->createAndAddMessage($message, Severity::Exception);
-            } catch (Throwable $inner) {
+            } catch (Throwable) {
                 // We do not know if we have informed the user per mail or
                 // screen, so assume not, and rethrow the original exception.
                 throw $e;
@@ -905,27 +896,13 @@ class Acumulus
      */
     private function SeverityToNoticeClass(int $severity): string
     {
-        switch ($severity) {
-            case Severity::Success:
-                $class = 'success';
-                break;
-            case Severity::Info:
-            case Severity::Notice:
-                $class = 'info';
-                break;
-            case Severity::Warning:
-                $class = 'warning';
-                break;
-            case Severity::Error:
-            case Severity::Exception:
-                $class = 'error';
-                break;
-            default:
-                $class = '';
-                break;
-        }
-
-        return $class;
+        return match ($severity) {
+            Severity::Success => 'success',
+            Severity::Info, Severity::Notice => 'info',
+            Severity::Warning => 'warning',
+            Severity::Error, Severity::Exception => 'error',
+            default => '',
+        };
     }
 
     /**
@@ -1059,7 +1036,7 @@ class Acumulus
     /**
      * @param string $invoiceSourceType
      *   The type of the invoice source to create.
-     * @param int|object|array $invoiceSourceOrId
+     * @param object|int|array $invoiceSourceOrId
      *   The invoice source itself or its id to create a
      *   \Siel\Acumulus\Invoice\Source instance for.
      *
@@ -1067,7 +1044,7 @@ class Acumulus
      *
      * @throws \Throwable
      */
-    private function sourceStatusChange(string $invoiceSourceType, $invoiceSourceOrId): void
+    private function sourceStatusChange(string $invoiceSourceType, object|int|array $invoiceSourceOrId): void
     {
         try {
             $source = $this->getAcumulusContainer()->createSource($invoiceSourceType, $invoiceSourceOrId);
@@ -1078,7 +1055,7 @@ class Acumulus
                 // We do not know if we are on the admin side, so we should not
                 // try to display the message returned by logAndMail().
                 $crashReporter->logAndMail($e);
-            } catch (Throwable $inner) {
+            } catch (Throwable) {
                 // We do not know if we have informed the user per mail or
                 // screen, so assume not, and rethrow the original exception.
                 throw $e;
@@ -1108,27 +1085,25 @@ class Acumulus
     }
 
     /**
-     * Reacts to the {@see \Siel\Acumulus\Helpers\Event::triggerItemLineCollectBefore()}
+     * Reacts to the {@see \Siel\Acumulus\Helpers\Event::triggerLineCollectBefore()}
      * event from Acumulus.
      *
      * See that event for more details.
      */
-    public function acumulusItemLineCollectBefore(Item $item, CollectorManager $collectorManager): void
+    public function acumulusLineCollectBefore(Line $line, PropertySources $propertySources): void
     {
-        /** @noinspection PhpParamsInspection  $item will be a WooCommerce\Invoice\Item */
-        $this->getCollector3rdPartyPluginSupport()->itemLineCollectBefore($item, $collectorManager);
+        $this->getCollector3rdPartyPluginSupport()->lineCollectBefore($line, $propertySources);
     }
 
     /**
-     * Reacts to the {@see \Siel\Acumulus\Helpers\Event::triggerItemLineCollectAfter()}
+     * Reacts to the {@see \Siel\Acumulus\Helpers\Event::triggerLineCollectAfter()}
      * event from Acumulus.
      *
      * See that event for more details.
      */
-    public function acumulusItemLineCollectAfter(Line $line, Item $item, CollectorManager $collectorManager): void
+    public function acumulusLineCollectAfter(Line $line, PropertySources $propertySources): void
     {
-        /** @noinspection PhpParamsInspection  $item will be a WooCommerce\Invoice\Item */
-        $this->getCollector3rdPartyPluginSupport()->itemLineCollectAfter($line, $item, $collectorManager);
+        $this->getCollector3rdPartyPluginSupport()->lineCollectAfter($line, $propertySources);
     }
 
     /**
