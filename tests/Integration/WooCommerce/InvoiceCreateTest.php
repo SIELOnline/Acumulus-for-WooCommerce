@@ -13,7 +13,8 @@ use Siel\Acumulus\Tests\WooCommerce\Acumulus_WooCommerce_TestCase;
 /**
  * InvoiceCreateTest tests the process of creating an {@see Invoice}.
  *
- * @todo: add a test with fee lines,
+ * @todo: add a test with fee lines.
+ * @todo: add a test with margin scheme.
  */
 class InvoiceCreateTest extends Acumulus_WooCommerce_TestCase
 {
