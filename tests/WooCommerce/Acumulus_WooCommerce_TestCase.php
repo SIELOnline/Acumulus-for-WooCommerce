@@ -10,7 +10,6 @@ namespace Siel\Acumulus\Tests\WooCommerce;
 
 use Acumulus;
 use Siel\Acumulus\Helpers\Container;
-use Siel\Acumulus\Tests\AcumulusTestUtils;
 use Yoast\WPTestUtils\WPIntegration\TestCase;
 
 /**

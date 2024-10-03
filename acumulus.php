@@ -99,9 +99,11 @@ class Acumulus
      */
     public function registerHooks(): void
     {
-        // activate/deactivate actions.
-        register_activation_hook($this->file, [$this, 'activate']);
-        register_deactivation_hook($this->file, [$this, 'deactivate']);
+        // activate/deactivate actions: may be undefined in test situations.
+        if (function_exists('register_activation_hook')) {
+            register_activation_hook($this->file, [$this, 'activate']);
+            register_deactivation_hook($this->file, [$this, 'deactivate']);
+        }
 
         // Actions:
         // - Add our forms to the admin menu.
