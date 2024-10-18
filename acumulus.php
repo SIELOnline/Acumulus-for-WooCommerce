@@ -4,7 +4,7 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 8.3.0
+ * Version: 8.3.1
  * LICENCE: GPLv3
  * Requires at least: 5.9
  * Tested up to: 6.6
