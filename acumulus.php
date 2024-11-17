@@ -8,15 +8,21 @@
  * LICENCE: GPLv3
  * Requires at least: 5.9
  * Tested up to: 6.7
- * WC requires at least: 5.0
+ * WC requires at least: 9.1.0
  * WC tested up to: 9.3
  * libAcumulus requires at least: 8.3.5
  * Requires PHP: 8.0
  */
 
 /**
+ * Remarks about WC Requires at least:
+ * - Stock handling:
+ *   - restock: since 9.1.0: do_action('woocommerce_restore_order_item_stock', ...);
+ *   - decrease stock: since 7.6.0: do_action('woocommerce_reduce_order_item_stock', ...);
+ * - If stock handling is not used: 5.0 should work.
+ *
  * @noinspection PhpMissingStrictTypesDeclarationInspection  accept strings as int
- * @noinspection AutoloadingIssuesInspection
+ * @noinspection AutoloadingIssuesInspection  is automatically loaded by WordPress
  */
 
 if (!defined('ABSPATH')) {
@@ -112,7 +118,7 @@ class Acumulus
         add_action('admin_notices', [$this, 'showAdminNotices']);
         add_action('add_meta_boxes', [$this, 'addShopOrderMetaBox'], 10, 2);
         add_action('wp_ajax_acumulus_ajax_action', [$this, 'handleAjaxRequest']);
-        add_filter( 'woocommerce_admin_order_actions', [$this, 'adminOrderActions'], 100, 2 );
+        add_filter('woocommerce_admin_order_actions', [$this, 'adminOrderActions'], 100, 2);
         // - To process our own forms.
         add_action('admin_post_acumulus_settings', [$this, 'processSettingsForm']);
         add_action('admin_post_acumulus_mappings', [$this, 'processMappingsForm']);
@@ -122,6 +128,22 @@ class Acumulus
         add_action('woocommerce_new_order', [$this, 'woocommerceOrderChanged'], 10, 2);
         add_action('woocommerce_order_status_changed', [$this, 'woocommerceOrderChanged'], 10, 4);
         add_action('woocommerce_order_refunded', [$this, 'woocommerceOrderRefunded'], 10, 2);
+        // - WooCommerce stock events.
+        /* These are events based on the sales side. Events on the purchase side, either a
+         * manual or automated direct update of the stock, are not handled (for now).
+         * Those would be:
+         * - wc_update_product_stock() or
+         *   WC_Product_Data_Store_Interface::handle_updated_props() (via public create()
+         *   or update()):
+         *   - woocommerce_variation_before_set_stock' or 'woocommerce_product_before_set_stock'
+         *   -'woocommerce_variation_set_stock' or 'woocommerce_product_set_stock'
+         * - WC_Product_Data_Store_Interface::update_product_stock():
+         *   - 'woocommerce_updated_product_stock', called between the actions above when
+         *     called via wc_update_product_stock() but not when called via create() or
+         *     update(), so is a lesser option.
+         */
+        add_action('woocommerce_reduce_order_item_stock', [$this, 'woocommerceReduceStock'], 10, 3);
+        add_action('woocommerce_restore_order_item_stock', [$this, 'woocommerceIncreaseStock'], 10, 4);
         // - Our own invoice related events.
         add_filter('acumulus_line_collect_before', [$this, 'acumulusLineCollectBefore'], 10, 2);
         add_filter('acumulus_line_collect_after', [$this, 'acumulusLineCollectAfter'], 10, 2);
@@ -133,7 +155,6 @@ class Acumulus
                 FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
             }
         });
-
     }
 
     /**
@@ -171,7 +192,7 @@ class Acumulus
     public function useHpos(): bool
     {
         return class_exists(CustomOrdersTableController::class)
-            && wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled();
+            && wc_get_container()->get(CustomOrdersTableController::class)->custom_orders_table_usage_is_enabled();
     }
 
     /**
@@ -272,7 +293,8 @@ class Acumulus
             [$this, 'processMappingsForm']
         );
         $this->getAcumulusContainer()->getTranslator()->add(new ActivateSupportFormTranslations());
-        add_submenu_page('options-general.php',
+        add_submenu_page(
+            'options-general.php',
             $this->t('activate_form_title'),
             $this->t('activate_form_header'),
             'manage_options',
@@ -293,7 +315,8 @@ class Acumulus
             [$this, 'processRegisterForm']
         );
         $this->getAcumulusContainer()->getTranslator()->add(new BatchFormTranslations());
-        add_submenu_page('woocommerce',
+        add_submenu_page(
+            'woocommerce',
             $this->t('batch_form_title'),
             $this->t('batch_form_header'),
             'manage_woocommerce',
@@ -405,7 +428,7 @@ class Acumulus
      *   The id of the screen to add meta boxes to: we want to add our meta box to:
      *   - 'shop_order': the legacy edit order as a post screen.
      *   - 'woocommerce_page_wc-orders': the HPOS edit order screen.
-     * @noinspection PhpDocSignatureInspection  object is base type of these possibilities.
+     *
      * @param \WP_Post|\WC_Order $shopOrderOrPost
      *   This will be a:
      *   - WP_POST: on the legacy screen.
@@ -413,7 +436,7 @@ class Acumulus
      *
      * @throws \Throwable
      */
-    public function addShopOrderMetaBox(string $screen_id, object $shopOrderOrPost): void
+    public function addShopOrderMetaBox(string $screen_id, WP_Post|WC_Order $shopOrderOrPost): void
     {
         if (in_array($screen_id, ['woocommerce_page_wc-orders', 'shop_order'])) {
             $orderId = ($shopOrderOrPost instanceof WP_Post) ? $shopOrderOrPost->ID : $shopOrderOrPost->get_id();
@@ -478,8 +501,7 @@ class Acumulus
             || $documentsSettings['mailInvoiceList']
             || $documentsSettings['showPackingSlipList']
             || $documentsSettings['mailPackingSlipList']
-        )
-        {
+        ) {
             $source = $this->getAcumulusContainer()->createSource(Source::Order, $order);
             $acumulusEntry = $this->getAcumulusContainer()->getAcumulusEntryManager()->getByInvoiceSource($source);
             if ($acumulusEntry !== null) {
@@ -928,8 +950,7 @@ class Acumulus
      *   The rendered notice.
      */
     private function renderNotice(string $message, string $type, string $id = '', array $extraAttributes = [], bool $isHtml = false):
-    string
-    {
+    string {
         $for = '';
         if (!empty($id) && func_num_args() === 3) {
             // Form field message (because: 3 arguments (I know: this sucks)):
@@ -1068,8 +1089,6 @@ class Acumulus
     /**
      * Hook to correct the behaviour of WC_Order::is_paid().
      *
-     * Note: this is used when running with WC 3.x.
-     *
      * WooCommerce thinks that only orders in the processing or completed statuses
      * are to be seen as paid, whereas for Acumulus, refunded orders are also
      * paid. (if an order is refunded, a separate credit note invoice will be
@@ -1084,6 +1103,59 @@ class Acumulus
     public function woocommerceOrderIsPaidStatuses(array $statuses/*, WC_Order $order*/): array
     {
         return array_merge($statuses, ['refunded']);
+    }
+
+    /**
+     * Hook to react to a stock decrease when an order gets fulfilled.
+     *
+     * @param array $change
+     *   Change Details. Array with the following keys:
+     *   - product' => WC_Product,
+     *   - 'from' => float,
+     *   - 'to' => float,
+     */
+    public function woocommerceReduceStock(WC_Order_Item_Product $item, array $change, WC_Order $order): void
+    {
+        $product = $item->get_product();
+        $productIdWithStock = $product->get_stock_managed_by_id();
+        $this->getAcumulusContainer()->getLog()->info(
+            'Decreasing stock for product %d (%s) (stock managed by %d) order item %d (order %d) from %f to %f',
+            $item->get_product_id(),
+            $product->get_formatted_name(),
+            $productIdWithStock,
+            $item->get_id(),
+            $order->get_id(),
+            $change['from'],
+            $change['to'],
+        );
+    }
+
+    /**
+     * Hook to react to a stock increase when an order gets returned.
+     *
+     * @todo: do we get the original order or a refund as 4th argument.
+     *   Seems to be based on order cancelling (or pending???) ..., so
+     *   what does the checkbox "Neem de terugbetaalde artikelen weer op voorraad" do?
+     */
+    public function woocommerceIncreaseStock(
+        WC_Order_Item_Product $item,
+        int|float $new_stock,
+        int|float $old_stock,
+        WC_Abstract_Order $order
+    ): void
+    {
+        $product = $item->get_product();
+        $productIdWithStock = $product->get_stock_managed_by_id();
+        $this->getAcumulusContainer()->getLog()->info(
+            'Increasing stock for product %d (%s) (stock managed by %d) order item %d (order %d) from %f to %f',
+            $item->get_product_id(),
+            $product->get_formatted_name(),
+            $productIdWithStock,
+            $item->get_id(),
+            $order->get_id(),
+            $old_stock,
+            $new_stock,
+        );
     }
 
     /**
