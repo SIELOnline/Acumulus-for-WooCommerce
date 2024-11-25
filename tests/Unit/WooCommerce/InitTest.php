@@ -25,7 +25,7 @@ class InitTest extends Acumulus_WooCommerce_TestCase
     {
         // 1.
         $container = Acumulus::create()->getAcumulusContainer();
-        $environmentInfo = $container->getEnvironment()->get();
+        $environmentInfo = $container->getEnvironment()->toArray();
         // 2.
         $this->assertMatchesRegularExpression('|\d+\.\d+\.\d+|', $environmentInfo['shopVersion']);
     }

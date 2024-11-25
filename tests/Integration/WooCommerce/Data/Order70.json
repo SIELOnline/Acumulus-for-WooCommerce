@@ -128,7 +128,7 @@
                     "meta-id": 26,
                     "vatAmount": 2.0,
                     "meta-vatamount-precision": 0.001,
-                    "meta-vatrate-lookup": "['20']",
+                    "meta-vatrate-lookup": "[20]",
                     "meta-vatrate-lookup-label": "['btw (20%)']",
                     "meta-vatclass-id": "standard",
                     "meta-vatrate-lookup-source": "shipping line taxes",

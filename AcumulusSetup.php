@@ -122,8 +122,7 @@ class AcumulusSetup
             add_action('admin_notices', [$this, 'adminNotice']);
         }
 
-        reset($this->messages);
-        return count($this->messages) === 0 || (count($this->messages) === 1 && strpos(key($this->messages), 'warning') !== false);
+        return count($this->messages) === 0 || (count($this->messages) === 1 && str_contains(array_key_first($this->messages), 'warning'));
     }
 
     /**
