@@ -4,13 +4,13 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 8.3.5
+ * Version: 8.3.6
  * LICENCE: GPLv3
  * Requires at least: 5.9
  * Tested up to: 6.7
- * WC requires at least: 9.1.0
- * WC tested up to: 9.3
- * libAcumulus requires at least: 8.3.5
+ * WC requires at least: 5.0
+ * WC tested up to: 9.4
+ * libAcumulus requires at least: 8.3.6
  * Requires PHP: 8.0
  */
 
@@ -74,6 +74,7 @@ class Acumulus
         }
         return self::$instance;
     }
+
     // End of singleton pattern.
 
     private string $file;
@@ -142,8 +143,8 @@ class Acumulus
          *     called via wc_update_product_stock() but not when called via create() or
          *     update(), so is a lesser option.
          */
-        add_action('woocommerce_reduce_order_item_stock', [$this, 'woocommerceReduceStock'], 10, 3);
-        add_action('woocommerce_restore_order_item_stock', [$this, 'woocommerceIncreaseStock'], 10, 4);
+//        add_action('woocommerce_reduce_order_item_stock', [$this, 'woocommerceReduceStock'], 10, 3);
+//        add_action('woocommerce_restore_order_item_stock', [$this, 'woocommerceIncreaseStock'], 10, 4);
         // - Our own invoice related events.
         add_filter('acumulus_line_collect_before', [$this, 'acumulusLineCollectBefore'], 10, 2);
         add_filter('acumulus_line_collect_after', [$this, 'acumulusLineCollectAfter'], 10, 2);
@@ -1106,32 +1107,30 @@ class Acumulus
     }
 
     /**
-     * Hook to react to a stock decrease when an order gets fulfilled.
+     * Hook to react to a stock decrease during order fulfillment.
      *
      * @param array $change
      *   Change Details. Array with the following keys:
      *   - product' => WC_Product,
      *   - 'from' => float,
      *   - 'to' => float,
+     *
+     * @throws \Throwable
      */
-    public function woocommerceReduceStock(WC_Order_Item_Product $item, array $change, WC_Order $order): void
+    public function woocommerceReduceStock(WC_Order_Item_Product $item, array $change, WC_Abstract_Order $order): void
     {
-        $product = $item->get_product();
-        $productIdWithStock = $product->get_stock_managed_by_id();
-        $this->getAcumulusContainer()->getLog()->info(
-            'Decreasing stock for product %d (%s) (stock managed by %d) order item %d (order %d) from %f to %f',
-            $item->get_product_id(),
-            $product->get_formatted_name(),
-            $productIdWithStock,
-            $item->get_id(),
-            $order->get_id(),
-            $change['from'],
-            $change['to'],
+        $this->woocommerceUpdateStock(
+            $item,
+            $change['to'] - $change['from'],
+            $order instanceof WC_Order ? Source::Order : Source::CreditNote,
+            $order
         );
     }
 
     /**
-     * Hook to react to a stock increase when an order gets returned.
+     * Hook to react to a stock increase when an order gets returned/refunded.
+     *
+     * @throws \Throwable
      *
      * @todo: do we get the original order or a refund as 4th argument.
      *   Seems to be based on order cancelling (or pending???) ..., so
@@ -1142,20 +1141,43 @@ class Acumulus
         int|float $new_stock,
         int|float $old_stock,
         WC_Abstract_Order $order
-    ): void
-    {
-        $product = $item->get_product();
-        $productIdWithStock = $product->get_stock_managed_by_id();
-        $this->getAcumulusContainer()->getLog()->info(
-            'Increasing stock for product %d (%s) (stock managed by %d) order item %d (order %d) from %f to %f',
-            $item->get_product_id(),
-            $product->get_formatted_name(),
-            $productIdWithStock,
-            $item->get_id(),
-            $order->get_id(),
-            $old_stock,
-            $new_stock,
+    ): void {
+        $this->woocommerceUpdateStock(
+            $item,
+            $new_stock - $old_stock,
+            $order instanceof WC_Order ? Source::Order : Source::CreditNote,
+            $order
         );
+    }
+
+    /**
+     * Updates the stock at Acumulus.
+     *
+     * @throws \Throwable
+     */
+    public function woocommerceUpdateStock(
+        int|WC_Order_Item_Product $orderItemOrId,
+        int|float $change,
+        string $invoiceSourceType,
+        object|int|array $invoiceSourceOrId
+    ): void {
+        try {
+            $this->init();
+            $source = $this->getAcumulusContainer()->createSource($invoiceSourceType, $invoiceSourceOrId);
+            $acumulusItem = $this->getAcumulusContainer()->createItem($orderItemOrId, $source);
+            $this->getAcumulusContainer()->getProductManager()->updateStockForItem($acumulusItem, $change, current_action());
+        } catch (Throwable $e) {
+            try {
+                $crashReporter = $this->getAcumulusContainer()->getCrashReporter();
+                // We do not know if we are on the admin side, so we should not
+                // try to display the message returned by logAndMail().
+                $crashReporter->logAndMail($e);
+            } catch (Throwable) {
+                // We do not know if we have informed the user per mail or
+                // screen, so assume not, and rethrow the original exception.
+                throw $e;
+            }
+        }
     }
 
     /**
