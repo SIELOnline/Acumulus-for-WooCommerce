@@ -60,7 +60,7 @@
                     "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':1},{'vatrate':21.0,'vattype':6}]",
                     "meta-recalculate-old-price": 37.19008266666667,
                     "meta-did-recalculate": true,
-                    "meta-vattypes-possible": "[1,6]"
+                    "meta-vat-types-possible": "[1,6]"
                 },
                 {
                     "product": "Gratis verzending",
@@ -80,7 +80,7 @@
                     "meta-vatrate-lookup-matches": "[{'vatrate':21.0,'vattype':1},{'vatrate':21.0,'vattype':6}]",
                     "unitPriceInc": 0,
                     "meta-fields-calculated": "['unitPriceInc']",
-                    "meta-vattypes-possible": "[1,6]"
+                    "meta-vat-types-possible": "[1,6]"
                 }
             ],
             "meta-source-type": "Order",
@@ -99,10 +99,10 @@
             "meta-lines-amount": 111.5702479338843,
             "meta-lines-amountinc": 135.0,
             "meta-lines-vatamount": 23.429752,
-            "meta-vattype-source": "WooCommerce\\Completor::guessVatType: is_variable_eu_vat",
-            "meta-vattypes-possible-invoice": "[1,6]",
-            "meta-vattypes-possible-lines-intersection": "[1,6]",
-            "meta-vattypes-possible-lines-union": "[1,6]"
+            "meta-vat-type-source": "WooCommerce\\Completor::guessVatType: is_variable_eu_vat",
+            "meta-vat-types-possible-invoice": "[1,6]",
+            "meta-vat-types-possible-lines-intersection": "[1,6]",
+            "meta-vat-types-possible-lines-union": "[1,6]"
         }
     }
 }

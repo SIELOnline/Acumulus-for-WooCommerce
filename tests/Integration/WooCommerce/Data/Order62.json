@@ -157,7 +157,7 @@
             "meta-lines-amount": 89.25619834710744,
             "meta-lines-amountinc": 108.0,
             "meta-lines-vatamount": 18.743801,
-            "meta-vattype-source": "Completor::checkForKnownVatType: only 1 possible vat type"
+            "meta-vat-type-source": "Completor::checkForKnownVatType: only 1 possible vat type"
         }
     }
 }

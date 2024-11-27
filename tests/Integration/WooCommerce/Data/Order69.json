@@ -60,7 +60,7 @@
                     "meta-vat-rate-source": "exact-0",
                     "meta-recalculate-old-price": 45.45,
                     "meta-did-recalculate": true,
-                    "meta-vattypes-possible": "[3]"
+                    "meta-vat-types-possible": "[3]"
                 },
                 {
                     "itemNumber": "woo-hoodie-blue-logo",
@@ -85,7 +85,7 @@
                     "meta-children-merged": 2,
                     "meta-recalculate-old-price": 37.19,
                     "meta-did-recalculate": true,
-                    "meta-vattypes-possible": "[3]"
+                    "meta-vat-types-possible": "[3]"
                 },
                 {
                     "product": "Vast tarief",
@@ -104,7 +104,7 @@
                     "meta-vat-rate-source": "exact-0",
                     "unitPriceInc": 5.0,
                     "meta-fields-calculated": "['unitPriceInc']",
-                    "meta-vattypes-possible": "[3]"
+                    "meta-vat-types-possible": "[3]"
                 }
             ],
             "meta-source-type": "Order",
@@ -123,10 +123,10 @@
             "meta-lines-amount": 87.64,
             "meta-lines-amountinc": 87.64,
             "meta-lines-vatamount": 0.0,
-            "meta-vattype-source": "Completor::completeVatType: Only 1 choice fits all",
-            "meta-vattypes-possible-invoice": "[1,6,3]",
-            "meta-vattypes-possible-lines-intersection": "[3]",
-            "meta-vattypes-possible-lines-union": "[3]"
+            "meta-vat-type-source": "Completor::completeVatType: Only 1 choice fits all",
+            "meta-vat-types-possible-invoice": "[1,6,3]",
+            "meta-vat-types-possible-lines-intersection": "[3]",
+            "meta-vat-types-possible-lines-union": "[3]"
         }
     }
 }

@@ -61,7 +61,7 @@
                     "meta-children-merged": 2,
                     "meta-recalculate-old-price": 32.97741,
                     "meta-did-recalculate": true,
-                    "meta-vattypes-possible": "[6]"
+                    "meta-vat-types-possible": "[6]"
                 },
                 {
                     "itemNumber": "woo-vneck-tee-red",
@@ -89,7 +89,7 @@
                     "meta-children-merged": 2,
                     "meta-recalculate-old-price": 15.703926,
                     "meta-did-recalculate": true,
-                    "meta-vattypes-possible": "[6]"
+                    "meta-vat-types-possible": "[6]"
                 },
                 {
                     "itemNumber": "woo-hoodie-blue-logo",
@@ -117,7 +117,7 @@
                     "meta-children-merged": 2,
                     "meta-recalculate-old-price": 35.323416,
                     "meta-did-recalculate": true,
-                    "meta-vattypes-possible": "[6]"
+                    "meta-vat-types-possible": "[6]"
                 },
                 {
                     "product": "Vast tarief",
@@ -143,7 +143,7 @@
                     "meta-vatrate-range-matches": "[{'vatrate':20.0,'vattype':6}]",
                     "meta-recalculate-old-price": 10.0,
                     "meta-did-recalculate": true,
-                    "meta-vattypes-possible": "[6]"
+                    "meta-vat-types-possible": "[6]"
                 },
                 {
                     "itemNumber": "min5%",
@@ -159,7 +159,7 @@
                     "meta-unitprice-precision": 0.01,
                     "meta-vatamount-precision": 0.01,
                     "meta-fields-calculated": "['vatRate']",
-                    "meta-vattypes-possible": "[6]"
+                    "meta-vat-types-possible": "[6]"
                 }
             ],
             "meta-source-type": "Order",
@@ -178,10 +178,10 @@
             "meta-lines-amount": 94.00475166666666,
             "meta-lines-amountinc": 112.805702,
             "meta-lines-vatamount": 18.80095,
-            "meta-vattype-source": "Completor::completeVatType: Only 1 choice fits all",
-            "meta-vattypes-possible-invoice": "[1,6]",
-            "meta-vattypes-possible-lines-intersection": "[6]",
-            "meta-vattypes-possible-lines-union": "[6]"
+            "meta-vat-type-source": "Completor::completeVatType: Only 1 choice fits all",
+            "meta-vat-types-possible-invoice": "[1,6]",
+            "meta-vat-types-possible-lines-intersection": "[6]",
+            "meta-vat-types-possible-lines-union": "[6]"
         }
     }
 }
