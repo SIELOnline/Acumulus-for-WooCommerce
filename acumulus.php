@@ -117,7 +117,10 @@ class Acumulus
         add_action('admin_menu', [$this, 'addMenuLinks'], 900);
         // - Admin notices , meta boxes, and ajax requests from them.
         add_action('admin_notices', [$this, 'showAdminNotices']);
-        add_action('add_meta_boxes', [$this, 'addShopOrderMetaBox'], 10, 2);
+        // Hook "add_meta_boxes_woocommerce_page_wc-orders" is triggered on the HPOS screen.
+        add_action('add_meta_boxes_woocommerce_page_wc-orders', [$this, 'addShopOrderMetaBox'], 10, 1);
+        // Hook "add_meta_boxes_shop_order" is triggered on the legacy screen.
+        add_action('add_meta_boxes_shop_order', [$this, 'addShopOrderMetaBox'], 10, 1);
         add_action('wp_ajax_acumulus_ajax_action', [$this, 'handleAjaxRequest']);
         add_filter('woocommerce_admin_order_actions', [$this, 'adminOrderActions'], 100, 2);
         // - To process our own forms.
@@ -437,7 +440,7 @@ class Acumulus
      *
      * @throws \Throwable
      */
-    public function addShopOrderMetaBox(string $screen_id, WP_Post|WC_Order $shopOrderOrPost): void
+    public function addShopOrderMetaBox(WP_Post|WC_Abstract_Order $shopOrderOrPost): void
     {
         if (in_array($screen_id, ['woocommerce_page_wc-orders', 'shop_order'])) {
             $orderId = ($shopOrderOrPost instanceof WP_Post) ? $shopOrderOrPost->ID : $shopOrderOrPost->get_id();

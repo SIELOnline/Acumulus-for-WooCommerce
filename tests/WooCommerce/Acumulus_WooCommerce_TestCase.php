@@ -19,7 +19,7 @@ class Acumulus_WooCommerce_TestCase extends TestCase
 {
     use AcumulusTestUtils;
 
-    protected static function getAcumulusContainer(): Container
+    protected static function createContainer(): Container
     {
         return Acumulus::create()->getAcumulusContainer();
     }
