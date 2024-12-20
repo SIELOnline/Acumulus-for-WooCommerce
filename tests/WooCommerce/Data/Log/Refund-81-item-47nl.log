@@ -1,0 +1,13 @@
+array (
+  'message' => 'woocommerce_restore_order_item_stock(bestelling 81, bestelregel 47): Voorraadupdate voor product \'woo-vneck-tee-green\': +3.000000 is verzonden (reden: alles OK) Succes',
+  'severity' => 2,
+  'format' => '%1$s(%2$s, %3$s): %4$s %5$s',
+  'values' => 
+  array (
+    0 => 'woocommerce_restore_order_item_stock',
+    1 => 'bestelling 81',
+    2 => 'bestelregel 47',
+    3 => 'Voorraadupdate voor product \'woo-vneck-tee-green\': +3.000000',
+    4 => 'is verzonden (reden: alles OK) Succes',
+  ),
+)

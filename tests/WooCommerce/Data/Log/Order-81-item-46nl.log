@@ -1,0 +1,17 @@
+array (
+  'message' => 'woocommerce_reduce_order_item_stock(bestelling 81, bestelregel 46): Voorraadupdate voor product \'woo-vneck-tee-red\': -4.000000 is niet verzonden (reden: Geen product in Acumulus voor zoekwaarde)
+• Fout: Search for reference \'woo-vneck-tee-red\' resulted in no products.
+',
+  'severity' => 32,
+  'format' => '%1$s(%2$s, %3$s): %4$s %5$s',
+  'values' => 
+  array (
+    0 => 'woocommerce_reduce_order_item_stock',
+    1 => 'bestelling 81',
+    2 => 'bestelregel 46',
+    3 => 'Voorraadupdate voor product \'woo-vneck-tee-red\': -4.000000',
+    4 => 'is niet verzonden (reden: Geen product in Acumulus voor zoekwaarde)
+• Fout: Search for reference \'woo-vneck-tee-red\' resulted in no products.
+',
+  ),
+)

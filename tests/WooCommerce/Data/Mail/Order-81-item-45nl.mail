@@ -1,0 +1,129 @@
+array (
+  'from' => 'erwin@burorader.com',
+  'fromName' => 'WooCommece Acumulus',
+  'to' => 'erwin@burorader.com',
+  'subject' => 'Voorraadmutatie verzonden naar Acumulus: succes',
+  'bodyText' => 'Onderstaande voorraadmutatie is succesvol naar Acumulus verstuurd.
+
+Over de voorraadmutatie:
+
+Bestelling:                81
+Bestelregel:               45
+Product (Webwinkel):       woo-vneck-tee-blue
+Mutatie:                   -2
+Product (Acumulus):        1833636
+Voorraadniveau (Acumulus): 23.00
+Verzendresultaat:          2 - "Succes"
+
+Informatie voor Acumulus support:
+
+De informatie hieronder wordt alleen getoond om eventuele support te
+vergemakkelijken, u kunt deze informatie negeren. U kunt support
+contacteren door deze mail door te sturen naar
+woocommerce@acumulus.nl.
+
+• Request: uri=https://api.sielsystems.nl/acumulus/stable/stock/stock_add.php
+submit={
+    "contract": {
+        "contractcode": "288252",
+        "username": "APIGebruiker12345",
+        "password": "REMOVED FOR SECURITY",
+        "emailonerror": "plugins@siel.nl",
+        "emailonwarning": "plugins@siel.nl"
+    },
+    "format": "json",
+    "testmode": 0,
+    "lang": "nl",
+    "connector": {
+        "application": "WooCommerce 9.4.2 (WordPress WordPress)",
+        "webkoppel": "Acumulus 8.3.7",
+        "development": "SIEL - Buro RaDer",
+        "remark": "Library 8.3.7 - PHP 8.1.29",
+        "sourceuri": "https://github.com/SIELOnline/libAcumulus"
+    },
+    "stock": {
+        "productid": 1833636,
+        "stockamount": -2.0,
+        "stockdescription": "localhost bestelling 81",
+        "meta-match-shop-value": "woo-vneck-tee-blue",
+        "meta-acumulus-product-id-source": "remote",
+        "meta-match-shop-field": "[product::getShopObject()::get_sku()]",
+        "meta-match-acumulus-field": "productsku"
+    }
+}
+• Response: status=200
+body={
+    "stock": {
+        "stockamount": "23.00",
+        "productid": "1833636"
+    },
+    "errors": {
+        "count_errors": "0"
+    },
+    "warnings": {
+        "count_warnings": "0"
+    },
+    "status": "0"
+}
+',
+  'bodyHtml' => '<p>Onderstaande voorraadmutatie is succesvol naar Acumulus verstuurd.</p>
+<h3>Over de voorraadmutatie</h3>
+<table style="text-align: left;">
+<tr><th>Bestelling</th><td>81</td></tr>
+<tr><th>Bestelregel</th><td>45</td></tr>
+<tr><th>Product (Webwinkel)</th><td>woo-vneck-tee-blue</td></tr>
+<tr><th>Mutatie</th><td>-2</td></tr>
+<tr><th>Product (Acumulus)</th><td>1833636</td></tr>
+<tr><th>Voorraadniveau (Acumulus)</th><td>23.00</td></tr>
+<tr><th>Verzendresultaat</th><td>2 - "Succes"</td></tr>
+</table>
+<h3>Informatie voor Acumulus support</h3>
+<p>De informatie hieronder wordt alleen getoond om eventuele support te vergemakkelijken, u kunt deze informatie negeren.
+U kunt support contacteren door deze mail door te sturen naar woocommerce@acumulus.nl.</p>
+<details><summary><span>(klik om te tonen of te verbergen)</span></summary><ul>
+<li><span>Request: uri=https://api.sielsystems.nl/acumulus/stable/stock/stock_add.php<br>
+submit={<br>
+    "contract": {<br>
+        "contractcode": "288252",<br>
+        "username": "APIGebruiker12345",<br>
+        "password": "REMOVED FOR SECURITY",<br>
+        "emailonerror": "plugins@siel.nl",<br>
+        "emailonwarning": "plugins@siel.nl"<br>
+    },<br>
+    "format": "json",<br>
+    "testmode": 0,<br>
+    "lang": "nl",<br>
+    "connector": {<br>
+        "application": "WooCommerce 9.4.2 (WordPress WordPress)",<br>
+        "webkoppel": "Acumulus 8.3.7",<br>
+        "development": "SIEL - Buro RaDer",<br>
+        "remark": "Library 8.3.7 - PHP 8.1.29",<br>
+        "sourceuri": "https://github.com/SIELOnline/libAcumulus"<br>
+    },<br>
+    "stock": {<br>
+        "productid": 1833636,<br>
+        "stockamount": -2.0,<br>
+        "stockdescription": "localhost bestelling 81",<br>
+        "meta-match-shop-value": "woo-vneck-tee-blue",<br>
+        "meta-acumulus-product-id-source": "remote",<br>
+        "meta-match-shop-field": "[product::getShopObject()::get_sku()]",<br>
+        "meta-match-acumulus-field": "productsku"<br>
+    }<br>
+}</span></li>
+<li><span>Response: status=200<br>
+body={<br>
+    "stock": {<br>
+        "stockamount": "23.00",<br>
+        "productid": "1833636"<br>
+    },<br>
+    "errors": {<br>
+        "count_errors": "0"<br>
+    },<br>
+    "warnings": {<br>
+        "count_warnings": "0"<br>
+    },<br>
+    "status": "0"<br>
+}</span></li></ul>
+</details>
+',
+)

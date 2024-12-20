@@ -1,24 +1,22 @@
 <?php
-/*
+/**
  * Plugin Name: Acumulus
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 8.3.6
+ * Version: 8.3.7
  * LICENCE: GPLv3
  * Requires at least: 5.9
  * Tested up to: 6.7
- * WC requires at least: 5.0
+ * WC requires at least: 9.1.0
  * WC tested up to: 9.4
- * libAcumulus requires at least: 8.3.6
+ * libAcumulus requires at least: 8.3.7
  * Requires PHP: 8.0
- */
-
-/**
+ *
  * Remarks about WC Requires at least:
  * - Stock handling:
- *   - restock: since 9.1.0: do_action('woocommerce_restore_order_item_stock', ...);
- *   - decrease stock: since 7.6.0: do_action('woocommerce_reduce_order_item_stock', ...);
+ *   - restock: exists since 9.1.0: do_action('woocommerce_restore_order_item_stock', ...);
+ *   - decrease stock: exists since 7.6.0: do_action('woocommerce_reduce_order_item_stock', ...);
  * - If stock handling is not used: 5.0 should work.
  *
  * @noinspection PhpMissingStrictTypesDeclarationInspection  accept strings as int
@@ -115,19 +113,22 @@ class Acumulus
         // Actions:
         // - Add our forms to the admin menu.
         add_action('admin_menu', [$this, 'addMenuLinks'], 900);
+
         // - Admin notices , meta boxes, and ajax requests from them.
         add_action('admin_notices', [$this, 'showAdminNotices']);
         // Hook "add_meta_boxes_woocommerce_page_wc-orders" is triggered on the HPOS screen.
         add_action('add_meta_boxes_woocommerce_page_wc-orders', [$this, 'addShopOrderMetaBox'], 10, 1);
-        // Hook "add_meta_boxes_shop_order" is triggered on the legacy screen.
+        // Hook "add_meta_boxes_shop_order" is triggered on the legacy screen (/wp-admin/edit.php?post_type=shop_order).
         add_action('add_meta_boxes_shop_order', [$this, 'addShopOrderMetaBox'], 10, 1);
         add_action('wp_ajax_acumulus_ajax_action', [$this, 'handleAjaxRequest']);
         add_filter('woocommerce_admin_order_actions', [$this, 'adminOrderActions'], 100, 2);
+
         // - To process our own forms.
         add_action('admin_post_acumulus_settings', [$this, 'processSettingsForm']);
         add_action('admin_post_acumulus_mappings', [$this, 'processMappingsForm']);
         add_action('admin_post_acumulus_batch', [$this, 'processBatchForm']);
         add_action('admin_post_acumulus_register', [$this, 'processRegisterForm']);
+
         // - WooCommerce order/refund events.
         add_action('woocommerce_new_order', [$this, 'woocommerceOrderChanged'], 10, 2);
         add_action('woocommerce_order_status_changed', [$this, 'woocommerceOrderChanged'], 10, 4);
@@ -146,8 +147,9 @@ class Acumulus
          *     called via wc_update_product_stock() but not when called via create() or
          *     update(), so is a lesser option.
          */
-//        add_action('woocommerce_reduce_order_item_stock', [$this, 'woocommerceReduceStock'], 10, 3);
-//        add_action('woocommerce_restore_order_item_stock', [$this, 'woocommerceIncreaseStock'], 10, 4);
+        add_action('woocommerce_reduce_order_item_stock', [$this, 'woocommerceReduceStock'], 10, 3);
+        add_action('woocommerce_restore_order_item_stock', [$this, 'woocommerceIncreaseStock'], 10, 4);
+
         // - Our own invoice related events.
         add_filter('acumulus_line_collect_before', [$this, 'acumulusLineCollectBefore'], 10, 2);
         add_filter('acumulus_line_collect_after', [$this, 'acumulusLineCollectAfter'], 10, 2);
@@ -223,7 +225,12 @@ class Acumulus
     }
 
     /**
-     * Loads our library and creates a configuration object.
+     * Loads our library and creates the Container.
+     *
+     * This method gets called by {@see \Acumulus::getAcumulusContainer()} and most of the
+     * time that is the right moment. However, in some actions, class constants form our
+     * library) are used before the container is retrieved and in those cases, that action
+     * method should call init() itself.
      */
     private function init(): void
     {
@@ -371,7 +378,6 @@ class Acumulus
     {
         check_ajax_referer('acumulus_ajax_action', 'acumulus_nonce');
 
-        $this->init();
         // Check where the ajax call came from.
         if (isset($_POST['area'])) {
             $content = match ($_POST['area']) {
@@ -426,12 +432,7 @@ class Acumulus
     }
 
     /**
-     * Action handler for the add_meta_boxes_shop_order action.
-     *
-     * @param string $screen_id
-     *   The id of the screen to add meta boxes to: we want to add our meta box to:
-     *   - 'shop_order': the legacy edit order as a post screen.
-     *   - 'woocommerce_page_wc-orders': the HPOS edit order screen.
+     * Action handler for the add_meta_boxes_{order-type-or-screen-id} actions.
      *
      * @param \WP_Post|\WC_Order $shopOrderOrPost
      *   This will be a:
@@ -442,35 +443,33 @@ class Acumulus
      */
     public function addShopOrderMetaBox(WP_Post|WC_Abstract_Order $shopOrderOrPost): void
     {
-        if (in_array($screen_id, ['woocommerce_page_wc-orders', 'shop_order'])) {
-            $orderId = ($shopOrderOrPost instanceof WP_Post) ? $shopOrderOrPost->ID : $shopOrderOrPost->get_id();
-            $invoiceStatusSettings = $this->getAcumulusContainer()->getConfig()->getInvoiceStatusSettings();
-            if ($invoiceStatusSettings['showInvoiceStatus']) {
-                // Create form to load form translations and set its Source.
-                /** @var \Siel\Acumulus\Shop\InvoiceStatusForm $form */
+        $orderId = ($shopOrderOrPost instanceof WP_Post) ? $shopOrderOrPost->ID : $shopOrderOrPost->get_id();
+        $invoiceStatusSettings = $this->getAcumulusContainer()->getConfig()->getInvoiceStatusSettings();
+        if ($invoiceStatusSettings['showInvoiceStatus']) {
+            // Create form to load form translations and set its Source.
+            /** @var \Siel\Acumulus\Shop\InvoiceStatusForm $form */
+            try {
+                $form = $this->getForm('invoice');
+                $source = $this->getAcumulusContainer()->createSource(Source::Order, $orderId);
+                $form->setSource($source);
+                add_meta_box(
+                    'acumulus-invoice-status-overview',
+                    $this->t('invoice_form_title'),
+                    [$this, 'outputInvoiceStatusInfoBox'],
+                    get_current_screen()?->id,
+                    'side'
+                );
+            } catch (Throwable $e) {
+                // We do not show the meta box, not even a message (though we
+                // could add an action for admin_notices), the mail should
+                // suffice to inform the user.
                 try {
-                    $form = $this->getForm('invoice');
-                    $source = $this->getAcumulusContainer()->createSource(Source::Order, $orderId);
-                    $form->setSource($source);
-                    add_meta_box(
-                        'acumulus-invoice-status-overview',
-                        $this->t('invoice_form_title'),
-                        [$this, 'outputInvoiceStatusInfoBox'],
-                        $screen_id,
-                        'side'
-                    );
-                } catch (Throwable $e) {
-                    // We do not show the meta box, not even a message (though we
-                    // could add an action for admin_notices), the mail should
-                    // suffice to inform the user.
-                    try {
-                        $crashReporter = $this->getAcumulusContainer()->getCrashReporter();
-                        $crashReporter->logAndMail($e);
-                    } catch (Throwable) {
-                        // We do not know if we have informed the user per mail or
-                        // screen, so assume not, and rethrow the original exception.
-                        throw $e;
-                    }
+                    $crashReporter = $this->getAcumulusContainer()->getCrashReporter();
+                    $crashReporter->logAndMail($e);
+                } catch (Throwable) {
+                    // We do not know if we have informed the user per mail or
+                    // screen, so assume not, and rethrow the original exception.
+                    throw $e;
                 }
             }
         }
@@ -1122,6 +1121,7 @@ class Acumulus
      */
     public function woocommerceReduceStock(WC_Order_Item_Product $item, array $change, WC_Abstract_Order $order): void
     {
+        $this->init();
         $this->woocommerceUpdateStock(
             $item,
             $change['to'] - $change['from'],
@@ -1135,9 +1135,8 @@ class Acumulus
      *
      * @throws \Throwable
      *
-     * @todo: do we get the original order or a refund as 4th argument.
-     *   Seems to be based on order cancelling (or pending???) ..., so
-     *   what does the checkbox "Neem de terugbetaalde artikelen weer op voorraad" do?
+     * The 4th argument seems to be the original order, not a {@see \WC_Order_Refund}.
+     * So what does the checkbox "Neem de terugbetaalde artikelen weer op voorraad" do?
      */
     public function woocommerceIncreaseStock(
         WC_Order_Item_Product $item,
@@ -1145,6 +1144,7 @@ class Acumulus
         int|float $old_stock,
         WC_Abstract_Order $order
     ): void {
+        $this->init();
         $this->woocommerceUpdateStock(
             $item,
             $new_stock - $old_stock,
@@ -1165,7 +1165,6 @@ class Acumulus
         object|int|array $invoiceSourceOrId
     ): void {
         try {
-            $this->init();
             $source = $this->getAcumulusContainer()->createSource($invoiceSourceType, $invoiceSourceOrId);
             $acumulusItem = $this->getAcumulusContainer()->createItem($orderItemOrId, $source);
             $this->getAcumulusContainer()->getProductManager()->updateStockForItem($acumulusItem, $change, current_action());
@@ -1210,14 +1209,17 @@ class Acumulus
      * event from Acumulus.
      *
      * See that event for more details.
+     *
+     * @noinspection PhpUnusedParameterInspection $localResult not used for now
      */
     public function acumulusInvoiceCollectAfter(Invoice $invoice, Source $invoiceSource, InvoiceAddResult $localResult): void
     {
-        $this->getCollector3rdPartyPluginSupport()->acumulusInvoiceCollectAfter($invoice, $invoiceSource, $localResult);
+        $this->getCollector3rdPartyPluginSupport()->acumulusInvoiceCollectAfter($invoice, $invoiceSource/*, $localResult*/);
     }
 
     private function getCollector3rdPartyPluginSupport(): Collector3rdPartyPluginSupport
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getAcumulusContainer()->getInstance('Collector3rdPartyPluginSupport', 'Invoice');
     }
 
