@@ -5,7 +5,7 @@
 
 declare(strict_types=1);
 
-namespace Siel\Acumulus\Tests\Integration\WooCommerce;
+namespace Siel\Acumulus\Tests\Integration\WooCommerce\Shop;
 
 use DateTime;
 use Siel\Acumulus\Api;
@@ -24,7 +24,7 @@ class InvoiceManagerTest extends Acumulus_WooCommerce_TestCase
 {
     private function getInvoiceManager(): InvoiceManager
     {
-        return static::getAcumulusContainer()->getInvoiceManager();
+        return static::getContainer()->getInvoiceManager();
     }
 
     public function InvoiceSourcesByIdRangeDataProvider(): array

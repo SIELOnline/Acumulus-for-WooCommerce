@@ -11,8 +11,9 @@ composer.lock
 # under the tests dir via custom actions, but not committed.
 /tests/.phpunit.result.cache
 /tests/wordpress-develop/
-# Our own tests are committed, but not the *.latest.json files
-/tests/Integration/WooCommerce/Data/*.latest.json
+# Our own tests are committed, but not the *.latest.* files
+**/Data/**/*.latest.*
+
 # Local config, create your own using wp-tests-config-sample.php.
 /tests/wp-tests-config.php
 

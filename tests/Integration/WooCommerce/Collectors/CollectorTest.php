@@ -5,7 +5,7 @@
 
 declare(strict_types=1);
 
-namespace Siel\Acumulus\Tests\Integration\WooCommerce;
+namespace Siel\Acumulus\Tests\Integration\WooCommerce\Collectors;
 
 use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Tests\WooCommerce\Acumulus_WooCommerce_TestCase;
@@ -85,7 +85,7 @@ class CollectorTest extends Acumulus_WooCommerce_TestCase
      */
     public function testCollectCustomer(string $type, int $id, array $values): void
     {
-        $container = $this->getAcumulusContainer();
+        $container = $this->getContainer();
         $source = $container->createSource($type, $id);
         $collectorManager = $container->getCollectorManager();
         $collectorManager->getPropertySources()->add('source', $source);
