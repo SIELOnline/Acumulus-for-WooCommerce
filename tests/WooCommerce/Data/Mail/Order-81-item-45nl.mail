@@ -35,7 +35,7 @@ submit={
     "testmode": 0,
     "lang": "nl",
     "connector": {
-        "application": "WooCommerce 9.4.2 (WordPress WordPress)",
+        "application": "WooCommerce 9.5.1 (WordPress WordPress)",
         "webkoppel": "Acumulus 8.3.7",
         "development": "SIEL - Buro RaDer",
         "remark": "Library 8.3.7 - PHP 8.1.29",
@@ -94,7 +94,7 @@ submit={<br>
     "testmode": 0,<br>
     "lang": "nl",<br>
     "connector": {<br>
-        "application": "WooCommerce 9.4.2 (WordPress WordPress)",<br>
+        "application": "WooCommerce 9.5.1 (WordPress WordPress)",<br>
         "webkoppel": "Acumulus 8.3.7",<br>
         "development": "SIEL - Buro RaDer",<br>
         "remark": "Library 8.3.7 - PHP 8.1.29",<br>
