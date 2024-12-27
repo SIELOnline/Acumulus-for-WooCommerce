@@ -29,7 +29,7 @@ De voorraadmutatie is niet verwerkt in Acumulus. Pas de zoekdata in uw webshop (
 <table style="text-align: left;">
 <tr><th>Bestelling</th><td>81</td></tr>
 <tr><th>Bestelregel</th><td>46</td></tr>
-<tr><th>Product (Webwinkel)</th><td>woo-vneck-tee-red</td></tr>
+<tr><th>Product (Webwinkel)</th><td><a href="http://localhost/woocommerce-acumulus-tests/wp-admin/post.php?post=29&action=edit">woo-vneck-tee-red</a></td></tr>
 <tr><th>Mutatie</th><td>-4</td></tr>
 <tr><th>Product (Acumulus)</th><td>onbekend</td></tr>
 <tr><th>Voorraadniveau (Acumulus)</th><td>niet aangemaakt in Acumulus</td></tr>

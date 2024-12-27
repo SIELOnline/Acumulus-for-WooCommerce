@@ -36,9 +36,9 @@ submit={
     "lang": "nl",
     "connector": {
         "application": "WooCommerce 9.5.1 (WordPress WordPress)",
-        "webkoppel": "Acumulus 8.3.7",
+        "webkoppel": "Acumulus 8.4.0",
         "development": "SIEL - Buro RaDer",
-        "remark": "Library 8.3.7 - PHP 8.1.29",
+        "remark": "Library 8.4.0 - PHP 8.1.29",
         "sourceuri": "https://github.com/SIELOnline/libAcumulus"
     },
     "stock": {
@@ -71,7 +71,7 @@ body={
 <table style="text-align: left;">
 <tr><th>Bestelling</th><td>81</td></tr>
 <tr><th>Bestelregel</th><td>47</td></tr>
-<tr><th>Product (Webwinkel)</th><td>woo-vneck-tee-green</td></tr>
+<tr><th>Product (Webwinkel)</th><td><a href="http://localhost/woocommerce-acumulus-tests/wp-admin/post.php?post=30&action=edit">woo-vneck-tee-green</a></td></tr>
 <tr><th>Mutatie</th><td>+3</td></tr>
 <tr><th>Product (Acumulus)</th><td>1833637</td></tr>
 <tr><th>Voorraadniveau (Acumulus)</th><td>79.00</td></tr>
@@ -95,9 +95,9 @@ submit={<br>
     "lang": "nl",<br>
     "connector": {<br>
         "application": "WooCommerce 9.5.1 (WordPress WordPress)",<br>
-        "webkoppel": "Acumulus 8.3.7",<br>
+        "webkoppel": "Acumulus 8.4.0",<br>
         "development": "SIEL - Buro RaDer",<br>
-        "remark": "Library 8.3.7 - PHP 8.1.29",<br>
+        "remark": "Library 8.4.0 - PHP 8.1.29",<br>
         "sourceuri": "https://github.com/SIELOnline/libAcumulus"<br>
     },<br>
     "stock": {<br>

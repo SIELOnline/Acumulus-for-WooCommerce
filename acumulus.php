@@ -4,13 +4,13 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 8.3.7
+ * Version: 8.4.0
  * LICENCE: GPLv3
  * Requires at least: 5.9
  * Tested up to: 6.7
  * WC requires at least: 9.1.0
- * WC tested up to: 9.4
- * libAcumulus requires at least: 8.3.7
+ * WC tested up to: 9.5
+ * libAcumulus requires at least: 8.4.0
  * Requires PHP: 8.0
  *
  * Remarks about WC Requires at least:
@@ -197,6 +197,7 @@ class Acumulus
      */
     public function useHpos(): bool
     {
+        /** @noinspection PhpUnhandledExceptionInspection */
         return class_exists(CustomOrdersTableController::class)
             && wc_get_container()->get(CustomOrdersTableController::class)->custom_orders_table_usage_is_enabled();
     }
@@ -228,8 +229,8 @@ class Acumulus
      * Loads our library and creates the Container.
      *
      * This method gets called by {@see \Acumulus::getAcumulusContainer()} and most of the
-     * time that is the right moment. However, in some actions, class constants form our
-     * library) are used before the container is retrieved and in those cases, that action
+     * time that is the right moment. However, in some actions, class constants from our
+     * library are used before the container is retrieved and in those cases, that action
      * method should call init() itself.
      */
     private function init(): void
@@ -350,7 +351,7 @@ class Acumulus
         // These notices should only show on the main dashboard and our own screens.
         if ($this->isDashboard() || $this->isOwnPage()) {
             // Notice about the new version.
-            if (time() >= $this->getAcumulusContainer()->getConfig()->getPluginV8Message()) {
+            if (time() >= $this->getAcumulusContainer()->getConfig()->get('showPluginV84Message')) {
                 echo $this->processMessageForm();
             }
             // Notice about rating our plugin.

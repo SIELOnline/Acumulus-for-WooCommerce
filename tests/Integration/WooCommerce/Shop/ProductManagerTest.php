@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Siel\Acumulus\Tests\Integration\WooCommerce\Shop;
 
+use Siel\Acumulus\Config\Config;
 use Siel\Acumulus\Helpers\Log;
 use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Tests\WooCommerce\Acumulus_WooCommerce_TestCase;
@@ -54,14 +55,21 @@ class ProductManagerTest extends Acumulus_WooCommerce_TestCase
                 break;
             }
         }
-        if ($sourceType === Source::Order) {
-            /** @noinspection PhpParamsInspection */
-            /** @noinspection PhpUndefinedVariableInspection */
-            $this->reduceStockLevels($item->getShopObject());
-        } else {
-            /** @noinspection PhpParamsInspection */
-            /** @noinspection PhpUndefinedVariableInspection */
-            $this->increaseStockLevels($item->getShopObject());
+
+        $config = static::getContainer()->getConfig();
+        $debug = $config->set('debug', Config::Send_SendAndMail);
+        try {
+            if ($sourceType === Source::Order) {
+                /** @noinspection PhpParamsInspection */
+                /** @noinspection PhpUndefinedVariableInspection */
+                $this->reduceStockLevels($item->getShopObject());
+            } else {
+                /** @noinspection PhpParamsInspection */
+                /** @noinspection PhpUndefinedVariableInspection */
+                $this->increaseStockLevels($item->getShopObject());
+            }
+        } finally {
+            $config->set('debug', $debug);
         }
     }
 
