@@ -24,7 +24,7 @@ onderstaande gegevens mee te sturen:
  - Een duidelijke probleem omschrijving.
  - De huidige versie van de plugin.
  - De huidige versie van uw webwinkel.
- - Op het instellingescherm van de Acumulus plugin kunt u de meeste van de
+ - Op het instellingenscherm van de Acumulus plugin kunt u de meeste van de
    bovenstaande gegevens terugvinden. Als u bij dat scherm kunt komen kopieer
    dan die informatie in uw mail.
  - Eventuele gemaakte aanpassingen.

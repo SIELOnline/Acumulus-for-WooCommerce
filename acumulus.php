@@ -4,13 +4,12 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 8.4.0
+ * Version: 8.4.1
  * LICENCE: GPLv3
  * Requires at least: 5.9
  * Tested up to: 6.7
  * WC requires at least: 9.1.0
  * WC tested up to: 9.5
- * libAcumulus requires at least: 8.4.0
  * Requires PHP: 8.0
  *
  * Remarks about WC Requires at least:
@@ -122,12 +121,6 @@ class Acumulus
         add_action('add_meta_boxes_shop_order', [$this, 'addShopOrderMetaBox'], 10, 1);
         add_action('wp_ajax_acumulus_ajax_action', [$this, 'handleAjaxRequest']);
         add_filter('woocommerce_admin_order_actions', [$this, 'adminOrderActions'], 100, 2);
-
-        // - To process our own forms.
-        add_action('admin_post_acumulus_settings', [$this, 'processSettingsForm']);
-        add_action('admin_post_acumulus_mappings', [$this, 'processMappingsForm']);
-        add_action('admin_post_acumulus_batch', [$this, 'processBatchForm']);
-        add_action('admin_post_acumulus_register', [$this, 'processRegisterForm']);
 
         // - WooCommerce order/refund events.
         add_action('woocommerce_new_order', [$this, 'woocommerceOrderChanged'], 10, 2);
