@@ -2,13 +2,13 @@
     "name": "siel/acumulus-woocommerce",
     "description": "Integrates WooCommerce with your Siel Acumulus online administration",
     "type": "wordpress-plugin",
-    "version": "8.4.1",
+    "version": "8.4.2",
     "license": [
         "GPL-3.0"
     ],
     "require": {
         "php": "^8",
-        "siel/acumulus": "^8.4.1"
+        "siel/acumulus": "^8.4.2"
     },
     "require-dev": {
         "phpunit/phpunit": "^9",
