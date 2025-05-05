@@ -8,6 +8,7 @@
         "telephone": "0475271234",
         "email": "bedrijf.frankrijk@example.com",
         "overwriteifexists": 1,
+        "disableduplicates": 0,
         "companyname1": "Le Rêve Provencal",
         "fullname": "Bedrijf Frankrijk",
         "address1": "1 Allée d'Ailleurs",

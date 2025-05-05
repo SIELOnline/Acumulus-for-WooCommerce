@@ -4,15 +4,15 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 8.4.3
+ * Version: 8.5.0
  * LICENCE: GPLv3
  * Requires at least: 5.9
- * Tested up to: 6.7
+ * Tested up to: 6.8
  * WC requires at least: 9.1.0
  * WC tested up to: 9.7
  * Requires PHP: 8.0
  *
- * Remarks about WC Requires at least:
+ * Remarks about "WC Requires at least":
  * - Stock handling:
  *   - restock: exists since 9.1.0: do_action('woocommerce_restore_order_item_stock', ...);
  *   - decrease stock: exists since 7.6.0: do_action('woocommerce_reduce_order_item_stock', ...);

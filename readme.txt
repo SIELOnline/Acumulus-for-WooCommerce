@@ -2,7 +2,7 @@
 Contributors: SIEL Acumulus.
 Tags: Acumulus, administratie, boekhouding, boekhoudpakket, boekhoudsoftware
 Requires at least: 5.9
-Tested up to: 6.7
+Tested up to: 6.8
 Requires PHP: 8.0
 Stable tag: trunk
 License: GPLv3 or later
@@ -37,7 +37,7 @@ If not, this plugin is useless and will not do anything.
 1. Install the plugin through the WordPress plugins screen directly or, alternatively, upload the plugin files to the `/wp-content/plugins/acumulus` directory manually.
 2. Activate the plugin through the 'Plugins' screen in WordPress.
 3. Go to the 'Settings - Acumulus' page (`wp-admin/options-general.php?page=acumulus_config`) to configure the plugin.
-4. If you do not have yet an account with Acumulus, you can apply for one by clicking on the register now button.
+4. If you do not yet have an account with Acumulus, you can apply for one by clicking on the register now button.
 5. Complete the (basic) configuration of the plugin.
 6. Go to the 'Settings - Acumulus advanced settings' page (`wp-admin/options-general.php?page=acumulus_advanced`) to configure the plugin.
 7. If you have set so, invoices for new orders are now automatically sent to your administration at Acumulus.
@@ -51,7 +51,7 @@ Note: this is only recommended for developers, not if you only want to use this 
 1. Open a cmd prompt and go to the plugins folder: cd wp-content/plugins
 3. Download the zip from https://github.com/SIELOnline/Acumulus-for-WooCommerce, either:
    - The latest version: https://github.com/SIELOnline/Acumulus-for-WooCommerce/archive/refs/heads/master.zip
-   - A specific version, e.g: https://github.com/SIELOnline/Acumulus-for-WooCommerce/archive/refs/tags/7.6.5.zip
+   - A specific version, e.g.: https://github.com/SIELOnline/Acumulus-for-WooCommerce/archive/refs/tags/7.6.5.zip
 4. Extract the zip and rename the folder Acumulus-for-WooCommerce-[master|7.6.5] to acumulus
 5. cd acumulus
 6. composer update --no-dev
@@ -67,7 +67,7 @@ Installing the test environment for this plugin is yet to be described here.
 4. Acumulus invoice status overview
 
 == Changelog ==
-The Acumulus plugin exists for multiple eCommerce solutions and are all built on a common library. Most changes take place in that common library, therefore there's only 1 changelog that is part of the library, see [changelog.txt](https://plugins.svn.wordpress.org/acumulus/trunk/vendor/siel/acumulus/changelog.txt).
+The Acumulus plugin exists for multiple eCommerce solutions and are all built on a common library. Most changes take place in that common library. Therefore, there's only 1 changelog that is part of the library, see [changelog.txt](https://plugins.svn.wordpress.org/acumulus/trunk/vendor/siel/acumulus/changelog.txt).
 
 == Support ==
 See the [Acumulus forum](https://forum.acumulus.nl/index.php?board=17.0).

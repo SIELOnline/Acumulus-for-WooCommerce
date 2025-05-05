@@ -1,6 +1,6 @@
 array (
   'from' => 'erwin@burorader.com',
-  'fromName' => 'WooCommece Acumulus',
+  'fromName' => 'WooCommerce Acumulus Tests',
   'to' => 'erwin@burorader.com',
   'subject' => 'Voorraadmutatie verzonden naar Acumulus: succes',
   'bodyText' => 'Onderstaande voorraadmutatie is succesvol naar Acumulus verstuurd.
@@ -35,10 +35,10 @@ submit={
     "testmode": 0,
     "lang": "nl",
     "connector": {
-        "application": "WooCommerce 9.5.1 (WordPress WordPress)",
-        "webkoppel": "Acumulus 8.4.0",
+        "application": "WooCommerce 9.7.1 (WordPress WordPress)",
+        "webkoppel": "Acumulus 8.5.0",
         "development": "SIEL - Buro RaDer",
-        "remark": "Library 8.4.0 - PHP 8.1.29",
+        "remark": "Library 8.5.0 - PHP 8.1.31",
         "sourceuri": "https://github.com/SIELOnline/libAcumulus"
     },
     "stock": {
@@ -94,10 +94,10 @@ submit={<br>
     "testmode": 0,<br>
     "lang": "nl",<br>
     "connector": {<br>
-        "application": "WooCommerce 9.5.1 (WordPress WordPress)",<br>
-        "webkoppel": "Acumulus 8.4.0",<br>
+        "application": "WooCommerce 9.7.1 (WordPress WordPress)",<br>
+        "webkoppel": "Acumulus 8.5.0",<br>
         "development": "SIEL - Buro RaDer",<br>
-        "remark": "Library 8.4.0 - PHP 8.1.29",<br>
+        "remark": "Library 8.5.0 - PHP 8.1.31",<br>
         "sourceuri": "https://github.com/SIELOnline/libAcumulus"<br>
     },<br>
     "stock": {<br>

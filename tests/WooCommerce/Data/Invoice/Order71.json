@@ -7,6 +7,7 @@
         "telephone": "0687654321",
         "email": "consument.belgie@example.com",
         "overwriteifexists": 1,
+        "disableduplicates": 0,
         "fullname": "Consument België",
         "address1": "Kade 1",
         "postalcode": "1100",

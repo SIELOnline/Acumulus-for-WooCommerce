@@ -7,6 +7,7 @@
         "telephone": "0123456789",
         "email": "nederland@example.com",
         "overwriteifexists": 1,
+        "disableduplicates": 0,
         "fullname": "Account Holland",
         "address1": "straat 1",
         "postalcode": "7777 AB",

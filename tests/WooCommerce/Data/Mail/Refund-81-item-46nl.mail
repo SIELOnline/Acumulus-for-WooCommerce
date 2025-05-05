@@ -1,6 +1,6 @@
 array (
   'from' => 'erwin@burorader.com',
-  'fromName' => 'WooCommece Acumulus',
+  'fromName' => 'WooCommerce Acumulus Tests',
   'to' => 'erwin@burorader.com',
   'subject' => 'Voorraadmutatie verzonden naar Acumulus: fout(en)',
   'bodyText' => 'Bij het verzenden van een voorraadmutatie naar Acumulus zijn er fouten
