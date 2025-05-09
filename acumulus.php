@@ -51,8 +51,8 @@ use Siel\Acumulus\WooCommerce\Invoice\Collector3rdPartyPluginSupport;
  * WooCommerce HPOS compatibility notes:
  * - new order list page: wp-admin/admin.php?page=wc-orders
  * - new order detail page: wp-admin/admin.php?page=wc-orders&action=edit&id={post_id}
- * - legacy order as a post order list page: wp-admin/edit.php?post_type=shop_order
- * - legacy order as a post order detail page: wp-admin/post.php?post={post_id}&action=edit
+ * - legacy order list page: wp-admin/edit.php?post_type=shop_order
+ * - legacy order detail page: wp-admin/post.php?post={post_id}&action=edit
  *
  * @noinspection EfferentObjectCouplingInspection
  */
