@@ -1,9 +1,18 @@
-array (
-  'from' => 'erwin@burorader.com',
-  'fromName' => 'WooCommerce Acumulus Tests',
-  'to' => 'erwin@burorader.com',
-  'subject' => 'Voorraadmutatie verzonden naar Acumulus: fout(en)',
-  'bodyText' => 'Bij het verzenden van een voorraadmutatie naar Acumulus zijn er fouten
+<?php
+/**
+ * @noinspection GrazieInspection
+ * @noinspection SpellCheckingInspection
+ */
+
+declare(strict_types=1);
+
+$mail =
+    [
+        'from' => 'erwin@burorader.com',
+        'fromName' => 'WooCommerce Acumulus Tests',
+        'to' => 'erwin@burorader.com',
+        'subject' => 'Voorraadmutatie verzonden naar Acumulus: fout(en)',
+        'bodyText' => 'Bij het verzenden van een voorraadmutatie naar Acumulus zijn er fouten
 opgetreden. De voorraadmutatie is niet verwerkt in Acumulus. Pas de
 zoekdata in uw webshop (of in Acumulus) aan.
 
@@ -23,7 +32,7 @@ Meldingen:
 
 Meer informatie over de terugkoppeling van de vermeldde foutcodes kunt u vinden op https://www.siel.nl/acumulus/API/Basic_Response/
 ',
-  'bodyHtml' => '<p>Bij het verzenden van een voorraadmutatie naar Acumulus zijn er fouten opgetreden.
+        'bodyHtml' => '<p>Bij het verzenden van een voorraadmutatie naar Acumulus zijn er fouten opgetreden.
 De voorraadmutatie is niet verwerkt in Acumulus. Pas de zoekdata in uw webshop (of in Acumulus) aan.</p>
 <h3>Over de voorraadmutatie</h3>
 <table style="text-align: left;">
@@ -41,4 +50,4 @@ De voorraadmutatie is niet verwerkt in Acumulus. Pas de zoekdata in uw webshop (
 </details>
 <p><p>Meer informatie over de terugkoppeling van vermeldde foutcodes kunt u vinden op <a href="https://www.siel.nl/acumulus/API/Basic_Response/">Acumulus - Basic response</a>.</p></p>
 ',
-)
+    ];

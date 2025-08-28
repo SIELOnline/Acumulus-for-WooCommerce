@@ -26,7 +26,7 @@ use function is_array;
  */
 class CollectorTest extends Acumulus_WooCommerce_TestCase
 {
-    public function collectCustomerProvider(): array
+    public static function collectCustomerProvider(): array
     {
         return [
             [

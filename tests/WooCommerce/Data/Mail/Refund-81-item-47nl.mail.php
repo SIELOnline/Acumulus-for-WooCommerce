@@ -1,18 +1,29 @@
-array (
-  'from' => 'erwin@burorader.com',
-  'fromName' => 'WooCommerce Acumulus Tests',
-  'to' => 'erwin@burorader.com',
-  'subject' => 'Voorraadmutatie verzonden naar Acumulus: succes',
-  'bodyText' => 'Onderstaande voorraadmutatie is succesvol naar Acumulus verstuurd.
+<?php
+/**
+ * @noinspection GrazieInspection
+ * @noinspection SpellCheckingInspection
+ */
+
+declare(strict_types=1);
+
+$mail =
+    [
+        'from' => 'erwin@burorader.com',
+        'fromName' => 'WooCommerce Acumulus Tests',
+        'to' => 'erwin@burorader.com',
+        'subject' => 'Voorraadmutatie verzonden naar Acumulus: succes',
+        'bodyText' => [
+            'Onderstaande voorraadmutatie is succesvol naar Acumulus verstuurd.
 
 Over de voorraadmutatie:
 
 Bestelling:                81
-Bestelregel:               45
-Product (Webwinkel):       woo-vneck-tee-blue
-Mutatie:                   -2
-Product (Acumulus):        1833636
-Voorraadniveau (Acumulus): 20.00
+Bestelregel:               47
+Product (Webwinkel):       woo-vneck-tee-green
+Mutatie:                   +3
+Product (Acumulus):        1833637
+Voorraadniveau (Acumulus): ',
+            '
 Verzendresultaat:          2 - "Succes"
 
 Informatie voor Acumulus support:
@@ -35,18 +46,15 @@ submit={
     "testmode": 0,
     "lang": "nl",
     "connector": {
-        "application": "WooCommerce 9.7.1 (WordPress WordPress)",
-        "webkoppel": "Acumulus 8.5.0",
-        "development": "SIEL - Buro RaDer",
-        "remark": "Library 8.5.0 - PHP 8.1.31",
-        "sourceuri": "https://github.com/SIELOnline/libAcumulus"
+        "application": "WooCommerce ',
+            '"sourceuri": "https://github.com/SIELOnline/libAcumulus"
     },
     "stock": {
-        "productid": 1833636,
-        "stockamount": -2.0,
+        "productid": 1833637,
+        "stockamount": 3.0,
         "stockdescription": "localhost bestelling 81",
-        "meta-match-shop-value": "woo-vneck-tee-blue",
-        "meta-acumulus-product-id-source": "local",
+        "meta-match-shop-value": "woo-vneck-tee-green",
+        "meta-acumulus-product-id-source": "remote",
         "meta-match-shop-field": "[product::getShopObject()::get_sku()]",
         "meta-match-acumulus-field": "productsku"
     }
@@ -54,8 +62,9 @@ submit={
 • Response: status=200
 body={
     "stock": {
-        "stockamount": "20.00",
-        "productid": "1833636"
+        "stockamount": "',
+            '",
+        "productid": "1833637"
     },
     "errors": {
         "count_errors": "0"
@@ -66,15 +75,18 @@ body={
     "status": "0"
 }
 ',
-  'bodyHtml' => '<p>Onderstaande voorraadmutatie is succesvol naar Acumulus verstuurd.</p>
+        ],
+        'bodyHtml' => [
+            '<p>Onderstaande voorraadmutatie is succesvol naar Acumulus verstuurd.</p>
 <h3>Over de voorraadmutatie</h3>
 <table style="text-align: left;">
 <tr><th>Bestelling</th><td>81</td></tr>
-<tr><th>Bestelregel</th><td>45</td></tr>
-<tr><th>Product (Webwinkel)</th><td><a href="http://localhost/woocommerce-acumulus-tests/wp-admin/post.php?post=31&action=edit">woo-vneck-tee-blue</a></td></tr>
-<tr><th>Mutatie</th><td>-2</td></tr>
-<tr><th>Product (Acumulus)</th><td>1833636</td></tr>
-<tr><th>Voorraadniveau (Acumulus)</th><td>20.00</td></tr>
+<tr><th>Bestelregel</th><td>47</td></tr>
+<tr><th>Product (Webwinkel)</th><td><a href="http://localhost/woocommerce-acumulus-tests/wp-admin/post.php?post=30&action=edit">woo-vneck-tee-green</a></td></tr>
+<tr><th>Mutatie</th><td>+3</td></tr>
+<tr><th>Product (Acumulus)</th><td>1833637</td></tr>
+<tr><th>Voorraadniveau (Acumulus)</th><td>',
+            '</td></tr>
 <tr><th>Verzendresultaat</th><td>2 - "Succes"</td></tr>
 </table>
 <h3>Informatie voor Acumulus support</h3>
@@ -94,18 +106,15 @@ submit={<br>
     "testmode": 0,<br>
     "lang": "nl",<br>
     "connector": {<br>
-        "application": "WooCommerce 9.7.1 (WordPress WordPress)",<br>
-        "webkoppel": "Acumulus 8.5.0",<br>
-        "development": "SIEL - Buro RaDer",<br>
-        "remark": "Library 8.5.0 - PHP 8.1.31",<br>
-        "sourceuri": "https://github.com/SIELOnline/libAcumulus"<br>
+        "application": "WooCommerce ',
+            '"sourceuri": "https://github.com/SIELOnline/libAcumulus"<br>
     },<br>
     "stock": {<br>
-        "productid": 1833636,<br>
-        "stockamount": -2.0,<br>
+        "productid": 1833637,<br>
+        "stockamount": 3.0,<br>
         "stockdescription": "localhost bestelling 81",<br>
-        "meta-match-shop-value": "woo-vneck-tee-blue",<br>
-        "meta-acumulus-product-id-source": "local",<br>
+        "meta-match-shop-value": "woo-vneck-tee-green",<br>
+        "meta-acumulus-product-id-source": "remote",<br>
         "meta-match-shop-field": "[product::getShopObject()::get_sku()]",<br>
         "meta-match-acumulus-field": "productsku"<br>
     }<br>
@@ -113,8 +122,9 @@ submit={<br>
 <li><span>Response: status=200<br>
 body={<br>
     "stock": {<br>
-        "stockamount": "20.00",<br>
-        "productid": "1833636"<br>
+        "stockamount": "',
+            '",<br>
+        "productid": "1833637"<br>
     },<br>
     "errors": {<br>
         "count_errors": "0"<br>
@@ -126,4 +136,5 @@ body={<br>
 }</span></li></ul>
 </details>
 ',
-)
+        ],
+    ];

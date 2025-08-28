@@ -90,6 +90,10 @@ label:not([for]) {
   cursor: inherit;
 }
 
+.notice label {
+    cursor: pointer;
+}
+
 input.error {
   border-color: #bc3232;
 }

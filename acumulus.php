@@ -4,13 +4,13 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 8.5.0
+ * Version: 8.6.0
  * LICENCE: GPLv3
  * Requires at least: 5.9
  * Tested up to: 6.8
  * WC requires at least: 9.1.0
- * WC tested up to: 9.7
- * Requires PHP: 8.0
+ * WC tested up to: 10.1
+ * Requires PHP: 8.1
  *
  * Remarks about "WC Requires at least":
  * - Stock handling:
@@ -72,7 +72,7 @@ class Acumulus
         return self::$instance;
     }
 
-    // End of singleton pattern.
+    // End of the singleton pattern.
 
     private string $file;
     private Container $acumulusContainer;
@@ -113,7 +113,7 @@ class Acumulus
         // - Add our forms to the admin menu.
         add_action('admin_menu', [$this, 'addMenuLinks'], 900);
 
-        // - Admin notices , meta boxes, and ajax requests from them.
+        // - Admin notices, meta-boxes, and ajax requests from them.
         add_action('admin_notices', [$this, 'showAdminNotices']);
         // Hook "add_meta_boxes_woocommerce_page_wc-orders" is triggered on the HPOS screen.
         add_action('add_meta_boxes_woocommerce_page_wc-orders', [$this, 'addShopOrderMetaBox'], 10, 1);
@@ -127,8 +127,8 @@ class Acumulus
         add_action('woocommerce_order_status_changed', [$this, 'woocommerceOrderChanged'], 10, 4);
         add_action('woocommerce_order_refunded', [$this, 'woocommerceOrderRefunded'], 10, 2);
         // - WooCommerce stock events.
-        /* These are events based on the sales side. Events on the purchase side, either a
-         * manual or automated direct update of the stock, are not handled (for now).
+        /* These are events based on the sales side. Events on the purchase side - either
+         * a manual or automated direct update of the stock - are not handled (for now).
          * Those would be:
          * - wc_update_product_stock() or
          *   WC_Product_Data_Store_Interface::handle_updated_props() (via public create()
@@ -143,7 +143,7 @@ class Acumulus
         add_action('woocommerce_reduce_order_item_stock', [$this, 'woocommerceReduceStock'], 10, 3);
         add_action('woocommerce_restore_order_item_stock', [$this, 'woocommerceIncreaseStock'], 10, 4);
 
-        // - Our own invoice related events.
+        // - Our own invoice-related events.
         add_filter('acumulus_line_collect_before', [$this, 'acumulusLineCollectBefore'], 10, 2);
         add_filter('acumulus_line_collect_after', [$this, 'acumulusLineCollectAfter'], 10, 2);
         add_filter('acumulus_invoice_collect_After', [$this, 'acumulusInvoiceCollectAfter'], 10, 3);
@@ -186,7 +186,7 @@ class Acumulus
     }
 
     /**
-     * Returns whether HPOS is used or the legacy order as post storage.
+     * Returns whether HPOS is used or the legacy order as post-storage.
      */
     public function useHpos(): bool
     {
@@ -223,7 +223,7 @@ class Acumulus
      *
      * This method gets called by {@see \Acumulus::getAcumulusContainer()} and most of the
      * time that is the right moment. However, in some actions, class constants from our
-     * library are used before the container is retrieved and in those cases, that action
+     * library are used before the container is retrieved, and in those cases, that action
      * method should call init() itself.
      */
     private function init(): void
@@ -254,7 +254,7 @@ class Acumulus
     /**
      * Returns an Acumulus container.
      *
-     * Perhaps, more importantly - especially for 3rd parties that wants to use
+     * Perhaps, more importantly - especially for 3rd parties that want to use
      * features from libAcumulus - the 1st time it is called, it ensures that
      * libAcumulus autoloading is defined and that a Container with the correct
      * settings is created.
@@ -361,8 +361,8 @@ class Acumulus
      * - Invoice status overview.
      * - Rate plugin message.
      * - plugin new version message.
-     * - Mail invoice/packing slip from order list. This use is not a real ajax
-     *   request but uses admin-ajax.php as entry point like WooCommerce does:
+     * - Mail invoice/packing slip from the order list. This use is not a real ajax
+     *   request but uses admin-ajax.php as the entry point like WooCommerce does:
      *   no need to define a proper admin page and finish with a redirect back to
      *   the order list.
      *
@@ -406,7 +406,7 @@ class Acumulus
     }
 
     /**
-     * Mails an Acumulus invoice or packing slip pdf.
+     * Mails an Acumulus invoice or packing slip PDF.
      *
      * @param string $acumulusAction
      *   Either 'acumulus-invoice' or 'acumulus-packing-slip' (already checked
@@ -440,7 +440,7 @@ class Acumulus
         $orderId = ($shopOrderOrPost instanceof WP_Post) ? $shopOrderOrPost->ID : $shopOrderOrPost->get_id();
         $invoiceStatusSettings = $this->getAcumulusContainer()->getConfig()->getInvoiceStatusSettings();
         if ($invoiceStatusSettings['showInvoiceStatus']) {
-            // Create form to load form translations and set its Source.
+            // Create the form to load the form translations and set its Source.
             /** @var \Siel\Acumulus\Shop\InvoiceStatusForm $form */
             try {
                 $form = $this->getForm('invoice');
@@ -454,15 +454,15 @@ class Acumulus
                     'side'
                 );
             } catch (Throwable $e) {
-                // We do not show the meta box, not even a message (though we
+                // We do not show the meta-box, not even a message (though we
                 // could add an action for admin_notices), the mail should
                 // suffice to inform the user.
                 try {
                     $crashReporter = $this->getAcumulusContainer()->getCrashReporter();
                     $crashReporter->logAndMail($e);
                 } catch (Throwable) {
-                    // We do not know if we have informed the user per mail or
-                    // screen, so assume not, and rethrow the original exception.
+                    // We don't know if we have informed the user per mail or
+                    // screen, so assume we didn't, and rethrow the original exception.
                     throw $e;
                 }
             }
@@ -483,13 +483,13 @@ class Acumulus
     }
 
     /**
-     * Callback that renders tha Acumulus actions on the order list page.
+     * Callback that renders the Acumulus actions on the order list page.
      *
      * @param array $actions
      * @param \WC_Order $order
      *
      * @return array
-     *   The $actions array with the (enabled) Acumulus actions added.
+     *   The $actions array with the (enabled) Acumulus actions added to it.
      */
     public function adminOrderActions(array $actions, WC_Order $order): array
     {
@@ -551,7 +551,7 @@ class Acumulus
                         ];
                     }
 
-                    // Add the actions and our own css.
+                    // Add the actions and our own CSS.
                     $actions += $subActions;
                     $pluginUrl = plugins_url('/acumulus');
                     wp_enqueue_style('acumulus_css_admin', $pluginUrl . '/acumulus.css');
@@ -604,7 +604,7 @@ class Acumulus
     /**
      * Implements the admin_post_acumulus_mappings action.
      *
-     * Processes and renders the mappings form.
+     * Processes and renders the 'mappings' form.
      *
      * @throws \Throwable
      */
@@ -650,7 +650,7 @@ class Acumulus
      * - Ajax request handler.
      *
      * @return string
-     *   The rendered form (embedded in any necessary html).
+     *   The rendered form (embedded in any necessary HTML).
      *
      * @throws \Throwable
      */
@@ -667,7 +667,7 @@ class Acumulus
      * - Ajax request handler.
      *
      * @return string
-     *   The rendered form (embedded in any necessary html).
+     *   The rendered form (embedded in any necessary HTML).
      *
      * @throws \Throwable
      */
@@ -683,7 +683,7 @@ class Acumulus
      * - Render admin notice.
      *
      * @return string
-     *   The rendered form (embedded in any necessary html).
+     *   The rendered form (embedded in any necessary HTML).
      *
      * @throws \Throwable
      */
@@ -699,7 +699,7 @@ class Acumulus
      *   The form type: config, advanced, or batch.
      *
      * @return string
-     *   the form html to output.
+     *   the form HTML to output.
      *
      * @throws \Throwable
      */
@@ -710,21 +710,21 @@ class Acumulus
             $this->preProcessForm($form);
             $form->process();
             $this->preRenderForm($form);
-            // Render the form first before wrapping it in its final format, so that any
+            // Render the form first before wrapping it in its final format so that any
             // messages added during rendering can be shown on top.
             $formOutput = $this->getAcumulusContainer()->getFormRenderer()->render($form);
         } catch (Throwable $e) {
             // We handle our "own" exceptions but only when we can process them
             // as we want, i.e. show it as an error at the beginning of the
-            // form. That's why we start catching only after we have a form, and
+            // form. That's why we start catching only after we have a form and
             // stop catching just before postRenderForm().
             try {
                 $crashReporter = $this->getAcumulusContainer()->getCrashReporter();
                 $message = $crashReporter->logAndMail($e);
                 $form->createAndAddMessage($message, Severity::Exception);
             } catch (Throwable) {
-                // We do not know if we have informed the user per mail or
-                // screen, so assume not, and rethrow the original exception.
+                // We don't know if we have informed the user per mail or
+                // screen, so assume we didn't and rethrow the original exception.
                 throw $e;
             }
         }
@@ -734,7 +734,7 @@ class Acumulus
     }
 
     /**
-     * Performs form type specific actions prior to processing a form.
+     * Performs form type-specific actions before processing a form.
      *
      * @param \Siel\Acumulus\Helpers\Form $form
      *   The form that is going to be processed.
@@ -758,7 +758,7 @@ class Acumulus
     }
 
     /**
-     * Performs form type specific actions after a form has been processed.
+     * Performs form type-specific actions after a form has been processed.
      *
      * @param \Siel\Acumulus\Helpers\Form $form
      *   The form that has been processed.
@@ -774,7 +774,7 @@ class Acumulus
     }
 
     /**
-     * Performs form type specific actions prior to rendering a form
+     * Performs form type-specific actions before rendering a form.
      *
      * @param \Siel\Acumulus\Helpers\Form $form
      *   The form that is going to be rendered.
@@ -782,7 +782,7 @@ class Acumulus
     private function preRenderForm(Form $form): void
     {
         // Get a new FormRenderer as the rate plugin message may be shown inside our
-        // pages and that one has different settings.
+        //  pages, and that one has different settings.
         $this->getAcumulusContainer()->getFormRenderer(true);
 
         // Add our own js.
@@ -794,7 +794,7 @@ class Acumulus
                 wp_enqueue_script('jquery-ui-datepicker');
                 wp_enqueue_script('acumulus-ajax.js', $pluginUrl . '/' . 'acumulus-ajax.js');
 
-                // The invoice status overview is not rendered as other forms, therefore
+                // The invoice status overview is not rendered as other forms. Therefore,
                 // we change some properties of the form renderer.
                 $this->getAcumulusContainer()->getFormRenderer()
                     ->setProperty('usePopupDescription', true)
@@ -809,7 +809,7 @@ class Acumulus
                 // Add some js.
                 wp_enqueue_script('acumulus-ajax.js', $pluginUrl . '/' . 'acumulus-ajax.js');
 
-                // The rte plugin message is not rendered as other forms, therefore
+                // The rate plugin message is not rendered as other forms. Therefore,
                 // we change some properties of the form renderer.
                 $this->getAcumulusContainer()->getFormRenderer()
                     ->setProperty('fieldsetContentWrapperTag', 'div')
@@ -820,17 +820,17 @@ class Acumulus
                     ->setProperty('markupWrapperTag', '');
                 break;
         }
-        // Add our own css.
+        // Add our own CSS.
         wp_enqueue_style('acumulus_css_admin', $pluginUrl . '/acumulus.css');
     }
 
     /**
-     * Performs form type specific actions after a form has been rendered.
+     * Performs form type-specific actions after a form has been rendered.
      *
      * @param \Siel\Acumulus\Helpers\Form $form
      *   The form that has been rendered.
      * @param string $formOutput
-     *   The html of the rendered form.
+     *   The HTML of the rendered form.
      *
      * @return string
      *   The rendered form with any wrapping around it.
@@ -931,16 +931,16 @@ class Acumulus
      *
      * @param string $message
      * @param string $type
-     *   The type of notice, used to construct css classes to distinguish the
+     *   The type of notice, used to construct CSS classes to distinguish the
      *   different types of messages. error, warning, info, etc.
      * @param string $id
      *   An optional id to use for the outer tag OR the name (id) of the field the
      *   form error message is meant for.
      * @param array $extraAttributes
-     *   Optional attributes, including additional css classes, to add to the
+     *   Optional attributes, including additional CSS classes, to add to the
      *   surrounding div.
      * @param bool $isHtml
-     *   Indicates whether $message is html or plain text. plain text will be
+     *   Indicates whether $message is HTML or plain text. plain text will be
      *   embedded in a <p>.
      *
      * @return string
@@ -1076,8 +1076,8 @@ class Acumulus
                 // try to display the message returned by logAndMail().
                 $crashReporter->logAndMail($e);
             } catch (Throwable) {
-                // We do not know if we have informed the user per mail or
-                // screen, so assume not, and rethrow the original exception.
+                // We don't know if we have informed the user per mail or
+                // screen, so assume we didn't, and rethrow the original exception.
                 throw $e;
             }
         }
@@ -1089,7 +1089,7 @@ class Acumulus
      * WooCommerce thinks that only orders in the processing or completed statuses
      * are to be seen as paid, whereas for Acumulus, refunded orders are also
      * paid. (if an order is refunded, a separate credit note invoice will be
-     * created in Acumulus and thus the invoice for the original order remains
+     * created in Acumulus, and thus the invoice for the original order remains
      * "paid".)
      *
      * @param array $statuses
@@ -1169,8 +1169,8 @@ class Acumulus
                 // try to display the message returned by logAndMail().
                 $crashReporter->logAndMail($e);
             } catch (Throwable) {
-                // We do not know if we have informed the user per mail or
-                // screen, so assume not, and rethrow the original exception.
+                // We don't know if we have informed the user per mail or
+                // screen, so assume we didn't, and rethrow the original exception.
                 throw $e;
             }
         }

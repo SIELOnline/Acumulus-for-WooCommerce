@@ -43,6 +43,11 @@ declare(strict_types=1);
  *   - WP_TESTS_DIR={path to the data and includes folders from above}
  *   - WP_TESTS_SKIP_INSTALL=1; {1 = skip install, 0 = reinstall tables}
  *   - WP_TESTS_PHPUNIT_POLYFILLS_PATH={path to yoast/phpunit-polyfills project}
+ *
+ * 4 Create a (hard) link to our plugin translations:
+ *   mklink /J ^
+ *   C:\Projecten\Acumulus\WooCommerce\www\wp-content\plugins\acumulus\tests\wordpress-develop\tests\phpunit\data\languages\plugins ^
+ *   C:\Projecten\Acumulus\WooCommerce\www\wp-content\languages\plugins
  */
 
 require_once __DIR__ . '/../vendor/autoload.php';

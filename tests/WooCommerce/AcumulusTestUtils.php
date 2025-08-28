@@ -34,11 +34,11 @@ trait AcumulusTestUtils
     }
 
     /**
-     * We want to test on a given set of customers, products and orders. As the WP utils
-     * will clear all posts, all products and orders will be gone after each test.
-     * However, WordPress allows to change the prefix during the execution of a request,
-     * and we use that to switch to tables containing our known set of testdata (just
-     * before each test and just before loading a plugin).
+     * We want to test using a given set of customers, products and orders.
+     * As the WP utils will clear all posts, all products and orders will be gone after
+     * each test. However, WordPress allows changing the prefix during the execution of a
+     * request, and we use that to switch to tables containing our known set of testdata
+     * (just before each test and just before loading a plugin).
      */
     public function changePrefix(): void
     {

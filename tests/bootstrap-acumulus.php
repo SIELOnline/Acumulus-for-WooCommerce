@@ -55,8 +55,6 @@ class AcumulusTestsBootstrap
         require_once $this->wp_tests_dir . '/includes/functions.php';
 
         // Ensure that translations from our own installation are loaded.
-
-        // Ensure that translations from our own installation are loaded.
         tests_add_filter('load_textdomain_mofile', [$this, 'load_text_domain_mo_file'], 10, 2);
 
         // Always load PayPal Standard for unit tests.
@@ -81,7 +79,7 @@ class AcumulusTestsBootstrap
         /**
          * The bootstrap.php we include here calls {@see _delete_al_posts()}. So we
          * bootstrap with a different prefix ('wptests_', defined in wp-tests-config.php)
-         * and change that to the prefix with tables with ou test orders and products,
+         * and change that to the prefix with tables with our test orders and products,
          * etc. as soon as the bootstrap finishes
          */
         require_once $this->wp_tests_dir . '/includes/bootstrap.php';

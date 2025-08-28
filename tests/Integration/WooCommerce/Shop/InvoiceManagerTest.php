@@ -27,7 +27,7 @@ class InvoiceManagerTest extends Acumulus_WooCommerce_TestCase
         return static::getContainer()->getInvoiceManager();
     }
 
-    public function InvoiceSourcesByIdRangeDataProvider(): array
+    public static function InvoiceSourcesByIdRangeDataProvider(): array
     {
         return [
           [Source::Order, 0, 10, []],
@@ -58,7 +58,7 @@ class InvoiceManagerTest extends Acumulus_WooCommerce_TestCase
 //    {
 //    }
 
-    public function InvoiceSourcesByDateRangeDataProvider(): array
+    public static function InvoiceSourcesByDateRangeDataProvider(): array
     {
         return [
             [Source::Order, '2021-01-01', '2021-12-31', []],

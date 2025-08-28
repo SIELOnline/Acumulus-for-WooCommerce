@@ -27,7 +27,7 @@ class ProductManagerTest extends Acumulus_WooCommerce_TestCase
         return static::getContainer()->getMailer();
     }
 
-    public function orderProvider(): array
+    public static function orderProvider(): array
     {
         return [
             'Order 81 item 45' => [Source::Order, 81, 45],
@@ -41,7 +41,7 @@ class ProductManagerTest extends Acumulus_WooCommerce_TestCase
 
     /**
      * This test method is loosely based on {@see \wc_reduce_stock_levels()} and
-     * {@see \wc_increase_stock_levels()} that reduce resp. increase stock levels
+     * {@see \wc_increase_stock_levels()} that reduce respectively increase stock levels
      * for all item lines in an order/refund.
      *
      * @dataProvider orderProvider
@@ -55,17 +55,13 @@ class ProductManagerTest extends Acumulus_WooCommerce_TestCase
                 break;
             }
         }
-
+        /** @var \Siel\Acumulus\WooCommerce\Invoice\Item $item */
         $config = static::getContainer()->getConfig();
         $debug = $config->set('debug', Config::Send_SendAndMail);
         try {
             if ($sourceType === Source::Order) {
-                /** @noinspection PhpParamsInspection */
-                /** @noinspection PhpUndefinedVariableInspection */
                 $this->reduceStockLevels($item->getShopObject());
             } else {
-                /** @noinspection PhpParamsInspection */
-                /** @noinspection PhpUndefinedVariableInspection */
                 $this->increaseStockLevels($item->getShopObject());
             }
         } finally {
@@ -117,9 +113,7 @@ class ProductManagerTest extends Acumulus_WooCommerce_TestCase
 
         // dataName() returns the key of the actual data set.
         $name = str_replace(' ', '-', $this->dataName()) . static::getContainer()->getLanguage();
-        $this->saveTestLogMessage($name, $logMessage);
-        $expected = $this->getTestLogMessage($name);
-        static::assertSame($expected, $logMessage);
+        $this->assertLogMatches($name, $logMessage);
     }
 
     /**
@@ -134,9 +128,7 @@ class ProductManagerTest extends Acumulus_WooCommerce_TestCase
 
             // dataName() returns the key of the actual data set.
             $name = str_replace(' ', '-', $this->dataName()) . static::getContainer()->getLanguage();
-            $this->saveTestMail($name, $mailSent);
-            $expected = $this->getTestMail($name);
-            static::assertSame($expected, $mailSent);
+            $this->assertMailMatches($name, $mailSent);
         }
     }
 }

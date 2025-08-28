@@ -41,7 +41,7 @@ class InvoiceCreateTest extends Acumulus_WooCommerce_TestCase
         update_option('woocommerce_tax_based_on', self::$taxBasedOn ?? 'billing');
     }
 
-    public function InvoiceDataProviderWithoutEmailAsPdf(): array
+    public static function InvoiceDataProviderWithoutEmailAsPdf(): array
     {
         return [
             '2 (fixed amount and percentage) coupons' => [Source::Order, 68,],
@@ -64,7 +64,7 @@ class InvoiceCreateTest extends Acumulus_WooCommerce_TestCase
         $this->_testCreate($type, $id, $excludeFields);
     }
 
-    public function InvoiceDataProviderWithEmailAsPdf(): array
+    public static function InvoiceDataProviderWithEmailAsPdf(): array
     {
         return [
             'NL consument' => [Source::Order, 61,],
@@ -87,7 +87,7 @@ class InvoiceCreateTest extends Acumulus_WooCommerce_TestCase
         $this->_testCreate($type, $id, $excludeFields);
     }
 
-    public function InvoiceDataProviderVatBasedOnShippingAddress(): array
+    public static function InvoiceDataProviderVatBasedOnShippingAddress(): array
     {
         return [
             'invoice to FR, shipping to NL, vat based on shipping' => [Source::Order, 77,],
