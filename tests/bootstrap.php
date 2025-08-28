@@ -53,7 +53,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/environment.php';
 
-// if our plugin is symlinked, we need to redefine WP_TESTS_INSTALLATION. Try to
+// If our plugin is symlinked, we need to redefine WP_TESTS_INSTALLATION. Try to
 // find it by looking at the --bootstrap option as passed to phpunit.
 global $argv;
 if (is_array($argv)) {

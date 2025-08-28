@@ -36,7 +36,7 @@ class AcumulusTestsBootstrap
         $this->wp_tests_dir = getenv('WP_TESTS_DIR');
         // The WordPress installation path.
         $wp_tests_installation = getenv('WP_TESTS_INSTALLATION');
-        // Plugins installation path.
+        // Plugin installation path.
         $this->plugins_dir = $wp_tests_installation . '/wp-content/plugins';
         $this->languages_dir = $wp_tests_installation . '/wp-content/languages';
 
@@ -79,8 +79,8 @@ class AcumulusTestsBootstrap
         /**
          * The bootstrap.php we include here calls {@see _delete_al_posts()}. So we
          * bootstrap with a different prefix ('wptests_', defined in wp-tests-config.php)
-         * and change that to the prefix with tables with our test orders and products,
-         * etc. as soon as the bootstrap finishes
+         * and change that to the prefix with tables with our testdata as soon as the
+         * bootstrap finishes
          */
         require_once $this->wp_tests_dir . '/includes/bootstrap.php';
 

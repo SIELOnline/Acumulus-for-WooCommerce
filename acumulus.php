@@ -472,7 +472,7 @@ class Acumulus
     /**
      * Callback that renders the contents of the Acumulus invoice info box.
      *
-     * param WP_Post $shopOrderPost
+     * @\param WP_Post $shopOrderPost
      *   The post for the current order.
      *
      * @throws \Throwable
@@ -931,8 +931,8 @@ class Acumulus
      *
      * @param string $message
      * @param string $type
-     *   The type of notice, used to construct CSS classes to distinguish the
-     *   different types of messages. error, warning, info, etc.
+     *   The type of notice. This is used to construct CSS classes to distinguish the
+     *   different types of messages: 'error', 'warning', 'info', etc.
      * @param string $id
      *   An optional id to use for the outer tag OR the name (id) of the field the
      *   form error message is meant for.
@@ -940,7 +940,7 @@ class Acumulus
      *   Optional attributes, including additional CSS classes, to add to the
      *   surrounding div.
      * @param bool $isHtml
-     *   Indicates whether $message is HTML or plain text. plain text will be
+     *   Indicates whether $message is HTML or plain text. Plain text will be
      *   embedded in a <p>.
      *
      * @return string
@@ -1008,7 +1008,7 @@ class Acumulus
      * Action function for the 'woocommerce_new_order' and
      * 'woocommerce_order_status_changed' actions.
      *
-     * This action gets called when an order is created resp. when the status of
+     * This action gets called when an order is created respectively when the status of
      * an order changes.
      *
      * @param int $orderId

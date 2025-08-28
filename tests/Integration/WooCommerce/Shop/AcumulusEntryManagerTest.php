@@ -22,7 +22,7 @@ class AcumulusEntryManagerTest extends Acumulus_WooCommerce_TestCase
     private const testSourceId = 72;
     private const testConceptId = 2; // Acumulus concept ids are auto incrementing and will never equal this anymore.
     private const testEntryId = 1; // Acumulus entry ids are auto incrementing and will never equal this anymore.
-    private const testToken = 'TESTTOKEN0123456789TESTTOKENtest';
+    private const testToken = 'TESTTOKEN0123456789TESTTOKENTest';
 
     private function getAcumulusEntryManager(): AcumulusEntryManager
     {
@@ -62,7 +62,7 @@ class AcumulusEntryManagerTest extends Acumulus_WooCommerce_TestCase
         self::assertSame(static::testConceptId, $entry->getConceptId());
         self::assertNull($entry->getEntryId());
         self::assertNull($entry->getToken());
-        // Checks that the timezone is correct, 25s is a large interval but is for when we are debugging.
+        // Checks that the timezone is correct, 25 s is a large interval but is for when we are debugging.
         self::assertEqualsWithDelta(0, $this->getDiffInSeconds($entry->getCreated(), $now), 25);
         $diff = $this->getDiffInSeconds($entry->getCreated(), $entry->getUpdated());
         self::assertSame(0, $diff);
@@ -91,8 +91,8 @@ class AcumulusEntryManagerTest extends Acumulus_WooCommerce_TestCase
         self::assertSame(static::testSourceType, $entry->getSourceType());
         self::assertSame(static::testSourceId, $entry->getSourceId());
         self::assertNull($entry->getConceptId());
-        self::assertSame($entry->getEntryId(), static::testEntryId);
-        self::assertSame($entry->getToken(), static::testToken);
+        self::assertSame(static::testEntryId, $entry->getEntryId());
+        self::assertSame(static::testToken, $entry->getToken());
         $diff = $this->getDiffInSeconds($entry->getCreated(), $created);
         self::assertSame(0, $diff);
         $diff = $this->getDiffInSeconds($entry->getUpdated(), $updated);

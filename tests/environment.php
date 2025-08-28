@@ -13,7 +13,7 @@ declare(strict_types=1);
  * - WP_TESTS_CONFIG_FILE_PATH={path and name to wp-tests-config.php}
  *   (includes/bootstrap.php expects this as a constant).
  * - WP_TESTS_DIR={path to the data and includes folders from the WordPress test framework}
- * - WP_TESTS_SKIP_INSTALL=1; {1 = skip install, 0 = reinstall tables}
+ * - WP_TESTS_SKIP_INSTALL=1; {1 = skip installation, 0 = reinstall tables}
  */
 
 // Get some paths, unaware that our plugin may be symlinked.

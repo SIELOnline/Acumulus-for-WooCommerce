@@ -9,7 +9,8 @@
     // Add some classes to our buttons in our area.
     $(buttonSelector, ".acumulus-area").addClass("button button-primary"); // jQuery
 
-    // Ajax <a> links: move the value of href to a data attribute and empty it.
+    // Links on which we want ajax behaviour: move the value of the "href"
+    // attribute to a data attribute and empty it.
     $("a.acumulus-ajax", elt).each(function() { // jQuery
       const target =  this.getAttribute("href");
       this.setAttribute("data-acumulus-ajax-href", target);
@@ -58,8 +59,8 @@
       area: area.id,
     };
 
-    // area is not necessarily a form node, in which case FormData will not
-    // work. So we clone area into a temporary form node.
+    // The area element is not necessarily a form node, in which case FormData
+    // will not work. So we clone the area element into a temporary form node.
     const form = document.createElement("form");
     form.appendChild(area.cloneNode(true));
     const formData = new FormData(form);
@@ -74,7 +75,7 @@
       area.parentNode.removeChild(area);
       addAcumulusAjaxHandling(newArea);
       $(document.body).trigger("post-load"); // jQuery
-      // Apparently, this help tip binding is not done on post-load.
+      // Apparently, this help tip binding is not done on post-load events.
       $(".woocommerce-help-tip", newArea).tipTip({ // jQuery
         "attribute": "data-tip",
         "fadeIn": 50,
