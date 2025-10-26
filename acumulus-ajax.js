@@ -86,7 +86,7 @@
     });
   }
 
-  // @todo: Not longer functional, remove when no"longer needed as possible
+  // @todo: Not longer functional, remove when no longer needed as possible
   //   example for other plugins.
   function acumulusAjaxHandlingLink(that) {
     const clickedElt = $(that); // jQuery
