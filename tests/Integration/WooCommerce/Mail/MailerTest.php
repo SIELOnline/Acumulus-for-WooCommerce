@@ -30,7 +30,7 @@ class MailerTest extends TestCase
                 return (bool) is_email( $email );
             };
         }
-        $this->_testMailer(false);
+        $this->_testMailer(hasTextPart: false);
         $phpmailer = $oldPHPMailer;
     }
 }
