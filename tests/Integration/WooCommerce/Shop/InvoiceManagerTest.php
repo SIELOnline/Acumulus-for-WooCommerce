@@ -11,7 +11,7 @@ use DateTime;
 use Siel\Acumulus\Api;
 use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Shop\InvoiceManager;
-use Siel\Acumulus\Tests\WooCommerce\Acumulus_WooCommerce_TestCase;
+use Siel\Acumulus\Tests\WooCommerce\TestCase;
 
 /**
  * InvoiceManagerTest tests the {@see \Siel\Acumulus\Shop\InvoiceManager} class.
@@ -20,7 +20,7 @@ use Siel\Acumulus\Tests\WooCommerce\Acumulus_WooCommerce_TestCase;
  * {@see \Siel\Acumulus\WooCommerce\Shop\InvoiceManager WooCommerce InvoiceManager} class.
  *
  */
-class InvoiceManagerTest extends Acumulus_WooCommerce_TestCase
+class InvoiceManagerTest extends TestCase
 {
     private function getInvoiceManager(): InvoiceManager
     {

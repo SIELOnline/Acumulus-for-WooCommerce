@@ -10,12 +10,12 @@ namespace Siel\Acumulus\Tests\WooCommerce;
 
 use Acumulus;
 use Siel\Acumulus\Helpers\Container;
-use Yoast\WPTestUtils\WPIntegration\TestCase;
+use Yoast\WPTestUtils\WPIntegration\TestCase as WPTestUtilsTestCase;
 
 /**
  * Acumulus_WooCommerce_TestCase is the base class for Acumulus WooCommerce tests.
  */
-class Acumulus_WooCommerce_TestCase extends TestCase
+class TestCase extends WPTestUtilsTestCase
 {
     use AcumulusTestUtils;
 

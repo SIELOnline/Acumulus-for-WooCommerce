@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Siel\Acumulus\Tests\Integration\WooCommerce\Mail;
 
 use MockPHPMailer;
-use Siel\Acumulus\Tests\WooCommerce\Acumulus_WooCommerce_TestCase;
+use Siel\Acumulus\Tests\WooCommerce\TestCase;
 use WP_PHPMailer;
 
 /**
@@ -14,7 +14,7 @@ use WP_PHPMailer;
  * This test is mainly used to test if the mail feature still works in new versions of the
  * shop.
  */
-class MailerTest extends Acumulus_WooCommerce_TestCase
+class MailerTest extends TestCase
 {
     public function testMailer(): void
     {

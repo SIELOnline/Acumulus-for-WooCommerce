@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Siel\Acumulus\Tests\Integration\WooCommerce\Shop;
 
 use Siel\Acumulus\Invoice\Source;
-use Siel\Acumulus\Tests\WooCommerce\Acumulus_WooCommerce_TestCase;
+use Siel\Acumulus\Tests\WooCommerce\TestCase;
 
 /**
  * InvoiceCreateTest tests the process of creating an {@see Invoice}.
@@ -16,7 +16,7 @@ use Siel\Acumulus\Tests\WooCommerce\Acumulus_WooCommerce_TestCase;
  * @todo: add a test with fee lines.
  * @todo: add a test with margin scheme.
  */
-class InvoiceCreateTest extends Acumulus_WooCommerce_TestCase
+class InvoiceCreateTest extends TestCase
 {
     protected static bool $emailAsPdf;
     protected static string $taxBasedOn;

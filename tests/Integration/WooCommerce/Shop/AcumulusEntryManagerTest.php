@@ -11,12 +11,12 @@ use DateTimeImmutable;
 use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Shop\AcumulusEntry;
 use Siel\Acumulus\Shop\AcumulusEntryManager;
-use Siel\Acumulus\Tests\WooCommerce\Acumulus_WooCommerce_TestCase;
+use Siel\Acumulus\Tests\WooCommerce\TestCase;
 
 /**
  * AcumulusEntryTest tests the CRUD actions on the acumulus entries storage in WordPress.
  */
-class AcumulusEntryManagerTest extends Acumulus_WooCommerce_TestCase
+class AcumulusEntryManagerTest extends TestCase
 {
     private const testSourceType = Source::CreditNote;
     private const testSourceId = 72;

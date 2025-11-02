@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Siel\Acumulus\Tests\Integration\WooCommerce\Collectors;
 
 use Siel\Acumulus\Invoice\Source;
-use Siel\Acumulus\Tests\WooCommerce\Acumulus_WooCommerce_TestCase;
+use Siel\Acumulus\Tests\WooCommerce\TestCase;
 
 use function is_array;
 
@@ -24,7 +24,7 @@ use function is_array;
  *   - @todo email packing slip as pdf
  *   - @todo invoice + lines
  */
-class CollectorTest extends Acumulus_WooCommerce_TestCase
+class CollectorTest extends TestCase
 {
     public static function collectCustomerProvider(): array
     {

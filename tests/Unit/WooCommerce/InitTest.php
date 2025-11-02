@@ -8,12 +8,12 @@ declare(strict_types=1);
 namespace Siel\Acumulus\Tests\Unit\WooCommerce;
 
 use Acumulus;
-use Siel\Acumulus\Tests\WooCommerce\Acumulus_WooCommerce_TestCase;
+use Siel\Acumulus\Tests\WooCommerce\TestCase;
 
 /**
  * Tests that WooCommerce and Acumulus have been initialized.
  */
-class InitTest extends Acumulus_WooCommerce_TestCase
+class InitTest extends TestCase
 {
     /**
      * A single test to see if the test framework (including the plugins) has been

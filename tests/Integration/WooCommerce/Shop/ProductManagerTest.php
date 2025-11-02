@@ -7,7 +7,7 @@ namespace Siel\Acumulus\Tests\Integration\WooCommerce\Shop;
 use Siel\Acumulus\Config\Config;
 use Siel\Acumulus\Helpers\Log;
 use Siel\Acumulus\Invoice\Source;
-use Siel\Acumulus\Tests\WooCommerce\Acumulus_WooCommerce_TestCase;
+use Siel\Acumulus\Tests\WooCommerce\TestCase;
 use Siel\Acumulus\Mail\Mailer;
 use WC_Order_Item_Product;
 use WC_Product;
@@ -15,7 +15,7 @@ use WC_Product;
 /**
  * ProductManagerTest tests the end-to-end execution of stock management events.
  */
-class ProductManagerTest extends Acumulus_WooCommerce_TestCase
+class ProductManagerTest extends TestCase
 {
     private function getLog(): Log
     {

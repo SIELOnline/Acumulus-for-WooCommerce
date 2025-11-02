@@ -6,7 +6,7 @@ namespace Siel\Acumulus\Tests\Integration\WooCommerce\Helpers;
 
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\File;
 use Automattic\WooCommerce\Internal\Admin\Logging\Settings;
-use Siel\Acumulus\Tests\WooCommerce\Acumulus_WooCommerce_TestCase;
+use Siel\Acumulus\Tests\WooCommerce\TestCase;
 
 use function sprintf;
 
@@ -16,7 +16,7 @@ use function sprintf;
  * This test is mainly used to test if the log feature still works in new versions of the
  * shop.
  */
-class LogTest extends Acumulus_WooCommerce_TestCase
+class LogTest extends TestCase
 {
     private function getLogFolder(): string
     {
