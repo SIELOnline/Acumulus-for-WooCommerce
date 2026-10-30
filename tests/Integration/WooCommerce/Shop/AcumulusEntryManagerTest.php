@@ -24,7 +24,7 @@ class AcumulusEntryManagerTest extends TestCase
     private const testEntryId = 1; // Acumulus entry ids are auto incrementing and will never equal this anymore.
     private const testToken = 'TESTTOKEN0123456789TESTTOKENTest';
 
-    private function getAcumulusEntryManager(): AcumulusEntryManager
+    private static function getAcumulusEntryManager(): AcumulusEntryManager
     {
         return static::getContainer()->getAcumulusEntryManager();
     }
@@ -35,7 +35,7 @@ class AcumulusEntryManagerTest extends TestCase
      */
     public function testDeleteForTestSource(): Source
     {
-        $acumulusEntryManager = $this->getAcumulusEntryManager();
+        $acumulusEntryManager = static::getAcumulusEntryManager();
         $source = static::getContainer()->createSource(static::testSourceType, static::testSourceId);
         $entry = $acumulusEntryManager->getByInvoiceSource($source);
         self::assertTrue($entry === null || $acumulusEntryManager->delete($entry));
@@ -50,7 +50,7 @@ class AcumulusEntryManagerTest extends TestCase
      */
     public function testCreate(Source $source): Source
     {
-        $acumulusEntryManager = $this->getAcumulusEntryManager();
+        $acumulusEntryManager = static::getAcumulusEntryManager();
         $now = current_datetime();
         self::assertTrue($acumulusEntryManager->save($source, static::testConceptId, null));
         static::commit_transaction();
@@ -63,8 +63,8 @@ class AcumulusEntryManagerTest extends TestCase
         self::assertNull($entry->getEntryId());
         self::assertNull($entry->getToken());
         // Checks that the timezone is correct, 25 s is a large interval but is for when we are debugging.
-        self::assertEqualsWithDelta(0, $this->getDiffInSeconds($entry->getCreated(), $now), 25);
-        $diff = $this->getDiffInSeconds($entry->getCreated(), $entry->getUpdated());
+        self::assertEqualsWithDelta(0, static::getDiffInSeconds($entry->getCreated(), $now), 25);
+        $diff = static::getDiffInSeconds($entry->getCreated(), $entry->getUpdated());
         self::assertSame(0, $diff);
 
         return $source;
@@ -77,7 +77,7 @@ class AcumulusEntryManagerTest extends TestCase
      */
     public function testUpdate(Source $source): Source
     {
-        $acumulusEntryManager = $this->getAcumulusEntryManager();
+        $acumulusEntryManager = static::getAcumulusEntryManager();
         $entry = $acumulusEntryManager->getByInvoiceSource($source);
         $created = $entry->getCreated();
         $updated = $entry->getUpdated();
@@ -93,12 +93,12 @@ class AcumulusEntryManagerTest extends TestCase
         self::assertNull($entry->getConceptId());
         self::assertSame(static::testEntryId, $entry->getEntryId());
         self::assertSame(static::testToken, $entry->getToken());
-        $diff = $this->getDiffInSeconds($entry->getCreated(), $created);
+        $diff = static::getDiffInSeconds($entry->getCreated(), $created);
         self::assertSame(0, $diff);
-        $diff = $this->getDiffInSeconds($entry->getUpdated(), $updated);
+        $diff = static::getDiffInSeconds($entry->getUpdated(), $updated);
         self::assertNotSame(0, $diff);
         // Checks that the timezone is correct
-        $diff = $this->getDiffInSeconds($entry->getUpdated(), $now);
+        $diff = static::getDiffInSeconds($entry->getUpdated(), $now);
         self::assertEqualsWithDelta(0, $diff, 25);
 
         return $source;
@@ -111,7 +111,7 @@ class AcumulusEntryManagerTest extends TestCase
      */
     public function testDelete(): void
     {
-        $acumulusEntryManager = $this->getAcumulusEntryManager();
+        $acumulusEntryManager = static::getAcumulusEntryManager();
         $entry = $acumulusEntryManager->getByEntryId(static::testEntryId);
         self::assertTrue($acumulusEntryManager->delete($entry));
         static::commit_transaction();

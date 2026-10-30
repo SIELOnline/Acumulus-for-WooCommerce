@@ -4,13 +4,13 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 8.7.0
+ * Version: 8.7.2
  * LICENCE: GPLv3
  * Requires at least: 5.9
- * Tested up to: 6.8
+ * Tested up to: 7.1
  * WC requires at least: 9.1.0
- * WC tested up to: 10.3
- * Requires PHP: 8.1
+ * WC tested up to: 11.2
+ * Requires PHP: 8.2
  *
  * Remarks about "WC Requires at least":
  * - Stock handling:
@@ -18,8 +18,8 @@
  *   - decrease stock: exists since 7.6.0: do_action('woocommerce_reduce_order_item_stock', ...);
  * - If stock handling is not used: 5.0 should work.
  *
- * @noinspection PhpMissingStrictTypesDeclarationInspection  accept strings as int
- * @noinspection AutoloadingIssuesInspection  is automatically loaded by WordPress
+ * @noinspection PhpMissingStrictTypesDeclarationInspection  accept strings as int.
+ * @noinspection AutoloadingIssuesInspection  is automatically loaded by WordPress.
  */
 
 if (!defined('ABSPATH')) {
@@ -37,7 +37,7 @@ use Siel\Acumulus\Helpers\Container;
 use Siel\Acumulus\Helpers\Form;
 use Siel\Acumulus\Helpers\Message;
 use Siel\Acumulus\Helpers\Severity;
-use Siel\Acumulus\Invoice\InvoiceAddResult;
+use Siel\Acumulus\Invoice\InvoiceSendResult;
 use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Shop\ActivateSupportFormTranslations;
 use Siel\Acumulus\Shop\BatchFormTranslations;
@@ -696,14 +696,14 @@ class Acumulus
      * Processes and renders the form of the given type.
      *
      * @param string $type
-     *   The form type: config, advanced, or batch.
+     *   The form type: 'settings', 'mappings', 'batch' or one of the other forms.
      *
      * @return string
      *   the form HTML to output.
      *
      * @throws \Throwable
      */
-    public function processForm(string $type): string
+    protected function processForm(string $type): string
     {
         $form = $this->getForm($type);
         try {
@@ -728,7 +728,7 @@ class Acumulus
                 throw $e;
             }
         }
-        $output = $this->postRenderForm($form, $formOutput ?? '');
+        $output = $this->postRenderForm($form, $formOutput ?? 'ERROR');
         $this->postProcessForm($form);
         return $output;
     }
@@ -783,7 +783,7 @@ class Acumulus
     {
         // Get a new FormRenderer as the rate plugin message may be shown inside our
         //  pages, and that one has different settings.
-        $this->getAcumulusContainer()->getFormRenderer(true);
+        $formRenderer = $this->getAcumulusContainer()->getFormRenderer(true);
 
         // Add our own js.
         $type = $form->getType();
@@ -794,9 +794,9 @@ class Acumulus
                 wp_enqueue_script('jquery-ui-datepicker');
                 wp_enqueue_script('acumulus-ajax.js', $pluginUrl . '/' . 'acumulus-ajax.js');
 
-                // The invoice status overview is not rendered as other forms. Therefore,
-                // we change some properties of the form renderer.
-                $this->getAcumulusContainer()->getFormRenderer()
+                // The invoice status overview is not rendered as other forms.
+                // Therefore, we change some properties of the form renderer.
+                $formRenderer
                     ->setProperty('usePopupDescription', true)
                     ->setProperty('fieldsetContentWrapperClass', 'data')
                     ->setProperty('detailsWrapperClass', '')
@@ -809,9 +809,9 @@ class Acumulus
                 // Add some js.
                 wp_enqueue_script('acumulus-ajax.js', $pluginUrl . '/' . 'acumulus-ajax.js');
 
-                // The rate plugin message is not rendered as other forms. Therefore,
-                // we change some properties of the form renderer.
-                $this->getAcumulusContainer()->getFormRenderer()
+                // The rate plugin message is not rendered as other forms.
+                // Therefore, we change some properties of the form renderer.
+                $formRenderer
                     ->setProperty('fieldsetContentWrapperTag', 'div')
                     ->setProperty('fieldsetContentWrapperClass', '')
                     ->setProperty('elementWrapperTag', '')
@@ -946,8 +946,8 @@ class Acumulus
      * @return string
      *   The rendered notice.
      */
-    private function renderNotice(string $message, string $type, string $id = '', array $extraAttributes = [], bool $isHtml = false):
-    string {
+    private function renderNotice(string $message, string $type, string $id = '', array $extraAttributes = [], bool $isHtml = false): string
+    {
         $for = '';
         if (!empty($id) && func_num_args() === 3) {
             // Form field message (because: 3 arguments (I know: this sucks)):
@@ -1206,7 +1206,7 @@ class Acumulus
      *
      * @noinspection PhpUnusedParameterInspection $localResult not used for now
      */
-    public function acumulusInvoiceCollectAfter(Invoice $invoice, Source $invoiceSource, InvoiceAddResult $localResult): void
+    public function acumulusInvoiceCollectAfter(Invoice $invoice, Source $invoiceSource, InvoiceSendResult $localResult): void
     {
         $this->getCollector3rdPartyPluginSupport()->acumulusInvoiceCollectAfter($invoice, $invoiceSource/*, $localResult*/);
     }
@@ -1246,8 +1246,10 @@ class Acumulus
         $result = true;
 
         $dbVersion = get_option('acumulus_version');
-        if (!empty($dbVersion) && empty($this->getAcumulusContainer()->getConfig()->get(Config::VersionKey))) {
-            $result = $this->getAcumulusContainer()->getConfig()->save([Config::VersionKey => $dbVersion]);
+        if (!empty($dbVersion)) {
+            if (empty($this->getAcumulusContainer()->getConfig()->get(Config::VersionKey))) {
+                $result = $this->getAcumulusContainer()->getConfig()->save([Config::VersionKey => $dbVersion]);
+            }
             delete_option('acumulus_version');
         }
 

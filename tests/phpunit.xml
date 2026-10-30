@@ -1,12 +1,14 @@
 <?xml version="1.0"?>
-<testsuites>
-    <testsuite name="all">
-        <directory>.</directory>
-    </testsuite>
-    <testsuite name="unit">
-        <directory>Unit/</directory>
-    </testsuite>
-    <testsuite name="integration">
-        <directory>Integration</directory>
-    </testsuite>
-</testsuites>
+<phpunit>
+    <testsuites>
+        <testsuite name="all">
+            <directory>.</directory>
+        </testsuite>
+        <testsuite name="unit">
+            <directory>Unit/</directory>
+        </testsuite>
+        <testsuite name="integration">
+            <directory>Integration</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

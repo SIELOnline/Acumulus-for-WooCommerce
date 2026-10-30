@@ -1,14 +1,14 @@
 === Acumulus ===
 Contributors: SIEL Acumulus.
-Tags: Acumulus, administratie, boekhouding, boekhoudpakket, boekhoudsoftware
+Tags: Acumulus, administratie, boekhouding, boekhoudpakket, boekhoudsoftware, accounting
 Requires at least: 5.9
-Tested up to: 6.8
-Requires PHP: 8.1
+Tested up to: 7.1
+Requires PHP: 8.2
 Stable tag: trunk
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl.html
 
-The Acumulus plugin connects your Woocommerce store to the Dutch [SIEL Acumulus online financial administration application](https://www.siel.nl/acumulus/).
+The Acumulus plugin connects your WooCommerce store to the Dutch [SIEL Acumulus online financial administration application](https://www.siel.nl/acumulus/).
 
 == Description ==
 
@@ -16,7 +16,7 @@ Over deze plugin.
 
 == WooCommerce boekhouden plugin voor Acumulus ==
 
-The Acumulus plugin connects your Woocommerce store to the Dutch SIEL Acumulus online financial administration application. It can add your invoices automatically or via a batch send form to your administration, saving you a lot of manual, error-prone work.
+The Acumulus plugin connects your WooCommerce store to the Dutch SIEL Acumulus online financial administration application. It can add your invoices automatically or via a batch send form to your administration, saving you a lot of manual, error-prone work.
 
 The Acumulus plugin:
 
@@ -41,7 +41,7 @@ If not, this plugin is useless and will not do anything.
 5. Complete the (basic) configuration of the plugin.
 6. Go to the 'Settings - Acumulus advanced settings' page (`wp-admin/options-general.php?page=acumulus_advanced`) to configure the plugin.
 7. If you have set so, invoices for new orders are now automatically sent to your administration at Acumulus.
-8. You can use the 'Woocommerce - Acumulus' page (`wp-admin/admin.php?page=acumulus_batch`) to send a batch of (older) orders to Acumulus.
+8. You can use the 'WooCommerce - Acumulus' page (`wp-admin/admin.php?page=acumulus_batch`) to send a batch of (older) orders to Acumulus.
 9. To cater for specific use cases, the plugin does define some filters and actions, so you can intercept and influence the actions it performs. See the separate [filters.txt](http://plugins.svn.wordpress.org/acumulus/trunk/filters.txt) for more information.
 
 == Installation using composer and GitHub ==

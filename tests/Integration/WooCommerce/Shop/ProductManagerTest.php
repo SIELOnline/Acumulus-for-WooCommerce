@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Siel\Acumulus\Tests\Integration\WooCommerce\Shop;
 
 use Siel\Acumulus\Config\Config;
-use Siel\Acumulus\Helpers\Log;
 use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Tests\WooCommerce\TestCase;
 use Siel\Acumulus\Mail\Mailer;
@@ -17,11 +16,6 @@ use WC_Product;
  */
 class ProductManagerTest extends TestCase
 {
-    private function getLog(): Log
-    {
-        return self::getContainer()->getLog();
-    }
-
     private function getMailer(): Mailer
     {
         return static::getContainer()->getMailer();

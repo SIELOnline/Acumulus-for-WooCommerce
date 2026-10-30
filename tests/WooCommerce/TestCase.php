@@ -1,8 +1,4 @@
 <?php
-/**
- * @noinspection PhpMultipleClassDeclarationsInspection class TestCase has indeed several
- *   polyfill versions.
- */
 
 declare(strict_types=1);
 

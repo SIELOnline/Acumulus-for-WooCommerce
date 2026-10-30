@@ -28,7 +28,7 @@ trait AcumulusTestUtils
         return Acumulus::create()->getAcumulusContainer();
     }
 
-    protected function getTestsPath(): string
+    protected static function getTestsPath(): string
     {
         return dirname(__FILE__, 2);
     }

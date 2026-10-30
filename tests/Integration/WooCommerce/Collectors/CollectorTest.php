@@ -88,7 +88,7 @@ class CollectorTest extends TestCase
         $container = $this->getContainer();
         $source = $container->createSource($type, $id);
         $collectorManager = $container->getCollectorManager();
-        $collectorManager->getPropertySources()->add('source', $source);
+        $collectorManager->getPropertySources()->source = $source;
         $customer = $collectorManager->collectCustomer();
         foreach ($values as $key => $value) {
             if (is_array($value)) {

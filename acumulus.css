@@ -1,93 +1,93 @@
 .required {
-  color: red;
-  margin-left: 0.5em;
+    color: red;
+    margin-left: 0.5em;
 }
 
 summary {
-  font-size: 1.3em;
-  font-weight: 600;
-  margin: 1em 0;
-  color: #23282d;
-  cursor: pointer;
+    font-size: 1.3em;
+    font-weight: 600;
+    margin: 1em 0;
+    color: #23282d;
+    cursor: pointer;
 }
 
 summary span {
-  display: inline-block;
-  font-size: smaller;
-  padding-left: 1em;
+    display: inline-block;
+    font-size: smaller;
+    padding-left: 1em;
 }
 
 .form-table .fieldset-description-label {
-  padding-bottom: 0;
-  font-size: x-large;
+    padding-bottom: 0;
+    font-size: x-large;
 }
 
 .form-table .fieldset-description {
-  padding-bottom: 0;
+    padding-bottom: 0;
 }
 
 .description,
 .form-table .fieldset-description {
-  font-style: italic;
+    font-style: italic;
 }
 
 .form-table {
-  border: 1px solid #444;
+    border: 1px solid #444;
 }
 
 details .form-table {
-  border: none;
+    border: none;
 }
 
 .form-table th {
-  padding-left: 20px;
+    padding-left: 20px;
 }
 
 .form-table .radio label,
 .form-table .checkbox label {
-  display: block;
+    display: block;
 }
 
 textarea {
-  width: 100%;
+    width: 100%;
 }
 
-.property-name strong{
-  font-size: larger;
-  font-weight: 700;
+.property-name strong {
+    font-size: larger;
+    font-weight: 700;
 }
 
 .property-list {
-  margin-left: 0;
-  margin-top: 0;
-  list-style-type: inherit;
-  list-style-position: inside;
+    margin-left: 0;
+    margin-top: 0;
+    list-style-type: inherit;
+    list-style-position: inside;
 }
 
 .property-list li {
-  margin-bottom: 0;
+    margin-bottom: 0;
 }
 
 .property-list dt {
-  font-weight: bolder;
+    font-weight: bolder;
 }
 
 .property-list dd {
-  margin-bottom: 0;
+    margin-bottom: 0;
 }
 
 .property-list dd .info {
-  display: block;
-  margin-bottom: 0.2em;
+    display: block;
+    margin-bottom: 0.2em;
 }
 
 label {
-  color: #777;
+    color: #777;
 }
 
 /* Labels without a form element: do not show a pointer cursor. */
 label:not([for]) {
-  cursor: inherit;
+    cursor: inherit;
 }
 
 .notice label {
@@ -95,218 +95,218 @@ label:not([for]) {
 }
 
 input.error {
-  border-color: #bc3232;
+    border-color: #bc3232;
 }
 
 input.warning {
-  border-color: #ffb900;
+    border-color: #ffb900;
 }
 
 input.notice,
 input.info {
-  border-color: #00a0d2;
+    border-color: #00a0d2;
 }
 
 input.success {
-  border-color: #46b450;
+    border-color: #46b450;
 }
 
 [id|="acumulus"] .button:not([id]) {
-  padding: 1.5em 2.5em;
-  border: 1px solid #0a73bc;
-  border-radius: 5px;
-  font-weight: bolder;
+    padding: 1.5em 2.5em;
+    border: 1px solid #0a73bc;
+    border-radius: 5px;
+    font-weight: bolder;
 }
 
 #acumulus-register h2 {
-  margin-top: 2em;
+    margin-top: 2em;
 }
 
 #acumulus-register details {
-  width: 50em;
-  max-width: 99%;
+    width: 50em;
+    max-width: 99%;
 }
 
 #acumulus-register summary {
-  font-size: inherit;
+    font-size: inherit;
 }
 
 /* Acumulus About block */
 .form-table h3 {
-  margin-top: 0;
-  margin-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 div[id$="Header"] {
-  margin-top: 0;
-  margin-bottom: -2em;
+    margin-top: 0;
+    margin-bottom: -2em;
 }
 
 [id$="Information"] ul {
-  list-style-position: outside;
-  list-style-type: initial;
-  margin-top: 0;
-  margin-bottom: 0;
-  margin-left: 1em;
+    list-style-position: outside;
+    list-style-type: initial;
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-left: 1em;
 }
 
 [id$="Information"] ul li {
-  margin-left: 1em;
+    margin-left: 1em;
 }
 
 .acumulus-blue {
-  color: #01a6d4;
+    color: #01a6d4;
 }
 
 .acumulus-light-green {
-  color: #f0fff0;
+    color: #f0fff0;
 }
 
 .button-pro-support {
-  display: inline-block;
-  transition: background-color 0.5s ease;
-  background-color: #f0fff0;
-  border-color: #000000;
-  border-style: solid;
-  border-width: 1px;
-  border-radius: 12px;
-  padding: 6px 20px;
-  margin-top: 5px;
+    display: inline-block;
+    transition: background-color 0.5s ease;
+    background-color: #f0fff0;
+    border-color: #000000;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 12px;
+    padding: 6px 20px;
+    margin-top: 5px;
 }
 
 .button-pro-support:hover {
-  background: #01a6d4;
+    background: #01a6d4;
 }
 
 /*
  * EU Commerce threshold progress bar
  */
 .acumulus-progressbar, .acumulus-progress, .acumulus-threshold {
-  display: inline-block;
+    display: inline-block;
 }
 
 .acumulus-progressbar {
-  box-sizing: border-box;
-  position: relative;
-  width: 75%;
-  max-width: 20em;
-  height: 2em;
-  border-radius: 16px;
-  background-color: lightgrey;
+    box-sizing: border-box;
+    position: relative;
+    width: 75%;
+    max-width: 20em;
+    height: 2em;
+    border-radius: 16px;
+    background-color: lightgrey;
 }
 
 .acumulus-progress {
-  box-sizing: border-box;
-  padding: 2px 0.5em 0;
-  border-radius: inherit;
-  height: 100%;
+    box-sizing: border-box;
+    padding: 2px 0.5em 0;
+    border-radius: inherit;
+    height: 100%;
 }
 
 .acumulus-error {
-  background-color: #bc3232;
-  color: white;
+    background-color: #bc3232;
+    color: white;
 }
 
 .acumulus-warning {
-  background-color: #ffb900;
+    background-color: #ffb900;
 }
 
 .acumulus-ok {
-  background-color: #46b450;
+    background-color: #46b450;
 }
 
 .acumulus-threshold {
-  box-sizing: border-box;
-  padding-left: 0.3em;
-  width: 24%;
-  height: 2em;
+    box-sizing: border-box;
+    padding-left: 0.3em;
+    width: 24%;
+    height: 2em;
 }
 
 /*
  * Acumulus invoice status overview "form".
  */
 #acumulus-invoice .inside {
-  padding-right: 0;
-  line-height: 1.4em;
+    padding-right: 0;
+    line-height: 1.4em;
 }
 
 /* Refund overview */
 #acumulus-invoice details {
-  font-size: 13px;
-  border: none;
+    font-size: 13px;
+    border: none;
 }
 
 #acumulus-invoice .invoice-sent-concept {
-  float: left;
-  width: 85%;
+    float: left;
+    width: 85%;
 }
 
 #acumulus-invoice .invoice-sent-concept + .woocommerce-help-tip {
-  float: left;
+    float: left;
 }
 
 /* Refund overview title */
 #acumulus-invoice summary {
-  font-size: 14px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 8px;
-  margin-bottom: 6px;
+    font-size: 14px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 #acumulus-invoice .label {
-  text-align: left;
-  vertical-align: top;
-  font-weight: normal;
-  display: inline-block;
-  padding-right: 1em;
+    text-align: left;
+    vertical-align: top;
+    font-weight: normal;
+    display: inline-block;
+    padding-right: 1em;
 }
 
 #acumulus-invoice .data .notice {
-  box-shadow: none;
-  margin: 0;
-  border-top-width: 0;
-  border-right-width: 0;
-  border-bottom-width:  0;
+    box-shadow: none;
+    margin: 0;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
 }
 
 #acumulus-invoice .data .notice-info {
-  color: #00a0d2;
+    color: #00a0d2;
 }
 
 #acumulus-invoice .data .notice-warning {
-  color: #ffb900;
+    color: #ffb900;
 }
 
 #acumulus-invoice .data label.notice-warning {
-  font-weight: 900;
+    font-weight: 900;
 }
 
 #acumulus-invoice .data .notice-error {
-  color: #bc3232;
+    color: #bc3232;
 }
 
 #acumulus-invoice .data .notice-success {
-  color: #46b450;
+    color: #46b450;
 }
 
 .acumulus-amount .amount {
-  display: block;
-  width: 6em;
-  text-align: right;
+    display: block;
+    width: 6em;
+    text-align: right;
 }
 
 .acumulus-amount .amount:nth-child(2) {
-  display: inline-block;
+    display: inline-block;
 }
 
 .acumulus-amount .amount:last-child {
-  border-top: 1px solid #444;
+    border-top: 1px solid #444;
 }
 
 .acumulus-amount .amount .sign,
 .acumulus-amount .amount .currency {
-  float: left;
-  width: 0.25em;
+    float: left;
+    width: 0.25em;
 }
 
 /*
@@ -314,67 +314,76 @@ div[id$="Header"] {
  * on both the order list and detail page.
  */
 [class*="acumulus-document"] {
-  display: inline-block;
+    display: inline-block;
 }
 
 #acumulus-invoice [class*="acumulus-document"] {
-  position: relative;
-  box-sizing: border-box;
-  height: 30px;
-  min-width: 85px;
-  margin-top: 5px;
-  margin-right: 10px;
-  padding-left: 34px;
-  padding-right: 0;
-  background-repeat: no-repeat;
-  background-position: left center;
-  background-position-x: 6px;
+    position: relative;
+    box-sizing: border-box;
+    height: 30px;
+    min-width: 85px;
+    margin-top: 5px;
+    margin-right: 10px;
+    padding-left: 34px;
+    padding-right: 0;
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-position-x: 6px;
 }
 
 #acumulus-invoice [class*="acumulus-document"]:last-of-type {
-  margin-right: 0;
+    margin-right: 0;
 }
 
 #acumulus-invoice [class*="acumulus-document-invoice"] {
-  background-image: url("acumulus-invoice.png");
+    background-image: url("acumulus-invoice.png");
 }
 
 #acumulus-invoice [class*="acumulus-document-packing-slip"] {
-  background-image: url("acumulus-packing-slip.png");
+    background-image: url("acumulus-packing-slip.png");
 }
 
 /*
  * Order list icons
  */
-.wc_actions [class*="acumulus-document-invoice"]::after {
-  content: url("acumulus-invoice.png");
+.wc_actions a.button.wc-action-button[class*="acumulus-document"] {
+    border-width: 0;
+    overflow: visible;
 }
 
-.wc_actions [class*="acumulus-document-packing-slip"]::after {
-  content: url("acumulus-packing-slip.png");
+.wc_actions a.button.wc-action-button[class*="acumulus-document"]::after {
+    margin-top: 0 !important;
+    position: absolute;
+    left: 4px;
+    top: 0;
 }
 
-.wc_actions [class*="acumulus-document"]::after {
-  margin-top: 0 !important;
-  position: absolute;
-  left: 0;
-  top: -7px;
+.wc_actions a.button.wc-action-button[class*="acumulus-document-invoice"]::after {
+    content: "";
+    background: url("acumulus-invoice.png") no-repeat 0 0;
+    background-size: 75%;
+}
+
+.wc_actions a.button.wc-action-button[class*="acumulus-document-packing-slip"]::after {
+    content: "";
+    background: url("acumulus-packing-slip.png") no-repeat 0 0;
+    background-size: 75%;
 }
 
 /*
  * Ensures that the rate plugin or message gets aligned with the field sets.
  */
 .acumulus {
-  margin-left: 0;
+    margin-left: 0;
 }
 
 .acumulus > div > img {
-  float: left;
-  margin-right: 12px;
+    float: left;
+    margin-right: 12px;
 }
 
 .acumulus .button {
-  margin: 0 2em 0.5em 0;
+    margin: 0 2em 0.5em 0;
 }
 
 #acumulus-message {
