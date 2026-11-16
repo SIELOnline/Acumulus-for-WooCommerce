@@ -8,7 +8,7 @@
     ],
     "require": {
         "php": "^8.2",
-        "siel/acumulus": "^8.7.2"
+        "siel/acumulus": "^8.7.3"
     },
     "require-dev": {
         "phpunit/phpunit": "^9",

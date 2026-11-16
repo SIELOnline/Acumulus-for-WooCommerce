@@ -4,7 +4,7 @@
  * Description: Acumulus plugin for WooCommerce
  * Author: Buro RaDer, https://burorader.com/
  * Copyright: SIEL BV, https://www.siel.nl/acumulus/
- * Version: 8.7.2
+ * Version: 8.7.3
  * LICENCE: GPLv3
  * Requires at least: 5.9
  * Tested up to: 7.1
@@ -343,14 +343,17 @@ class Acumulus
     {
         // These notices should only show on the main dashboard and our own screens.
         if ($this->isDashboard() || $this->isOwnPage()) {
-            // Notice about the new version.
-            if (time() >= $this->getAcumulusContainer()->getConfig()->get('showPluginV84Message')) {
-                echo $this->processMessageForm();
-            }
             // Notice about rating our plugin.
-            if (time() >= $this->getAcumulusContainer()->getConfig()->getShowRatePluginMessage()) {
+            if (time() >= $this->getAcumulusContainer()->getConfig()->get('showRatePluginMessage')) {
                 echo $this->processRatePluginForm();
             }
+        }
+
+        // Show result of mailing a document.
+        $message = get_transient('acumulus_admin_message');
+        delete_transient('acumulus_admin_message');
+        if (is_array($message)) {
+            echo $this->renderNotice(...$message);
         }
     }
 
@@ -381,22 +384,24 @@ class Acumulus
                 default => $this->renderNotice('Area parameter of ajax request unknown to Acumulus.', 'error'),
             };
         } elseif (isset($_REQUEST['acumulus_action'])) {
-            // @nth: should we have some visual feedback here, in case of both
-            //   error and success. Given the redirect at the end, this needs
-            //   transient flags or messages. See e.g:
-            // - https://wordpress.stackexchange.com/questions/261167/getting-admin-notices-to-appear-after-page-refresh
-            // - https://github.com/wpscholar/wp-transient-admin-notices
             switch ($_REQUEST['acumulus_action']) {
                 case 'acumulus-document-invoice-mail':
                 case 'acumulus-document-packing-slip-mail':
                     $result = $this->mailPdf($_REQUEST['acumulus_action'], $_REQUEST['order_id']);
-                    /** @noinspection PhpUnusedLocalVariableInspection @todo: do something with this content. */
-                    $content = !$result->hasError() ? '✓' : '❌';
+                    $document = str_replace('-', '_', substr($_REQUEST['acumulus_action'], strlen('acumulus-'), -strlen('-mail')));
+                    if ($result->hasError()) {
+                        $message = $result->formatMessages(Message::Format_HtmlList, Severity::ErrorOrWorse);
+                        $type = 'error';
+                    } else {
+                        $message = sprintf($this->t('document_mailed'), $this->t($document), $this->t(Source::Order), $_REQUEST['order_id']);
+                        $type = 'success';
+                    }
                     break;
                 default:
-                    /** @noinspection PhpUnusedLocalVariableInspection */
-                    $content = $this->renderNotice('Acumulus_action parameter of ajax request unknown to Acumulus.', 'error');
+                    $message = 'Acumulus_action parameter of ajax request unknown to Acumulus.';
+                    $type = 'error';
             }
+            set_transient('acumulus_admin_message', compact('message', 'type'), 600);
             wp_safe_redirect(wp_get_referer() ?: admin_url($this->getOrderListPage()));
             exit;
         } else {
@@ -856,6 +861,7 @@ class Acumulus
                     $output .= '<div class="wrap"><form id="' . $id . '" method="post" action="' . $url . '">';
                     $output .= wp_nonce_field("acumulus_{$type}_nonce", '_wpnonce', true, false);
                 } else {
+                    // Form within a form which is, tag-wise, not allowed in HTML.
                     $output .= "<div id='$id' class='acumulus-area' data-acumulus-wait='$wait' data-acumulus-nonce='$nonce'>";
                 }
                 $output .= $formOutput;
