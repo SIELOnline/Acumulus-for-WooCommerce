@@ -55,10 +55,11 @@
                     "meta-vatclass-id": "standard",
                     "meta-vatrate-lookup": "[21.0]",
                     "meta-vatrate-lookup-label": "['btw (21%)']",
-                    "meta-vatrate-min": 20.983604447105655,
-                    "meta-vatrate-max": 21.01640028778668,
+                    "meta-vatrate-min": 20.98386791426522,
+                    "meta-vatrate-max": 21.016136678916403,
                     "meta-vatrate-source": "completor-range",
                     "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':1}]",
+                    "meta-fields-calculated": "['vatrate']",
                     "meta-recalculate-old-price": 41.322314,
                     "meta-did-recalculate": true
                 },
@@ -78,10 +79,10 @@
                     "meta-unitprice-precision": 0.01,
                     "unitpriceinc": 6.05,
                     "meta-unitpriceinc-precision": 0.01,
-                    "meta-fields-calculated": "['unitpriceinc']",
+                    "meta-fields-calculated": "['unitpriceinc','vatrate']",
                     "meta-recalculate-price": "unitprice",
-                    "meta-vatrate-min": 20.864631612593893,
-                    "meta-vatrate-max": 21.1356719525869,
+                    "meta-vatrate-min": 20.866804781131197,
+                    "meta-vatrate-max": 21.133489104993703,
                     "meta-vatrate-source": "completor-range",
                     "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':1}]",
                     "meta-recalculate-old-price": 5.0,
@@ -100,7 +101,7 @@
                     "meta-id": 65,
                     "meta-unitprice-precision": 0.01,
                     "meta-vatamount-precision": 0.01,
-                    "meta-fields-calculated": "['vatrate']"
+                    "meta-fields-calculated": "['unitpriceinc','vatrate']"
                 }
             ],
             "emailaspdf": {

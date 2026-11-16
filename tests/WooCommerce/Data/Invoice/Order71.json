@@ -55,10 +55,11 @@
                     "meta-vatclass-id": "standard",
                     "meta-vatrate-lookup": "[21.0]",
                     "meta-vatrate-lookup-label": "['btw (21%)']",
-                    "meta-vatrate-min": 20.99181976746979,
-                    "meta-vatrate-max": 21.008182552994686,
+                    "meta-vatrate-min": 20.99195121486526,
+                    "meta-vatrate-max": 21.008051027039727,
                     "meta-vatrate-source": "completor-range",
                     "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':1},{'vatrate':21.0,'vattype':6}]",
+                    "meta-fields-calculated": "['vatrate']",
                     "meta-recalculate-old-price": 37.19008266666667,
                     "meta-did-recalculate": true,
                     "meta-vattypes-possible": "[1,6]"
@@ -77,10 +78,10 @@
                     "meta-unitprice-precision": 0.01,
                     "vatamount": 0.0,
                     "meta-vatamount-precision": 0.01,
+                    "unitpriceinc": 0.0,
+                    "meta-fields-calculated": "['unitpriceinc','vatrate']",
                     "meta-vatrate-source": "completor-lookup",
                     "meta-vatrate-lookup-matches": "[{'vatrate':21.0,'vattype':1},{'vatrate':21.0,'vattype':6}]",
-                    "unitpriceinc": 0,
-                    "meta-fields-calculated": "['unitpriceinc']",
                     "meta-vattypes-possible": "[1,6]"
                 }
             ],

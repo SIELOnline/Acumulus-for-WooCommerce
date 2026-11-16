@@ -55,10 +55,11 @@
                     "meta-vatclass-id": "standard",
                     "meta-vatrate-lookup": "[21.0]",
                     "meta-vatrate-lookup-label": "['btw (21%)']",
-                    "meta-vatrate-min": 20.969660406568646,
-                    "meta-vatrate-max": 21.030366538210522,
+                    "meta-vatrate-min": 20.970147810132158,
+                    "meta-vatrate-max": 21.029878307167436,
                     "meta-vatrate-source": "completor-range",
                     "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':1}]",
+                    "meta-fields-calculated": "['vatrate']",
                     "meta-recalculate-old-price": 13.0991735,
                     "meta-did-recalculate": true
                 },
@@ -81,10 +82,11 @@
                     "meta-vatclass-id": "standard",
                     "meta-vatrate-lookup": "[21.0]",
                     "meta-vatrate-lookup-label": "['btw (21%)']",
-                    "meta-vatrate-min": 20.963013615223137,
-                    "meta-vatrate-max": 21.03702840741068,
+                    "meta-vatrate-min": 20.963607762227376,
+                    "meta-vatrate-max": 21.036433030338205,
                     "meta-vatrate-source": "completor-range",
                     "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':1}]",
+                    "meta-fields-calculated": "['vatrate']",
                     "meta-recalculate-old-price": 10.7438015,
                     "meta-did-recalculate": true
                 },
@@ -104,10 +106,10 @@
                     "meta-unitprice-precision": 0.01,
                     "unitpriceinc": 6.05,
                     "meta-unitpriceinc-precision": 0.01,
-                    "meta-fields-calculated": "['unitpriceinc']",
+                    "meta-fields-calculated": "['unitpriceinc','vatrate']",
                     "meta-recalculate-price": "unitprice",
-                    "meta-vatrate-min": 20.864631612593893,
-                    "meta-vatrate-max": 21.1356719525869,
+                    "meta-vatrate-min": 20.866804781131197,
+                    "meta-vatrate-max": 21.133489104993703,
                     "meta-vatrate-source": "completor-range",
                     "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':1}]",
                     "meta-recalculate-old-price": 5.0,
@@ -126,7 +128,7 @@
                     "meta-id": 66,
                     "meta-unitprice-precision": 0.01,
                     "meta-vatamount-precision": 0.01,
-                    "meta-fields-calculated": "['vatrate']"
+                    "meta-fields-calculated": "['unitpriceinc','vatrate']"
                 },
                 {
                     "itemnumber": "min5",
@@ -141,7 +143,7 @@
                     "meta-id": 65,
                     "meta-unitprice-precision": 0.01,
                     "meta-vatamount-precision": 0.01,
-                    "meta-fields-calculated": "['vatrate']"
+                    "meta-fields-calculated": "['unitpriceinc','vatrate']"
                 }
             ],
             "meta-source-type": "Order",
