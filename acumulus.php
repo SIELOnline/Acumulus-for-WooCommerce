@@ -559,7 +559,7 @@ class Acumulus
                     // Add the actions and our own CSS.
                     $actions += $subActions;
                     $pluginUrl = plugins_url('/acumulus');
-                    wp_enqueue_style('acumulus_css_admin', $pluginUrl . '/acumulus.css');
+                    wp_enqueue_style('acumulus_css_admin', $pluginUrl . '/acumulus.css', ver: $this->getVersionNumber());
                 }
             }
         }
@@ -797,7 +797,7 @@ class Acumulus
             case 'invoice':
                 // Add some js.
                 wp_enqueue_script('jquery-ui-datepicker');
-                wp_enqueue_script('acumulus-ajax.js', $pluginUrl . '/' . 'acumulus-ajax.js');
+                wp_enqueue_script('acumulus-ajax.js', $pluginUrl . '/' . 'acumulus-ajax.js', ver: $this->getVersionNumber());
 
                 // The invoice status overview is not rendered as other forms.
                 // Therefore, we change some properties of the form renderer.
@@ -812,7 +812,7 @@ class Acumulus
             case 'rate':
             case 'message':
                 // Add some js.
-                wp_enqueue_script('acumulus-ajax.js', $pluginUrl . '/' . 'acumulus-ajax.js');
+                wp_enqueue_script('acumulus-ajax.js', $pluginUrl . '/' . 'acumulus-ajax.js', ver: $this->getVersionNumber());
 
                 // The rate plugin message is not rendered as other forms.
                 // Therefore, we change some properties of the form renderer.
@@ -826,7 +826,7 @@ class Acumulus
                 break;
         }
         // Add our own CSS.
-        wp_enqueue_style('acumulus_css_admin', $pluginUrl . '/acumulus.css');
+        wp_enqueue_style('acumulus_css_admin', $pluginUrl . '/acumulus.css', ver: $this->getVersionNumber());
     }
 
     /**
